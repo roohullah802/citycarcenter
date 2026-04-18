@@ -58,7 +58,9 @@ export default function RootLayout() {
               <FavoritesProvider>
                 <ToastProvider>
                   <StripeProvider
-                    publishableKey={process.env.STRIPE_PUBLISHABLE_KEY!}
+                    publishableKey={
+                      process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+                    }
                   >
                     <StackLayout />
                   </StripeProvider>
