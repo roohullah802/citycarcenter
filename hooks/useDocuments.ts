@@ -32,7 +32,6 @@ export const usePostIssues = () => {
       router.back();
     },
     onError: (error) => {
-      console.log(error);
       showToast(error.message || "Failed to post issue!");
     },
   });

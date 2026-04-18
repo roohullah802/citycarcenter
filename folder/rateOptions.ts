@@ -20,14 +20,3 @@ export type DetailsRateOption = {
   label: string;
   value: number | string;
 };
-
-export const rateOptionsDetails: DetailsRateOption[] = [
-  {
-    label: "Initial Miles:",
-    value: "N/A",
-  },
-  {
-    label: "Miles Allowed:",
-    value: "N/A",
-  },
-];

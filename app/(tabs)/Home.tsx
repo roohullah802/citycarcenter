@@ -36,7 +36,6 @@ function HomeScreen() {
     error: brandsError,
   } = useFetchBrands();
   const { data: cars, isLoading: carsLoading, error: carsError } = useCars();
-  console.log("cars ", cars);
 
   const openProfileModal = () => {
     modalRef.current?.open();

@@ -1,43 +1,94 @@
 import CountDown from "@/components/CountDown";
+import { useActiveLeases } from "@/hooks/useFetchLease";
 import { useAuth } from "@clerk/expo";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Platform,
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Icon from "react-native-vector-icons/Ionicons";
 
 const AllLeases: React.FC = () => {
   const { isSignedIn } = useAuth();
-  const LeasesCountDown: [] = [];
+  const router = useRouter();
+
+  const { data, isLoading, isError, refetch } = useActiveLeases();
+  const leases = data?.leases;
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#1F305E" />
+        <Text style={styles.loadingText}>Fetching your leases...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (isError) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered]}>
+        <Icon name="cloud-offline-outline" size={60} color="red" />
+        <Text style={styles.errorTitle}>Oops! Something went wrong</Text>
+        <Text style={styles.message}>
+          We couldn&apos;t load your leases. Please check your connection.
+        </Text>
+        <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
+          <Text style={styles.retryText}>Try Again</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       {Platform.OS === "ios" && <View style={styles.statusBarBackground} />}
       <StatusBar backgroundColor="transparent" barStyle="dark-content" />
 
-      {LeasesCountDown?.length === 0 || !isSignedIn ? (
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Icon name="chevron-back" size={24} color="#1F305E" />
+        </TouchableOpacity>
+
+        <Text style={styles.topText}>Car lease</Text>
+
+        <View style={styles.headerSpacer} />
+      </View>
+
+      {/* Content Logic */}
+      {!isSignedIn || leases?.length === 0 ? (
         <View style={styles.noLeaseContainer}>
-          <Text style={styles.noLeaseText}>No Lease Found!</Text>
+          <Icon name="car-outline" size={80} color="#ccc" />
+          <Text style={styles.noLeaseText}>No Active Leases Found!</Text>
+          <Text style={styles.message}>
+            Rent a car to see your active timers here.
+          </Text>
         </View>
       ) : (
         <View style={styles.contentContainer}>
-          <Text style={styles.topText}>Car lease</Text>
           <Text style={styles.topDescription}>
-            You have 1 car
-            {LeasesCountDown?.length > 1 ? "s" : ""} at lease so far
+            You have {leases?.length} car{leases?.length > 1 ? "s" : ""} at
+            lease so far
           </Text>
 
           <FlatList
-            data={LeasesCountDown || []}
-            // keyExtractor={(item, index) => item._id || index.toString()}
+            data={leases || []}
+            keyExtractor={(item) => item._id || Math.random().toString()}
             renderItem={({ item }) => <CountDown item={item} />}
             showsVerticalScrollIndicator={false}
-            extraData={LeasesCountDown}
+            contentContainerStyle={{ paddingBottom: 20 }}
           />
         </View>
       )}
@@ -51,83 +102,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: Platform.OS === "android" ? 20 : 30,
   },
   statusBarBackground: {
     backgroundColor: "white",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginTop: Platform.OS === "android" ? 10 : 0,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  topText: {
+    fontSize: 20,
+    fontFamily: "bold",
+    color: "#3f3f3fff",
+    textAlign: "center",
   },
   contentContainer: {
     flex: 1,
     paddingHorizontal: 15,
   },
-  topText: {
-    fontSize: 24,
-    marginBottom: 4,
-    fontFamily: "bold",
-    color: "#3f3f3fff",
-  },
   topDescription: {
     color: "#3f3f3fff",
     fontSize: 14,
     marginBottom: 20,
-    fontFamily: "demiBold",
-  },
-  leaseCard: {
-    width: "100%",
-    backgroundColor: "#25262A",
-    borderRadius: 15,
-    padding: 13,
-    marginBottom: 20,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  leaseTitle: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 12,
-    fontFamily: "demiBold",
-  },
-  leaseModel: {
-    color: "#ccc",
-    fontSize: 12,
-    marginTop: 16,
-    fontFamily: "demiBold",
-  },
-  extendButton: {
-    backgroundColor: "#fff",
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-  },
-  extendText: {
-    fontWeight: "600",
-    fontSize: 10,
-    fontFamily: "demiBold",
-    color: "#3f3f3fff",
-  },
-  timerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 8,
-    paddingHorizontal: 10,
-  },
-  timerBlock: {
-    flex: 1,
-    alignItems: "center",
-  },
-  ti: {
-    color: "#fff",
-    fontSize: 30,
-    marginTop: 10,
-    fontFamily: "BebasNeue Regular",
-  },
-  timerLabel: {
-    width: 30,
-    fontSize: 11,
-    color: "#fff",
-    marginTop: 4,
     fontFamily: "demiBold",
     textAlign: "center",
   },
@@ -135,13 +143,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 15,
+    paddingHorizontal: 30,
+    marginTop: -50,
   },
   noLeaseText: {
     fontSize: 18,
-    color: "gray",
+    color: "#3f3f3fff",
     textAlign: "center",
-    fontFamily: "demiBold",
+    fontFamily: "bold",
+    marginTop: 10,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: "#666",
+    fontFamily: "medium",
   },
   centered: {
     flex: 1,
@@ -152,10 +168,9 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    marginTop: 10,
-    color: "red",
     fontFamily: "bold",
+    marginTop: 15,
+    color: "#333",
   },
   message: {
     fontSize: 14,
@@ -165,11 +180,11 @@ const styles = StyleSheet.create({
     fontFamily: "medium",
   },
   retryButton: {
-    marginTop: 16,
-    backgroundColor: "#000",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
+    marginTop: 20,
+    backgroundColor: "#1F305E",
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
   },
   retryText: {
     color: "#fff",

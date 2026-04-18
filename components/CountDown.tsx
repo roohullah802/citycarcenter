@@ -10,6 +10,8 @@ import {
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 
 const CountDown = ({ item }: any) => {
+  console.log(item.car.modelName);
+
   const remainingSeconds = useMemo(() => {
     const end = new Date(item?.endDate).getTime();
     const now = new Date().getTime();
@@ -45,11 +47,8 @@ const CountDown = ({ item }: any) => {
         <View>
           <Text style={styles.statusLabel}>CURRENT LEASE</Text>
           <Text style={styles.modelName} numberOfLines={1}>
-            {item?.carDetails?.[0]?.modelName?.toUpperCase() || "CAR MODEL"}
+            {item?.car.modelName?.toUpperCase() || "CAR MODEL"}
           </Text>
-          {/* <View style={styles.detailRow}>
-            <Text style={styles.detailText}>ID: #{item?._id?.slice(-6).toUpperCase()}</Text>
-          </View> */}
         </View>
 
         <TouchableOpacity
@@ -88,7 +87,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 20,
     padding: 20,
-    marginHorizontal: 16,
+    marginHorizontal: 6,
     marginVertical: 10,
     elevation: 5,
     shadowColor: "#000",

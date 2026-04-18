@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/expo";
+import { useAuth, useUser } from "@clerk/expo";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
@@ -19,10 +19,13 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { showToast } from "../../../folder/toastService";
+import { useCreateIntent } from "@/hooks/usePayment";
 
 export default function DateAndTimeScreen() {
   const { carId } = useLocalSearchParams<{ carId: string }>();
   const insets = useSafeAreaInsets();
+
+  const createIntent = useCreateIntent();
 
   // State
   const [pickUpDate, setPickUpDate] = useState<Date>(new Date());
@@ -32,8 +35,8 @@ export default function DateAndTimeScreen() {
   // Stripe
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { isSignedIn } = useAuth();
+  const { user } = useUser();
 
-  // Return date: 7 days after pick-up
   const returnDate = useMemo(() => {
     const result = new Date(pickUpDate);
     if (isNaN(result.getTime())) return new Date();
@@ -41,7 +44,6 @@ export default function DateAndTimeScreen() {
     return result;
   }, [pickUpDate]);
 
-  // Handle date change
   const onChangeDate = useCallback(
     (event: DateTimePickerEvent, selectedDate?: Date) => {
       if (Platform.OS !== "ios") setShowDatePicker(false);
@@ -82,16 +84,17 @@ export default function DateAndTimeScreen() {
         return;
       }
 
-      // const response = await createPaymentIntent({
-      //   id: validCarId,
-      //   startDate: pickUpDate.toISOString(),
-      //   endDate: returnDate.toISOString(),
-      // }).unwrap();
+      const resp = await createIntent.mutateAsync({
+        action: "createLease",
+        userId: user?.publicMetadata.mongodbId,
+        carId: validCarId,
+        startDate: pickUpDate.toISOString(),
+        endDate: returnDate.toISOString(),
+      });
 
-      const response = { clientSecret: "" };
+      const clientSecret = resp?.clientSecret;
 
-      const clientSecret = response?.clientSecret;
-      if (!clientSecret) throw new Error("No client secret returned");
+      if (!clientSecret) throw new Error("No client secret returned!");
 
       const { error: initError } = await initPaymentSheet({
         merchantDisplayName: "City Car Center",

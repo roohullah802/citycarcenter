@@ -4,7 +4,6 @@ export const uploadFile = async (uri: string, fileName: string) => {
   try {
     const { data } = await axiosInstance.get("/signature");
     const { signature, token, expire } = data;
-    console.log(data);
 
     const formData = new FormData();
 

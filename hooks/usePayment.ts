@@ -15,7 +15,9 @@ export const useCreateIntent = () => {
     mutationKey: ["intent"],
     mutationFn: (data: any) => paymentApi.createIntent(data),
     onSuccess: () => showToast("Intent created! "),
-    onError: (error) => showToast(error.message || "Failed to create intent"),
+    onError: (error) => {
+      showToast(error.message || "Failed to create intent");
+    },
   });
 
   return result;

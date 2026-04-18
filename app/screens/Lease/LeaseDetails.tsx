@@ -1,6 +1,9 @@
-import { rateOptionsDetails } from "@/folder/rateOptions";
+import { capitalText } from "@/folder/capitalText";
+import { formatDate } from "@/folder/formatDate";
+import { DetailsRateOption } from "@/folder/rateOptions";
+import { useLeaseById } from "@/hooks/useFetchLease";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Platform,
   ScrollView,
@@ -9,6 +12,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,29 +21,60 @@ import Icon from "react-native-vector-icons/Ionicons";
 const LeaseDetails: React.FC = () => {
   const { id } = useLocalSearchParams();
   const [menuVisible, setMenuVisible] = useState(false);
-  const [lease, setLease] = useState<any>({
-    status: "active",
-  });
-  const [days, setDays] = useState<number>(0);
+  const { data, isLoading, isError } = useLeaseById(id as string);
 
-  useEffect(() => {
-    if (lease?.startDate && lease?.endDate) {
-      const start = new Date(lease.startDate).getTime();
-      const end = new Date(lease.endDate).getTime();
+  // Safely extract nested data
+  const leaseDetails = data?.details?.[0];
+  const carDetails = leaseDetails?.carDetails?.[0];
+
+  const days = useMemo(() => {
+    if (leaseDetails?.startDate && leaseDetails?.endDate) {
+      const start = new Date(leaseDetails.startDate).getTime();
+      const end = new Date(leaseDetails.endDate).getTime();
       const diff = end - start;
-      const calculatedDays = Math.round(diff / (24 * 60 * 60 * 1000));
-      setDays(calculatedDays);
+      return Math.round(diff / (24 * 60 * 60 * 1000));
     }
-  }, [lease?.startDate, lease?.endDate]);
+    return 0;
+  }, [leaseDetails?.startDate, leaseDetails?.endDate]);
+
+  const rateOptionsDetails: DetailsRateOption[] = [
+    {
+      label: "Initial Miles:",
+      value: carDetails?.initialMileage ?? "0",
+    },
+    {
+      label: "Miles Allowed:",
+      value: carDetails?.allowedMilleage ?? "0",
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#1F305E" />
+      </SafeAreaView>
+    );
+  }
+
+  if (isError || !leaseDetails) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered]}>
+        <Icon name="alert-circle-outline" size={50} color="red" />
+        <Text style={styles.errorText}>Failed to load lease details</Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.retryText}>Go Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
+        <View style={{ flex: 1 }}>
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity
@@ -68,6 +103,7 @@ const LeaseDetails: React.FC = () => {
                       });
                     }}
                   >
+                    <Icon name="card-outline" size={16} color="#3f3f3fff" />
                     <Text style={styles.dropdownText}>Payment Details</Text>
                   </TouchableOpacity>
                 </View>
@@ -75,91 +111,100 @@ const LeaseDetails: React.FC = () => {
             </View>
           </View>
 
-          {/* Lease Info */}
-          <Text style={styles.sectionTitle}>Lease Info:</Text>
-          <InfoRow
-            label="Status:"
-            value={lease.status}
-            valueStyle={[
-              styles.statusActive,
-              lease.status === "active"
-                ? { color: "green" }
-                : lease.status === "expired"
-                  ? { color: "red" }
-                  : {},
-            ]}
-          />
-          <InfoRow label="Lease Type:" value="Limited Miles Lease" />
-          <InfoRow label="Daily Miles:" value="2000" />
-          <InfoRow label="Duration:" value={`${days || "N/A"} days`} />
-          <InfoRow label="Lease Start Date:" value={"00//00/00"} />
-          <InfoRow label="Lease End Date:" value={"00/00/00"} />
-
-          {/* Miles Info */}
-          <Text style={styles.sectionTitle}>Miles:</Text>
-          <View style={styles.rateOptions}>
-            {rateOptionsDetails.map((option, index) => (
-              <View key={index} style={styles.rateCard}>
-                <Text style={styles.rateLabel}>{option.label}</Text>
-                <Text style={styles.rateValue}>{option.value}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Car Info */}
-          <Text style={styles.sectionTitle}>Car Info:</Text>
-          <InfoRow label="Brand:" value={"bmw"} />
-          <InfoRow label="Car:" value={"bmw cc2"} />
-          <InfoRow label="Price Per Day:" value={"12"} />
-          <InfoRow label="Miles:" value={"2222"} />
-
-          {/* Contact Info */}
-          <Text style={styles.sectionTitle}>Contact Us:</Text>
-          <View style={styles.contactRow}>
-            <Icon name="call" size={22} color="#1F305E" />
-            <Text style={styles.contactText}>+9234567673338</Text>
-          </View>
-          <View style={[styles.contactRow, styles.contactRowMargin]}>
-            <Icon name="mail" size={22} color="#1F305E" />
-            <Text style={styles.contactText}>
-              Citycarcenterarizona@gmail.com
-            </Text>
-          </View>
-
-          {/* Extend Button */}
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() =>
-              router.push({
-                pathname: "/screens/Lease/ExtendLease",
-                params: { id: lease?._id },
-              })
-            }
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
           >
-            <Text style={styles.buttonText}>Extend Lease</Text>
-          </TouchableOpacity>
-        </ScrollView>
+            {/* Lease Info */}
+            <Text style={styles.sectionTitle}>Lease Info:</Text>
+            <InfoRow
+              label="Status:"
+              value={capitalText(leaseDetails?.status || "N/A")}
+              valueStyle={{
+                color: leaseDetails?.status === "active" ? "green" : "red",
+              }}
+            />
+            <InfoRow label="Lease Type:" value="Limited Miles Lease" />
+            <InfoRow label="Daily Miles:" value="2000" />
+            <InfoRow label="Duration:" value={`${days} days`} />
+            <InfoRow
+              label="Lease Start Date:"
+              value={formatDate(leaseDetails?.startDate)}
+            />
+            <InfoRow
+              label="Lease End Date:"
+              value={formatDate(leaseDetails?.endDate)}
+            />
+
+            {/* Miles Info */}
+            <Text style={styles.sectionTitle}>Miles Tracking:</Text>
+            <View style={styles.rateOptionsContainer}>
+              {rateOptionsDetails.map((option, index) => (
+                <View key={index} style={styles.rateCard}>
+                  <Text style={styles.rateLabel}>{option.label}</Text>
+                  <Text style={styles.rateValue}>{option.value}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Car Info */}
+            <Text style={styles.sectionTitle}>Car Info:</Text>
+            <InfoRow label="Brand:" value={capitalText(carDetails?.brand)} />
+            <InfoRow
+              label="Model:"
+              value={capitalText(carDetails?.modelName)}
+            />
+            <InfoRow
+              label="Price Per Day:"
+              value={`$${carDetails?.pricePerDay}`}
+            />
+            <InfoRow
+              label="Current Odometer:"
+              value={`${carDetails?.initialMileage} mi`}
+            />
+
+            {/* Contact Info */}
+            <Text style={styles.sectionTitle}>Contact Support:</Text>
+            <View style={styles.contactContainer}>
+              <View style={styles.contactRow}>
+                <Icon name="call" size={20} color="#1F305E" />
+                <Text style={styles.contactText}>+92 345 67673338</Text>
+              </View>
+              <View style={[styles.contactRow, { marginTop: 12 }]}>
+                <Icon name="mail" size={20} color="#1F305E" />
+                <Text style={styles.contactText}>
+                  citycarcenterarizona@gmail.com
+                </Text>
+              </View>
+            </View>
+
+            {/* Extend Button */}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() =>
+                router.push({
+                  pathname: "/screens/Lease/ExtendLease",
+                  params: { id: leaseDetails?._id },
+                })
+              }
+            >
+              <Text style={styles.buttonText}>Extend Lease Duration</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
       </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };
 
-const InfoRow = ({
-  label,
-  value,
-  valueStyle,
-}: {
-  label: string;
-  value: any;
-  valueStyle?: any;
-}) => (
-  <>
+const InfoRow = ({ label, value, valueStyle }: any) => (
+  <View style={styles.infoRowContainer}>
     <View style={styles.priceRow}>
       <Text style={styles.priceLabel}>{label}</Text>
       <Text style={[styles.priceValue, valueStyle]}>{value}</Text>
     </View>
     <View style={styles.line} />
-  </>
+  </View>
 );
 
 export default LeaseDetails;
@@ -167,154 +212,159 @@ export default LeaseDetails;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: RFValue(15),
     backgroundColor: "#fff",
-    paddingTop: Platform.OS === "android" ? 10 : 30,
+  },
+  centered: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   scrollContent: {
-    padding: 3,
+    paddingHorizontal: RFValue(15),
+    paddingBottom: RFValue(30),
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: RFValue(10),
-    marginTop: 10,
+    paddingHorizontal: RFValue(15),
+    height: RFValue(50),
+    zIndex: 10,
   },
   backButton: {
-    paddingRight: RFValue(10),
+    width: 40,
   },
   headerTitle: {
-    fontSize: RFValue(14),
+    fontSize: RFValue(16),
     fontFamily: "bold",
     color: "#3f3f3fff",
   },
   menuWrapper: {
-    position: "relative",
+    width: 40,
+    alignItems: "flex-end",
   },
   dropdownMenu: {
     position: "absolute",
-    top: RFValue(28),
+    top: RFValue(30),
     right: 0,
     backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 6,
+    borderRadius: 8,
     zIndex: 999,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
-    minWidth: RFValue(120),
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: { elevation: 5 },
+    }),
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+    minWidth: RFValue(150),
   },
   dropdownItem: {
-    paddingVertical: RFValue(10),
-    paddingHorizontal: RFValue(12),
-    color: "#3f3f3fff",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: RFValue(12),
+    paddingHorizontal: RFValue(15),
   },
   dropdownText: {
     fontFamily: "demiBold",
-    fontSize: RFValue(11),
+    fontSize: RFValue(12),
     color: "#3f3f3fff",
+    marginLeft: 10,
   },
   sectionTitle: {
     fontFamily: "bold",
-    fontSize: RFValue(12),
+    fontSize: RFValue(13),
     marginTop: RFValue(20),
-    marginBottom: RFValue(10),
-    color: "#3f3f3fff",
+    marginBottom: RFValue(12),
+    color: "#1F305E",
+  },
+  infoRowContainer: {
+    width: "100%",
   },
   priceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: RFValue(10),
+    paddingVertical: 2,
   },
   priceLabel: {
-    fontSize: RFValue(10),
-    fontFamily: "demiBold",
-    color: "#3f3f3fff",
+    fontSize: RFValue(11),
+    fontFamily: "medium",
+    color: "#666",
   },
   priceValue: {
-    fontSize: RFValue(10),
-    fontFamily: "demiBold",
+    fontSize: RFValue(11),
+    fontFamily: "bold",
     color: "#3f3f3fff",
-  },
-  statusActive: {
-    color: "green",
   },
   line: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#ccc",
-    marginVertical: RFValue(8),
+    height: 1,
+    backgroundColor: "#f0f0f0",
+    marginVertical: RFValue(10),
   },
-  rateOptions: {
+  rateOptionsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: RFValue(10),
   },
   rateCard: {
-    flex: 1,
-    marginHorizontal: RFValue(5),
-    backgroundColor: "#eef5ff",
-    borderRadius: RFValue(10),
-    paddingVertical: RFValue(12),
-    paddingHorizontal: RFValue(8),
-    alignItems: "center",
-    justifyContent: "center",
+    flex: 0.48,
+    backgroundColor: "#f9f9f9",
+    padding: RFValue(12),
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
   },
   rateLabel: {
-    fontSize: RFValue(10),
-    color: "#3f3f3fff",
-    textAlign: "center",
-    marginBottom: RFValue(4),
-    fontFamily: "demiBold",
+    fontSize: RFValue(9),
+    color: "#888",
+    fontFamily: "medium",
   },
   rateValue: {
     fontSize: RFValue(14),
-    fontWeight: "600",
-    color: "#3f3f3fff",
-    fontFamily: "demiBold",
+    color: "#1F305E",
+    fontFamily: "bold",
+    marginTop: 4,
+  },
+  contactContainer: {
+    backgroundColor: "#f5f7fa",
+    padding: RFValue(15),
+    borderRadius: 12,
   },
   contactRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-  },
-  contactRowMargin: {
-    marginTop: RFValue(10),
   },
   contactText: {
+    fontSize: RFValue(11),
+    fontFamily: "medium",
     color: "#3f3f3fff",
-    fontSize: RFValue(10),
-    fontFamily: "demiBold",
+    marginLeft: 10,
   },
   button: {
-    backgroundColor: "#73C2FB",
+    backgroundColor: "#1F305E",
     paddingVertical: RFValue(14),
-    borderRadius: RFValue(10),
-    alignItems: "center",
+    borderRadius: 12,
     marginTop: RFValue(30),
-    marginBottom: RFValue(20),
+    alignItems: "center",
   },
   buttonText: {
     color: "#fff",
-    fontSize: RFValue(14),
-    fontWeight: "500",
-    fontFamily: "demiBold",
+    fontSize: RFValue(13),
+    fontFamily: "bold",
   },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    backgroundColor: "#fff",
-  },
-  message: {
-    fontSize: 14,
-    textAlign: "center",
+  errorText: {
+    marginTop: 10,
+    fontSize: RFValue(12),
     color: "#666",
-    marginTop: 8,
-    fontFamily: "medium",
+  },
+  retryButton: {
+    marginTop: 20,
+    padding: 10,
+  },
+  retryText: {
+    color: "#1F305E",
+    fontFamily: "bold",
   },
 });
