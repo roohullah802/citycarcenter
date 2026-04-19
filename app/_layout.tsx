@@ -1,3 +1,4 @@
+import "react-native-url-polyfill/auto";
 import ToastProvider from "@/folder/toastService";
 import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/expo";
 import { StripeProvider } from "@stripe/stripe-react-native";

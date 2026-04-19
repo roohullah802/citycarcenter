@@ -1,7 +1,9 @@
+// Exact match with your backend documentStatus enum
 export const statusConfig: Record<string, { label: string; color: string }> = {
-  verified: { label: "Verified", color: "#10B981" },
-  notVerified: { label: "Not Verified", color: "#F59E0B" },
-  rejected: { label: "Rejected", color: "#EF4444" },
+  unverified: { label: "Unverified", color: "#6B7280" },
+  pending: { label: "Pending", color: "#F59E0B" },
+  approved: { label: "Approved", color: "#10B981" },
+  declined: { label: "Declined", color: "#EF4444" },
 };
 
 type LeaseStatus = "active" | "expired" | "upcoming" | "terminated";
@@ -20,6 +22,8 @@ export const statusColor = (s: LeaseStatus) => {
       return "#dc2626";
     case "upcoming":
       return "#f59e0b";
+    case "terminated":
+      return "#4B5563";
     default:
       return "#000";
   }

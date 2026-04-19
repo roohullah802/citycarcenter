@@ -14,10 +14,7 @@
       "intentFilters": [
         {
           "action": "VIEW",
-          "category": [
-            "DEFAULT",
-            "BROWSABLE"
-          ],
+          "category": ["DEFAULT", "BROWSABLE"],
           "data": [
             {
               "scheme": "citycarcenter",
@@ -59,13 +56,12 @@
         {
           "android": {
             "packagingOptions": {
-              "pickFirst": [
-                "**/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
-              ]
+              "pickFirst": ["**/META-INF/versions/9/OSGI-INF/MANIFEST.MF"]
             }
           }
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

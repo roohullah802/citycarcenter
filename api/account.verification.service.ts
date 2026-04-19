@@ -10,10 +10,12 @@ const accountVerificationApi = {
     return response.data;
   },
   issues: async (data: any) => {
-    console.log(process.env.EXPO_PUBLIC_BASE_URL);
     const response = await axiosInstance.post("/issues", data);
-    console.log(response.status);
     return response.data;
+  },
+  signature: async () => {
+    const response = await axiosInstance.get("/signature");
+    return response;
   },
 };
 

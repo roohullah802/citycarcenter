@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from "expo-router";
-import React, { useEffect } from "react";
+import React from "react";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";

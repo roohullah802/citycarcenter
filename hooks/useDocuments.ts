@@ -3,10 +3,10 @@ import { showToast } from "@/folder/toastService";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 
-export const useUploadDocs = (data: any) => {
+export const useUploadDocs = () => {
   const result = useMutation({
     mutationKey: ["uploadDocs"],
-    mutationFn: () => accountVerificationApi.documents(data),
+    mutationFn: (data: any) => accountVerificationApi.documents(data),
     onSuccess: () => showToast("Documents uploaded successfully! "),
     onError: (error) =>
       showToast(error.message || "Failed to upload documents!"),
@@ -34,6 +34,14 @@ export const usePostIssues = () => {
     onError: (error) => {
       showToast(error.message || "Failed to post issue!");
     },
+  });
+  return result;
+};
+
+export const useSignature = () => {
+  const result = useQuery({
+    queryKey: ["signature"],
+    queryFn: accountVerificationApi.signature,
   });
   return result;
 };

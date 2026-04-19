@@ -1,5 +1,6 @@
 import PaymentHistory from "@/components/PaymentHistory";
-import { router, useLocalSearchParams } from "expo-router";
+import { usePaymentHistory } from "@/hooks/usePayment";
+import { router } from "expo-router";
 import React from "react";
 import {
   FlatList,
@@ -7,53 +8,71 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
 
-const PaymentDetails: React.FC = () => {
-  const { id } = useLocalSearchParams();
-
-  const data = { data: { leases: [] } };
-  const payment = data?.data.leases;
+const PaymentDetails = () => {
+  const { data, isLoading, isError, refetch } = usePaymentHistory();
+  const payment = data?.leases;
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+
+      {/* Professional Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.iconBtn} onPress={() => router.back()}>
+          <Icon name="chevron-back" size={24} color="#111827" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Payment History</Text>
+        <TouchableOpacity style={styles.iconBtn} onPress={() => refetch()}>
+          <Icon name="reload" size={20} color="#111827" />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.content}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Icon name="chevron-back" size={24} color="#1F305E" />
-          </TouchableOpacity>
-          <Text style={styles.headerText}>Payment Details</Text>
-        </View>
-
-        <View>
-          <View style={styles.tableHeader}>
-            <Text style={styles.tableHeaderText}>Payment ID</Text>
-            <Text style={[styles.tableHeaderText, { marginRight: 30 }]}>
-              Reason
-            </Text>
-            <Text style={styles.tableHeaderText}>Date</Text>
+        {isLoading && (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color="#1F305E" />
+            <Text style={styles.infoText}>Loading records...</Text>
           </View>
+        )}
 
-          {!payment || payment?.length === 0 ? (
-            <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>No payment history</Text>
+        {isError && (
+          <View style={styles.centerContainer}>
+            <View style={styles.errorCircle}>
+              <Icon name="cloud-offline" size={32} color="#EF4444" />
             </View>
-          ) : (
-            <FlatList
-              data={payment}
-              renderItem={({ item }) => <PaymentHistory item={item} />}
-              // keyExtractor={(item) => item._id}
-              showsVerticalScrollIndicator={false}
-              ItemSeparatorComponent={() => <View style={styles.itemGap} />}
-            />
-          )}
-        </View>
+            <Text style={styles.errorText}>Unable to load history</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={() => refetch()}
+            >
+              <Text style={styles.retryText}>Try Again</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {!isLoading && !isError && (
+          <FlatList
+            data={payment}
+            renderItem={({ item }) => <PaymentHistory item={item} />}
+            keyExtractor={(item) => item._id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listPadding}
+            ItemSeparatorComponent={() => <View style={styles.itemGap} />}
+            ListEmptyComponent={
+              <View style={styles.centerContainer}>
+                <Icon name="receipt-outline" size={64} color="#E5E7EB" />
+                <Text style={styles.noDataText}>No leases found yet</Text>
+              </View>
+            }
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -62,60 +81,73 @@ const PaymentDetails: React.FC = () => {
 export default PaymentDetails;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  content: {
-    padding: RFValue(16),
-  },
+  container: { flex: 1, backgroundColor: "#F9FAFB" },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    width: "100%",
     justifyContent: "space-between",
-    marginTop: 10,
+    paddingHorizontal: RFValue(16),
+    paddingVertical: RFValue(10),
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
   },
-  backButton: {
-    paddingRight: RFValue(10),
+  iconBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
   },
-  headerText: {
+  headerTitle: {
     fontFamily: "bold",
     fontSize: RFValue(16),
+    color: "#111827",
+  },
+  content: { flex: 1 },
+  listPadding: {
+    padding: RFValue(16),
+    paddingBottom: RFValue(30),
+  },
+  itemGap: { height: RFValue(14) },
+  centerContainer: {
     flex: 1,
-    textAlign: "center",
-    marginRight: RFValue(30),
-    color: "#3f3f3fff",
-  },
-  tableHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: RFValue(20),
-    marginBottom: RFValue(15),
-  },
-  tableHeaderText: {
-    fontFamily: "demiBold",
-    fontSize: RFValue(12),
-    color: "#3f3f3fff",
-  },
-
-  itemGap: {
-    height: RFValue(10),
-  },
-  unSuccessText: {
-    color: "red",
-  },
-  successText: {
-    color: "black",
-  },
-  noDataContainer: {
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: RFValue(20),
+    marginTop: RFValue(40),
   },
-
-  noDataText: {
-    fontSize: RFValue(12),
-    color: "#888",
+  infoText: {
+    marginTop: RFValue(12),
+    fontSize: RFValue(13),
+    color: "#6B7280",
     fontFamily: "medium",
+  },
+  errorCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#FEF2F2",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  errorText: {
+    fontSize: RFValue(14),
+    color: "#111827",
+    fontFamily: "bold",
+  },
+  retryButton: {
+    marginTop: RFValue(16),
+    paddingHorizontal: RFValue(24),
+    paddingVertical: RFValue(10),
+    backgroundColor: "#1F305E",
+    borderRadius: 10,
+  },
+  retryText: { color: "white", fontFamily: "bold", fontSize: RFValue(12) },
+  noDataText: {
+    fontSize: RFValue(14),
+    color: "#9CA3AF",
+    fontFamily: "medium",
+    marginTop: RFValue(12),
   },
 });

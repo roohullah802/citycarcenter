@@ -44,7 +44,6 @@ export default function StackLayout() {
       <Stack.Screen name="screens/Payments/PaymentSuccess" />
       <Stack.Screen name="screens/Auth/SocialAuth" />
       <Stack.Screen name="screens/Others/CarImages" />
-      <Stack.Screen name="screens/Lease/LeaseHistory" />
       <Stack.Screen name="screens/Setting/DocumentUploadScreen" />
       <Stack.Screen name="screens/Setting/DocumentSubmittedScreen" />
     </Stack>
