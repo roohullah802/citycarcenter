@@ -40,7 +40,7 @@ const FavouriteCars: React.FC = () => {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1F305E" />
+        <ActivityIndicator size="large" color="#73C2FB" />
       </View>
     );
   }

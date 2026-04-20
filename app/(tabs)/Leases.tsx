@@ -16,7 +16,7 @@ import { RFValue } from "react-native-responsive-fontsize";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
 
-const AllLeases: React.FC = () => {
+const AllLeases = () => {
   const { isSignedIn } = useAuth();
   const router = useRouter();
 
@@ -26,7 +26,7 @@ const AllLeases: React.FC = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color="#1F305E" />
+        <ActivityIndicator size="large" color="#73C2FB" />
         <Text style={styles.loadingText}>Fetching your leases...</Text>
       </SafeAreaView>
     );
