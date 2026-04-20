@@ -1,65 +1,91 @@
 import React, { useCallback, useRef } from "react";
 import {
-  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
-  useWindowDimensions,
   View,
+  StatusBar,
 } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SignInWithApple from "./SignInWithApple";
 import SignInWithGoogle from "./SignInWithGoogle";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function SocialAuthScreen() {
-  const { width, height } = useWindowDimensions();
   const modelRef = useRef<Modalize>(null);
-
-  const isTablet = Math.min(width, height) >= 600;
-  const logoTop = (height / 896) * (isTablet ? 80 : 60);
 
   const openModel = useCallback(() => modelRef.current?.open(), []);
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={[styles.container, { paddingHorizontal: 20 }]}>
-        <View style={[styles.header, { marginTop: logoTop }]}>
-          <Text style={styles.title}>
-            <Text style={styles.titleBold}>
-              Smart Solutions{"\n"}For Your Car Needs {"\n"}
-            </Text>
-            <Text style={styles.titleAccent}>City Car Center</Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+
+      <View style={styles.decorativeCircle} />
+
+      <View style={styles.main}>
+        <View style={styles.header}>
+          <View style={styles.brandMark}>
+            <Ionicons name="car-sport" size={24} color="#FFF" />
+          </View>
+          <Text style={styles.heroText}>
+            Elevate Your{"\n"}
+            <Text style={styles.heroBold}>Driving Experience</Text>
           </Text>
+          <Text style={styles.brandSub}>CITY CAR CENTER — PREMIUM FLEET</Text>
         </View>
 
-        <View style={styles.buttonsWrap}>
-          <SignInWithGoogle />
-          <SignInWithApple />
+        <View style={styles.authWrapper}>
+          <Text style={styles.authTitle}>Secure Access</Text>
+          <Text style={styles.authDescription}>
+            Sign in to access your curated fleet and seamless booking
+            management.
+          </Text>
+
+          <View style={styles.buttonContainer}>
+            <SignInWithGoogle />
+            <SignInWithApple />
+          </View>
         </View>
 
-        <TouchableOpacity
-          accessibilityRole="link"
-          onPress={openModel}
-          style={styles.whyWrap}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.whyText}>Why do I have to sign in?</Text>
-        </TouchableOpacity>
+        {/* FOOTER */}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            onPress={openModel}
+            style={styles.whyButton}
+            activeOpacity={0.6}
+          >
+            <Text style={styles.whyText}>Security & Privacy Information</Text>
+            <Ionicons name="chevron-forward" size={14} color="#94A3B8" />
+          </TouchableOpacity>
+
+          <Text style={styles.copyright}>© 2026 CITY CAR CENTER</Text>
+        </View>
       </View>
 
       <Modalize
         ref={modelRef}
-        handleStyle={{ backgroundColor: "#73C2FB" }}
-        modalStyle={{ padding: 30 }}
-        modalHeight={300}
+        adjustToContentHeight
+        handlePosition="inside"
+        modalStyle={styles.modal}
+        handleStyle={{ backgroundColor: "#E2E8F0", width: 40 }}
       >
         <View style={styles.modalContent}>
-          <Text style={styles.modalText}>
-            Signing in helps uniquely identify who you are. This ensures that
-            your data—like favorites, rental history, and payment info—is
-            securely tied to your account only.
+          <View style={styles.modalIcon}>
+            <Ionicons name="shield-checkmark" size={32} color="#73C2FB" />
+          </View>
+
+          <Text style={styles.modalHeading}>Enterprise-Grade Security</Text>
+
+          <Text style={styles.modalBody}>
+            We use encrypted authentication to ensure your personal data, rental
+            preferences, and payment details remain confidential and accessible
+            only to you.
           </Text>
+
+          <View style={styles.swipeHint}>
+            <Text style={styles.swipeHintText}>Swipe down to dismiss</Text>
+          </View>
         </View>
       </Modalize>
     </SafeAreaView>
@@ -67,58 +93,143 @@ export default function SocialAuthScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  container: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: Platform.OS === "android" ? 50 : 0,
+    backgroundColor: "#FFFFFF",
   },
-  container: { flex: 1, justifyContent: "flex-start" },
-  header: { alignSelf: "stretch", marginBottom: 24 },
-  title: { color: "#222", fontWeight: "400" },
-  titleBold: { color: "#222", fontWeight: "700", fontSize: 25 },
-  titleAccent: { color: "#00AEEF", fontWeight: "700", fontSize: 25 },
-  buttonsWrap: { marginTop: 20, gap: 8 },
-  button: {
+  decorativeCircle: {
+    position: "absolute",
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: "#F8FAFC",
+    zIndex: -1,
+  },
+  main: {
+    flex: 1,
+    paddingHorizontal: 32,
+    justifyContent: "space-between",
+  },
+  header: {
+    marginTop: 40,
+  },
+  brandMark: {
+    width: 48,
+    height: 48,
+    backgroundColor: "#1F305E",
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
+    shadowColor: "#1F305E",
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  heroText: {
+    fontSize: 30,
+    fontWeight: "300",
+    color: "#1F305E",
+    lineHeight: 38,
+    letterSpacing: -0.5,
+  },
+  heroBold: {
+    fontWeight: "800",
+  },
+  brandSub: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#73C2FB",
+    letterSpacing: 2,
+    marginTop: 12,
+  },
+  authWrapper: {
+    marginTop: 20,
+  },
+  authTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1F305E",
+    marginBottom: 8,
+  },
+  authDescription: {
+    fontSize: 14,
+    color: "#64748B",
+    lineHeight: 20,
+    marginBottom: 32,
+    fontWeight: "500",
+  },
+  buttonContainer: {
+    gap: 14,
+  },
+  footer: {
+    alignItems: "center",
+    paddingBottom: 20,
+  },
+  whyButton: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 5,
-    paddingHorizontal: 14,
-    borderWidth: 0.2,
-    borderColor: "gray",
-    marginBottom: 12,
+    gap: 6,
+    paddingVertical: 10,
   },
-  iconWrap: { width: 48, alignItems: "center", justifyContent: "center" },
-  icon: { width: 28, height: 28 },
-  labelWrap: {
-    flex: 1,
-    alignItems: "flex-start",
-    justifyContent: "center",
-    paddingLeft: 6,
-  },
-  buttonLabel: {
-    color: "#222",
-    fontWeight: "600",
-    letterSpacing: -0.6,
-    fontSize: 12,
-  },
-  whyWrap: { marginTop: 40, alignSelf: "center" },
   whyText: {
-    textDecorationLine: "underline",
-    color: "#9aa0a6",
-    fontWeight: "600",
+    color: "#94A3B8",
+    fontWeight: "700",
     fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  copyright: {
+    fontSize: 9,
+    color: "#CBD5E1",
+    fontWeight: "800",
+    marginTop: 8,
+  },
+
+  modal: {
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    backgroundColor: "#FFFFFF",
   },
   modalContent: {
-    flex: 1,
+    padding: 32,
+    paddingTop: 45,
+    alignItems: "center",
+    paddingBottom: 60,
+  },
+  modalIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 22,
+    backgroundColor: "#F0F9FF",
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    marginBottom: 20,
   },
-  modalText: {
-    fontSize: 18,
+  modalHeading: {
+    fontSize: 22,
+    fontWeight: "800",
     color: "#1F305E",
-    fontWeight: "bold",
+    marginBottom: 12,
+  },
+  modalBody: {
+    fontSize: 15,
+    color: "#64748B",
     textAlign: "center",
-    fontFamily: "demiBold",
+    lineHeight: 24,
+    fontWeight: "500",
+  },
+  swipeHint: {
+    marginTop: 40,
+    opacity: 0.5,
+  },
+  swipeHintText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#94A3B8",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
 });

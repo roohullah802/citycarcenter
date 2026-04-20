@@ -10,13 +10,16 @@ import {
   Text,
   ActivityIndicator,
   StyleSheet,
+  StatusBar,
 } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width, height } = Dimensions.get("window");
 
 function CarImages() {
   const { id } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const { data, isLoading, isError, refetch } = useCarById(id as string);
 
   const images = data?.data?.[0]?.images || [];
@@ -36,7 +39,6 @@ function CarImages() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#73C2FB" size="large" />
-        <Text style={styles.infoText}>Loading...</Text>
       </View>
     );
   }
@@ -44,8 +46,8 @@ function CarImages() {
   if (isError) {
     return (
       <View style={styles.centered}>
-        <Icon name="cloud-offline-outline" size={50} color="#FF6B6B" />
-        <Text style={styles.errorText}>Error loading images</Text>
+        <Ionicons name="cloud-offline-outline" size={48} color="#FF6B6B" />
+        <Text style={styles.errorText}>Gallery Sync Failed</Text>
         <TouchableOpacity style={styles.retryBtn} onPress={() => refetch()}>
           <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
@@ -55,9 +57,16 @@ function CarImages() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Icon name="close" color="white" size={30} />
+      <StatusBar barStyle="light-content" />
+
+      {/* REFINED OVERLAY HEADER */}
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => router.back()}
+          style={styles.closeCircle}
+        >
+          <Ionicons name="close" color="white" size={24} />
         </TouchableOpacity>
 
         <View style={styles.counterBadge}>
@@ -66,7 +75,7 @@ function CarImages() {
           </Text>
         </View>
 
-        <View style={styles.placeholder} />
+        <View style={{ width: 44 }} />
       </View>
 
       <FlatList
@@ -78,34 +87,38 @@ function CarImages() {
         viewabilityConfig={viewabilityConfig}
         keyExtractor={(_, index) => index.toString()}
         renderItem={({ item }) => <IndividualImage url={item?.url} />}
+        contentContainerStyle={styles.listContent}
       />
     </View>
   );
 }
 
 const IndividualImage = ({ url }: { url: string }) => {
-  const [loading, setLoading] = useState(true);
+  const [isImgLoading, setIsImgLoading] = useState(true);
 
   return (
     <View style={styles.imageWrapper}>
-      {loading ? (
+      {isImgLoading && (
         <View style={styles.imageLoader}>
           <ActivityIndicator color="#73C2FB" size="small" />
         </View>
-      ) : null}
+      )}
       <Image
         source={{ uri: url }}
         contentFit="contain"
+        transition={300}
         style={styles.fullImage}
-        onLoadStart={() => setLoading(true)}
-        onLoadEnd={() => setLoading(false)}
+        onLoadEnd={() => setIsImgLoading(false)}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000" },
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
   centered: {
     flex: 1,
     backgroundColor: "#000",
@@ -113,38 +126,73 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    marginTop: 60,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
     paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  backBtn: { width: 40 },
-  placeholder: { width: 40 },
-  counterBadge: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 15,
-  },
-  counterText: { color: "#fff", fontWeight: "bold", fontSize: 14 },
-  imageWrapper: {
-    width: width,
-    height: height * 0.7,
+  closeCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.15)",
     justifyContent: "center",
     alignItems: "center",
   },
-  fullImage: { width: width, height: "100%" },
-  imageLoader: { position: "absolute", zIndex: 1 },
-  infoText: { color: "#73C2FB", marginTop: 10 },
-  errorText: { color: "#999", marginTop: 10 },
-  retryBtn: {
-    marginTop: 15,
-    padding: 10,
-    backgroundColor: "#333",
-    borderRadius: 8,
+  counterBadge: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
   },
-  retryText: { color: "#73C2FB", fontWeight: "bold" },
+  counterText: {
+    color: "#fff",
+    fontWeight: "800",
+    fontSize: 14,
+    letterSpacing: 1,
+  },
+  listContent: {
+    alignItems: "center",
+  },
+  imageWrapper: {
+    width: width,
+    height: height,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fullImage: {
+    width: width,
+    height: "100%",
+  },
+  imageLoader: {
+    position: "absolute",
+    zIndex: 1,
+  },
+  errorText: {
+    color: "#94A3B8",
+    marginTop: 12,
+    fontWeight: "600",
+  },
+  retryBtn: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    backgroundColor: "rgba(115, 194, 251, 0.2)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#73C2FB",
+  },
+  retryText: {
+    color: "#73C2FB",
+    fontWeight: "800",
+  },
 });
 
 export default CarImages;

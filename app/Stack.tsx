@@ -1,30 +1,6 @@
-import { setAuthToken } from "@/folder/axiosInstance";
-import { useAuth, useUser } from "@clerk/expo";
 import { Stack } from "expo-router";
-import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
 
 export default function StackLayout() {
-  const { isLoaded, isSignedIn } = useUser();
-  const { getToken } = useAuth();
-
-  useEffect(() => {
-    async function syncToken() {
-      const token = await getToken();
-      setAuthToken(token);
-    }
-
-    if (isSignedIn) syncToken();
-  }, [getToken, isSignedIn]);
-
-  if (!isLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
   return (
     <Stack
       screenOptions={{ headerShown: false, animation: "fade_from_bottom" }}

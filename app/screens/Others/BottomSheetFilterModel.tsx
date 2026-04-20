@@ -1,118 +1,95 @@
 import Slider from "@react-native-community/slider";
 import React, { forwardRef, useCallback, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Modalize } from "react-native-modalize";
 
 interface FilterModalProps {
   onClose: () => void;
   priceRange: [number, number];
   setPriceRange: React.Dispatch<React.SetStateAction<[number, number]>>;
-  setSelectedBrand: React.Dispatch<React.SetStateAction<string | null>>;
-  selectedBrand: string | null;
 }
 
 const BottomSheetFilterModal = React.memo(
   forwardRef<Modalize, FilterModalProps>(
-    (
-      { onClose, setPriceRange, setSelectedBrand, selectedBrand, priceRange },
-      ref,
-    ) => {
+    ({ onClose, setPriceRange, priceRange }, ref) => {
       const [localPrice, setLocalPrice] =
         useState<[number, number]>(priceRange);
-      const [localBrand, setLocalBrand] = useState<string | null>(
-        selectedBrand,
-      );
 
-      const [Brands] = useState([]);
-      const isLoading = false;
-
+      // Sync local state when global prop changes
       useEffect(() => {
-        setLocalBrand(selectedBrand);
         setLocalPrice(priceRange);
-      }, [selectedBrand, priceRange]);
+      }, [priceRange]);
 
       const handleApplyFilters = useCallback(() => {
-        setSelectedBrand(localBrand);
         setPriceRange(localPrice);
         onClose();
-      }, [localBrand, localPrice, onClose, setPriceRange, setSelectedBrand]);
+      }, [localPrice, onClose, setPriceRange]);
 
       const clearFilter = () => {
-        setLocalBrand(null);
-        setSelectedBrand(null);
-        setPriceRange([1, 1000]);
-        setLocalPrice([1, 1000]);
+        const defaultRange: [number, number] = [1, 1000];
+        setLocalPrice(defaultRange);
+        setPriceRange(defaultRange);
       };
 
       return (
-        <Modalize ref={ref} adjustToContentHeight modalStyle={styles.modal}>
-          <ScrollView style={{ paddingHorizontal: 20, paddingTop: 10 }}>
+        <Modalize
+          ref={ref}
+          adjustToContentHeight
+          modalStyle={styles.modal}
+          handlePosition="inside"
+          handleStyle={styles.modalHandle}
+        >
+          <View style={styles.content}>
             {/* Header */}
             <View style={styles.headerRow}>
-              <Text style={styles.title}>Filters</Text>
-              <TouchableOpacity onPress={clearFilter}>
-                <Text style={styles.clearText}>Clear filter</Text>
+              <Text style={styles.title}>Filter Price</Text>
+              <TouchableOpacity onPress={clearFilter} activeOpacity={0.6}>
+                <Text style={styles.clearText}>Reset</Text>
               </TouchableOpacity>
             </View>
 
-            {/* Brand */}
-            <Text style={styles.label}>Price Range</Text>
-            <View style={styles.sliderRow}>
-              <Text style={styles.sliderValue}>${localPrice[0]}</Text>
-              <Text style={styles.sliderValue}>${localPrice[1]}</Text>
-            </View>
-            <Slider
-              style={{ width: "100%" }}
-              minimumValue={1}
-              maximumValue={1000}
-              step={1}
-              value={localPrice[1]}
-              onValueChange={(value) => setLocalPrice([1, value])}
-            />
+            {/* Price Range Section */}
+            <View style={styles.section}>
+              <View style={styles.labelRow}>
+                <Text style={styles.label}>Daily Rate</Text>
+                <View style={styles.badge}>
+                  <Text style={styles.rangeIndicator}>
+                    Up to ${localPrice[1]}
+                  </Text>
+                </View>
+              </View>
 
-            {/* Price Slider */}
-            <Text style={styles.label}>Brand</Text>
-            <View style={styles.brandContainer}>
-              {isLoading ? (
-                <ActivityIndicator size="large" color="#73C2FB" />
-              ) : (
-                Brands.map(({ brand }: any) => (
-                  <TouchableOpacity
-                    key={brand}
-                    style={[
-                      styles.brandButton,
-                      localBrand === brand && styles.brandButtonSelected,
-                    ]}
-                    onPress={() => setLocalBrand(brand)}
-                  >
-                    <Text
-                      style={[
-                        styles.brandText,
-                        localBrand === brand && styles.brandTextSelected,
-                      ]}
-                    >
-                      {brand}
-                    </Text>
-                  </TouchableOpacity>
-                ))
-              )}
+              <Slider
+                style={styles.slider}
+                minimumValue={1}
+                maximumValue={1000}
+                step={10}
+                minimumTrackTintColor="#73C2FB"
+                maximumTrackTintColor="#F1F5F9"
+                thumbTintColor="#73C2FB"
+                value={localPrice[1]}
+                onValueChange={(value) => setLocalPrice([1, value])}
+              />
+
+              <View style={styles.sliderLabels}>
+                <Text style={styles.minMax}>$1</Text>
+                <Text style={styles.minMax}>$1,000+</Text>
+              </View>
             </View>
 
-            {/* Apply */}
+            <Text style={styles.helperText}>
+              Adjust the slider to find vehicles within your daily budget.
+            </Text>
+
+            {/* Action Button */}
             <TouchableOpacity
-              style={styles.searchButton}
+              style={styles.applyButton}
               onPress={handleApplyFilters}
+              activeOpacity={0.9}
             >
-              <Text style={styles.searchButtonText}>Apply Filters</Text>
+              <Text style={styles.applyButtonText}>Apply Price Range</Text>
             </TouchableOpacity>
-          </ScrollView>
+          </View>
         </Modalize>
       );
     },
@@ -121,90 +98,103 @@ const BottomSheetFilterModal = React.memo(
 
 const styles = StyleSheet.create({
   modal: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    marginBottom: 20,
+  },
+  modalHandle: {
+    backgroundColor: "#E2E8F0",
+    width: 40,
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 40,
   },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 32,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "700",
-    fontFamily: "bold",
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#1F305E",
+    letterSpacing: -0.5,
   },
   clearText: {
-    width: 100,
-    color: "#73C2FB",
+    color: "#EF4444",
     fontSize: 14,
-    fontFamily: "demiBold",
+    fontWeight: "700",
+  },
+  section: {
+    marginBottom: 20,
+  },
+  labelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
   },
   label: {
     fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 8,
-    marginTop: 10,
-    fontFamily: "demiBold",
-    color: "#3f3f3fff",
+    fontWeight: "800",
+    color: "#94A3B8",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
-  brandContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginBottom: 20,
+  badge: {
+    backgroundColor: "#F0F9FF",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E0F2FE",
   },
-  brandButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    backgroundColor: "#f2f2f2",
-    borderRadius: 20,
+  rangeIndicator: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#1F305E",
   },
-  brandButtonSelected: {
-    backgroundColor: "#000",
+  slider: {
+    width: "100%",
+    height: 40,
   },
-  brandText: {
-    fontSize: 14,
-    color: "#333",
-    fontFamily: "demiBold",
-  },
-  brandTextSelected: {
-    color: "#fff",
-    fontWeight: "600",
-    fontFamily: "demiBold",
-  },
-  sliderRow: {
+  sliderLabels: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 6,
+    marginTop: -4,
   },
-  sliderValue: {
+  minMax: {
     fontSize: 12,
-    color: "#555",
-    fontFamily: "demiBold",
+    color: "#94A3B8",
+    fontWeight: "700",
   },
-  sliderCenterLabel: {
-    textAlign: "center",
-    fontSize: 12,
-    marginBottom: 20,
-    color: "gray",
-    fontFamily: "demiBold",
+  helperText: {
+    fontSize: 13,
+    color: "#64748B",
+    lineHeight: 18,
+    marginBottom: 32,
+    fontWeight: "500",
   },
-  searchButton: {
+  applyButton: {
     backgroundColor: "#73C2FB",
-    paddingVertical: 14,
-    borderRadius: 8,
-    marginBottom: 30,
-    marginTop: 10,
+    height: 60,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#1F305E",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  searchButtonText: {
-    color: "#fff",
+  applyButtonText: {
+    color: "#FFF",
     fontSize: 16,
-    textAlign: "center",
-    fontWeight: "600",
-    fontFamily: "demiBold",
+    fontWeight: "700",
   },
 });
 

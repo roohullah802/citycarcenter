@@ -13,19 +13,19 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  StatusBar,
 } from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { showToast } from "../../../folder/toastService";
 
 const ReportIssueScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const [description, setDescription] = useState("");
   const [email, setEmail] = useState("");
   const [isFocused, setIsFocused] = useState<string | null>(null);
 
   const postIssue = usePostIssues();
 
-  // Simple validation for button state
   const isValid = useMemo(
     () => description.trim().length > 5 && email.includes("@"),
     [description, email],
@@ -44,55 +44,54 @@ const ReportIssueScreen: React.FC = () => {
   }, [description, email, postIssue]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.mainContainer}>
+      <StatusBar barStyle="dark-content" />
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* --- HEADER --- */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backBtn}
-          >
-            <Ionicons name="chevron-back" size={24} color="#1F305E" />
+        {/* PROFESSIONAL HEADER */}
+        <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.navBtn}>
+            <Ionicons name="chevron-back" size={28} color="#1F305E" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Support</Text>
+          <Text style={styles.headerTitle}>Report Issue</Text>
           <View style={{ width: 40 }} />
         </View>
 
         <ScrollView
-          contentContainerStyle={styles.content}
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.textSection}>
-            <Text style={styles.welcomeHeader}>Report an Issue</Text>
-            <Text style={styles.subHeader}>
-              Encountered a bug or have a concern? Let us know the details and
-              we&apos;ll fix it as soon as possible.
+          <View style={styles.heroSection}>
+            <Text style={styles.heroTitle}>How can we help?</Text>
+            <Text style={styles.heroSubtitle}>
+              Our team is here to assist. Please describe the problem
+              you&apos;re experiencing in detail.
             </Text>
           </View>
 
           {/* Email Input */}
-          <View style={styles.inputWrapper}>
-            <Text style={styles.label}>Email Address</Text>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>EMAIL ADDRESS</Text>
             <View
               style={[
                 styles.inputBox,
-                isFocused === "email" && styles.inputFocused,
+                isFocused === "email" && styles.inputBoxFocused,
               ]}
             >
               <Ionicons
                 name="mail-outline"
-                size={18}
-                color="#9CA3AF"
-                style={styles.inputIcon}
+                size={20}
+                color={isFocused === "email" ? "#73C2FB" : "#94A3B8"}
+                style={styles.icon}
               />
               <TextInput
-                style={styles.input}
-                placeholder="How can we reach you?"
-                placeholderTextColor="#9CA3AF"
+                style={styles.textInput}
+                placeholder="Enter your contact email"
+                placeholderTextColor="#94A3B8"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
@@ -104,18 +103,18 @@ const ReportIssueScreen: React.FC = () => {
           </View>
 
           {/* Description Input */}
-          <View style={styles.inputWrapper}>
-            <Text style={styles.label}>Detailed Description</Text>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>ISSUE DETAILS</Text>
             <View
               style={[
                 styles.textAreaBox,
-                isFocused === "desc" && styles.inputFocused,
+                isFocused === "desc" && styles.inputBoxFocused,
               ]}
             >
               <TextInput
                 style={styles.textArea}
-                placeholder="Tell us exactly what happened..."
-                placeholderTextColor="#9CA3AF"
+                placeholder="Please provide as much information as possible..."
+                placeholderTextColor="#94A3B8"
                 value={description}
                 onFocus={() => setIsFocused("desc")}
                 onBlur={() => setIsFocused(null)}
@@ -127,143 +126,129 @@ const ReportIssueScreen: React.FC = () => {
             </View>
           </View>
 
+          {/* SEND BUTTON */}
           <TouchableOpacity
-            style={[
-              styles.submitButton,
-              { backgroundColor: isValid ? "#1F305E" : "#E5E7EB" },
-            ]}
+            style={[styles.submitBtn, !isValid && styles.submitBtnDisabled]}
             onPress={handleSend}
             disabled={!isValid || postIssue.isPending}
+            activeOpacity={0.8}
           >
             {postIssue.isPending ? (
-              <ActivityIndicator color="white" />
+              <ActivityIndicator color="#FFF" />
             ) : (
               <>
                 <Text
-                  style={[
-                    styles.buttonText,
-                    { color: isValid ? "#FFF" : "#9CA3AF" },
-                  ]}
+                  style={[styles.submitBtnText, !isValid && styles.textMuted]}
                 >
-                  Send Report
+                  Submit Report
                 </Text>
                 <Ionicons
-                  name="send"
-                  size={16}
-                  color={isValid ? "#FFF" : "#9CA3AF"}
-                  style={{ marginLeft: 8 }}
+                  name="paper-plane"
+                  size={18}
+                  color={isValid ? "#FFF" : "#94A3B8"}
+                  style={{ marginLeft: 10 }}
                 />
               </>
             )}
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 
-export default ReportIssueScreen;
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9FAFB",
-  },
+  mainContainer: { flex: 1, backgroundColor: "#FFFFFF" },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    backgroundColor: "#FFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "#F1F5F9",
   },
-  backBtn: { width: 40, height: 40, justifyContent: "center" },
-  headerTitle: { fontSize: RFValue(16), fontFamily: "bold", color: "#1F305E" },
-  content: {
-    padding: 20,
-    paddingBottom: 40,
+  navBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  textSection: {
-    marginBottom: 25,
+  headerTitle: { fontSize: 18, fontWeight: "800", color: "#1F305E" },
+  scrollContent: { padding: 24 },
+  heroSection: { marginBottom: 32 },
+  heroTitle: { fontSize: 26, fontWeight: "800", color: "#1F305E" },
+  heroSubtitle: {
+    fontSize: 15,
+    color: "#64748B",
+    marginTop: 8,
+    lineHeight: 22,
   },
-  welcomeHeader: {
-    fontSize: RFValue(20),
-    fontFamily: "bold",
-    color: "#111827",
-    marginBottom: 6,
-  },
-  subHeader: {
-    fontSize: RFValue(13),
-    color: "#6B7280",
-    fontFamily: "medium",
-    lineHeight: 20,
-  },
-  inputWrapper: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: RFValue(12),
-    fontFamily: "bold",
-    color: "#374151",
-    marginBottom: 8,
+  inputGroup: { marginBottom: 24 },
+  inputLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#94A3B8",
+    letterSpacing: 1.2,
+    marginBottom: 10,
     marginLeft: 4,
   },
   inputBox: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 56,
+  },
+  inputBoxFocused: {
+    borderColor: "#73C2FB",
     backgroundColor: "#FFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    height: 52,
   },
-  inputFocused: {
-    borderColor: "#1F305E",
-    backgroundColor: "#FFF",
-    shadowColor: "#1F305E",
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 1,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  input: {
+  icon: { marginRight: 12 },
+  textInput: {
     flex: 1,
-    fontSize: RFValue(13),
-    fontFamily: "medium",
-    color: "#111827",
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1F305E",
   },
   textAreaBox: {
-    backgroundColor: "#FFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 14,
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
+    borderRadius: 20,
+    padding: 16,
   },
   textArea: {
-    height: 150,
-    fontSize: RFValue(13),
-    fontFamily: "medium",
-    color: "#111827",
+    height: 160,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1F305E",
   },
-  submitButton: {
+  submitBtn: {
+    backgroundColor: "#1F305E",
+    height: 60,
+    borderRadius: 18,
     flexDirection: "row",
-    height: 54,
-    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
-    shadowColor: "#000",
+    shadowColor: "#1F305E",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
-    elevation: 2,
+    elevation: 3,
   },
-  buttonText: {
-    fontSize: RFValue(14),
-    fontFamily: "bold",
+  submitBtnDisabled: {
+    backgroundColor: "#F1F5F9",
+    elevation: 0,
+    shadowOpacity: 0,
   },
+  submitBtnText: { color: "#FFF", fontSize: 16, fontWeight: "700" },
+  textMuted: { color: "#94A3B8" },
 });
+
+export default ReportIssueScreen;

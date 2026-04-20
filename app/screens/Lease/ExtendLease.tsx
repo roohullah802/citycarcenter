@@ -1,4 +1,3 @@
-import { ExtendRateOption, rateOptions } from "@/folder/rateOptions";
 import { showToast } from "@/folder/toastService";
 import { useStripe } from "@stripe/stripe-react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -13,35 +12,31 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  StatusBar,
 } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 const ExtendLeaseScreen = () => {
   const { id } = useLocalSearchParams();
-  const [selectedRate, setSelectedRate] = useState<ExtendRateOption | null>(
-    null,
-  );
-  const [manualDays, setManualDays] = useState<string>("1");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
+  const insets = useSafeAreaInsets();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
-  const handleSelectRate = useCallback((option: ExtendRateOption) => {
-    setSelectedRate(option);
-  }, []);
+  const [manualDays, setManualDays] = useState<string>("1");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleManualInput = useCallback((text: string) => {
     const numericValue = text.replace(/[^0-9]/g, "");
     setManualDays(numericValue);
-    setSelectedRate(null);
   }, []);
 
   const handleContinue = useCallback(async () => {
     const days = Number(manualDays);
 
     if (!days || days === 0) {
-      return showToast("Please enter days number! ");
+      return showToast("Please enter a valid number of days");
     }
+
     setIsLoading(true);
     try {
       const response = { clientSecret: "" };
@@ -52,89 +47,114 @@ const ExtendLeaseScreen = () => {
       const { error: initError } = await initPaymentSheet({
         merchantDisplayName: "City Car Center",
         paymentIntentClientSecret: clientSecret,
+        appearance: {
+          colors: { primary: "#73C2FB" },
+          shapes: { borderRadius: 12 },
+        },
       });
 
       if (initError) throw initError;
 
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) throw presentError;
+
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {
-      console.log(error);
-      showToast(
-        error?.data?.message || error?.message || "something error happened",
-      );
+      showToast(error?.message || "Extension failed");
     } finally {
       setIsLoading(false);
     }
   }, [manualDays, initPaymentSheet, presentPaymentSheet]);
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.headerCon}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Icon name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.header}>Extend Lease</Text>
-        </View>
-        <Text style={styles.subHeader}>
-          Choose how much days you want to extend the lease of the car
-        </Text>
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
 
-        <Text style={styles.sectionTitle}>Default Days with Rate</Text>
+      {/* Professional Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <Ionicons name="chevron-back" size={28} color="#1F305E" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Extend Lease</Text>
+        <View style={{ width: 40 }} />
+      </View>
 
-        <View style={styles.rateOptions}>
-          {rateOptions.map((option) => {
-            const isSelected = selectedRate?.type === option.type;
-            return (
-              <TouchableOpacity
-                key={option.type}
-                style={[styles.rateCard, isSelected && styles.selectedRateCard]}
-                onPress={() => handleSelectRate(option)}
-              >
-                <Text style={styles.rateLabel}>
-                  {option.label} {option.subLabel}
-                </Text>
-                <Text style={styles.rateValue}>{option.value.toFixed(2)}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.introSection}>
+            <Text style={styles.welcomeText}>Custom Extension</Text>
+            <Text style={styles.subText}>
+              Enter the specific number of days you would like to keep the
+              vehicle.
+            </Text>
+          </View>
 
-        <Text style={styles.sectionTitle}>Or enter your days manually</Text>
+          <Text style={styles.sectionTitle}>Duration</Text>
+          <View style={styles.inputWrapper}>
+            <View style={styles.inputIcon}>
+              <Ionicons name="calendar-outline" size={24} color="#73C2FB" />
+            </View>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              value={manualDays}
+              onChangeText={handleManualInput}
+              placeholder="0"
+              placeholderTextColor="#94A3B8"
+              autoFocus={true}
+            />
+            <View style={styles.suffixBadge}>
+              <Text style={styles.daySuffix}>Days</Text>
+            </View>
+          </View>
 
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            value={manualDays}
-            onChangeText={handleManualInput}
-            placeholder="Enter number of days"
-            placeholderTextColor="#aaa"
-          />
-          <Text style={styles.daySuffix}>- Days</Text>
-        </View>
+          <View style={styles.infoHighlight}>
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={22}
+              color="#1F305E"
+            />
+            <Text style={styles.infoHighlightText}>
+              Daily rates apply based on your original agreement. Insurance
+              coverage remains active.
+            </Text>
+          </View>
 
+          <View style={styles.tipBox}>
+            <Text style={styles.tipTitle}>Note:</Text>
+            <Text style={styles.tipText}>
+              Extension starts immediately after your current lease ends. Ensure
+              you have sufficient funds for the selected period.
+            </Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* Fixed Footer */}
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
         <TouchableOpacity
           disabled={isLoading}
-          style={styles.button}
+          style={[styles.primaryButton, isLoading && styles.buttonDisabled]}
           onPress={handleContinue}
+          activeOpacity={0.8}
         >
           {isLoading ? (
-            <ActivityIndicator size={"small"} color={"white"} />
+            <ActivityIndicator size={"small"} color={"#FFF"} />
           ) : (
-            <Text style={styles.buttonText}>Continue</Text>
+            <Text style={styles.buttonText}>Confirm & Pay</Text>
           )}
         </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </View>
+    </View>
   );
 };
 
@@ -143,111 +163,144 @@ export default ExtendLeaseScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 20,
-    paddingTop: 40,
-  },
-  headerCon: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingTop: Platform.OS === "ios" ? 50 : 10,
-    marginBottom: 20,
-  },
-  backButton: {
-    marginRight: 10,
+    backgroundColor: "#FFFFFF",
   },
   header: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#002A32",
-    fontFamily: "bold",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingBottom: 15,
+    backgroundColor: "#FFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
   },
-  subHeader: {
-    fontSize: 13,
-    color: "#444",
-    marginBottom: 25,
-    marginTop: 10,
-    fontFamily: "demiBold",
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1F305E",
+  },
+  scrollContent: {
+    padding: 24,
+  },
+  introSection: {
+    marginBottom: 40,
+  },
+  welcomeText: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#1F305E",
+    letterSpacing: -0.5,
+  },
+  subText: {
+    fontSize: 15,
+    color: "#64748B",
+    marginTop: 8,
+    lineHeight: 22,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 10,
-    color: "#111",
-    fontFamily: "demiBold",
-  },
-  rateOptions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 30,
-  },
-  rateCard: {
-    flex: 1,
-    marginHorizontal: 5,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  selectedRateCard: {
-    borderColor: "#007AFF",
-    backgroundColor: "#F0F8FF",
-  },
-  rateLabel: {
-    fontSize: 12,
-    color: "#555",
-    textAlign: "center",
-    marginBottom: 4,
-    fontFamily: "demiBold",
-  },
-  rateValue: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000",
-    fontFamily: "demiBold",
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#94A3B8",
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    marginBottom: 16,
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    borderColor: "#ddd",
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginBottom: 30,
+    backgroundColor: "#F8FAFC",
+    borderWidth: 2,
+    borderColor: "#F1F5F9",
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    height: 80,
+    marginBottom: 32,
+  },
+  inputIcon: {
+    marginRight: 16,
   },
   input: {
     flex: 1,
-    fontSize: 16,
-    color: "#000",
-    fontFamily: "demiBold",
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#1F305E",
+  },
+  suffixBadge: {
+    backgroundColor: "#E0F2FE",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
   daySuffix: {
-    fontSize: 16,
-    color: "#555",
-    marginLeft: 10,
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1F305E",
   },
-  button: {
-    backgroundColor: "#73C2FB",
-    paddingVertical: 14,
-    borderRadius: 10,
+  infoHighlight: {
+    flexDirection: "row",
+    backgroundColor: "#F0F9FF",
+    padding: 20,
+    borderRadius: 20,
     alignItems: "center",
-    marginTop: 10,
-    opacity: 1,
+    borderWidth: 1,
+    borderColor: "#E0F2FE",
+    marginBottom: 24,
+  },
+  infoHighlightText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#1F305E",
+    marginLeft: 12,
+    lineHeight: 20,
+    fontWeight: "500",
+  },
+  tipBox: {
+    padding: 16,
+  },
+  tipTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#64748B",
+    marginBottom: 4,
+  },
+  tipText: {
+    fontSize: 13,
+    color: "#94A3B8",
+    lineHeight: 18,
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#F1F5F9",
+    backgroundColor: "#FFF",
+  },
+  primaryButton: {
+    backgroundColor: "#73C2FB",
+    height: 60,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#73C2FB",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  buttonDisabled: {
+    backgroundColor: "#CBD5E1",
+    shadowOpacity: 0,
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "500",
-    fontFamily: "demiBold",
+    color: "#FFF",
+    fontSize: 18,
+    fontWeight: "700",
   },
 });

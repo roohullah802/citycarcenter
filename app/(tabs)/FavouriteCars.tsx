@@ -13,9 +13,8 @@ import {
   FlatList,
   StatusBar,
 } from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 
 const FavouriteCars: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
@@ -39,8 +38,9 @@ const FavouriteCars: React.FC = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={styles.centerWrapper}>
         <ActivityIndicator size="large" color="#73C2FB" />
+        <Text style={styles.loadingText}>Loading your collection...</Text>
       </View>
     );
   }
@@ -49,44 +49,41 @@ const FavouriteCars: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
-      {/* Dynamic Header */}
+      {/* REFINED DYNAMIC HEADER */}
       <View style={styles.header}>
         {!isSearching ? (
           <View style={styles.headerRow}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={styles.iconBtn}
+              style={styles.navBtn}
             >
-              <Icon name="chevron-back" size={24} color="#1F305E" />
+              <Ionicons name="chevron-back" size={28} color="#1F305E" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Favorites</Text>
+
+            <Text style={styles.headerTitle}>My Favorites</Text>
+
             <TouchableOpacity
               onPress={() => setIsSearching(true)}
-              style={styles.iconBtn}
+              style={styles.navBtn}
             >
-              <Icon name="search-outline" size={24} color="#1F305E" />
+              <Ionicons name="search-outline" size={24} color="#1F305E" />
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.searchRow}>
             <View style={styles.searchBar}>
-              <Icon
-                name="search"
-                size={18}
-                color="#9CA3AF"
-                style={{ marginRight: 8 }}
-              />
+              <Ionicons name="search" size={18} color="#94A3B8" />
               <TextInput
-                placeholder="Search your favorites..."
+                placeholder="Search favorite models..."
                 value={searchText}
                 onChangeText={setSearchText}
                 autoFocus
                 style={styles.searchInput}
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#94A3B8"
               />
               {searchText.length > 0 && (
                 <TouchableOpacity onPress={() => setSearchText("")}>
-                  <Icon name="close-circle" size={18} color="#9CA3AF" />
+                  <Ionicons name="close-circle" size={18} color="#94A3B8" />
                 </TouchableOpacity>
               )}
             </View>
@@ -110,21 +107,21 @@ const FavouriteCars: React.FC = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconCircle}>
-              <Icon
-                name={searchText ? "search" : "heart-outline"}
-                size={40}
-                color="#1F305E"
+          <View style={styles.emptyWrapper}>
+            <View style={styles.emptyIconBox}>
+              <Ionicons
+                name={searchText ? "search-outline" : "heart-dislike-outline"}
+                size={42}
+                color="#CBD5E1"
               />
             </View>
             <Text style={styles.emptyTitle}>
-              {searchText ? "No matches found" : "No favorites yet"}
+              {searchText ? "No matches found" : "Collection is empty"}
             </Text>
             <Text style={styles.emptySubtitle}>
               {searchText
-                ? "Try searching for a different brand or model."
-                : "Tap the heart icon on any car to save it here."}
+                ? "We couldn't find any favorites matching your search term."
+                : "Save your favorite vehicles to access them quickly here."}
             </Text>
           </View>
         }
@@ -138,20 +135,26 @@ export default FavouriteCars;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFFFFF",
   },
-  loadingContainer: {
+  centerWrapper: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFFFFF",
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#94A3B8",
   },
   header: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "#F1F5F9",
   },
   headerRow: {
     flexDirection: "row",
@@ -159,11 +162,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   headerTitle: {
-    fontSize: RFValue(16),
-    fontFamily: "bold",
+    fontSize: 18,
+    fontWeight: "800",
     color: "#1F305E",
+    letterSpacing: -0.5,
   },
-  iconBtn: {
+  navBtn: {
     width: 40,
     height: 40,
     justifyContent: "center",
@@ -178,57 +182,61 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F3F4F6",
-    borderRadius: 12,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 14,
     paddingHorizontal: 12,
-    height: 44,
+    height: 48,
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
   },
   searchInput: {
     flex: 1,
-    fontSize: RFValue(13),
-    color: "#1F2937",
-    fontFamily: "medium",
+    fontSize: 15,
+    color: "#1F305E",
+    fontWeight: "600",
+    marginLeft: 8,
   },
   cancelBtn: {
-    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
   cancelText: {
     color: "#EF4444",
-    fontFamily: "bold",
-    fontSize: RFValue(13),
+    fontWeight: "700",
+    fontSize: 14,
   },
   listContent: {
-    padding: 16,
+    padding: 20,
     paddingBottom: 40,
     flexGrow: 1,
   },
-  emptyContainer: {
+  emptyWrapper: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 40,
+    paddingBottom: 60,
   },
-  emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#E5E7EB",
+  emptyIconBox: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: "#F8FAFC",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   emptyTitle: {
-    fontSize: RFValue(16),
-    fontFamily: "bold",
-    color: "#1F2937",
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1F305E",
     textAlign: "center",
   },
   emptySubtitle: {
-    fontSize: RFValue(12),
-    color: "#6B7280",
+    fontSize: 14,
+    color: "#94A3B8",
     textAlign: "center",
     marginTop: 8,
-    lineHeight: 20,
-    fontFamily: "medium",
+    lineHeight: 22,
+    fontWeight: "500",
   },
 });

@@ -12,9 +12,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 
 const AllLeases = () => {
   const { isSignedIn } = useAuth();
@@ -25,27 +24,27 @@ const AllLeases = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
+      <View style={styles.centerWrapper}>
         <ActivityIndicator size="large" color="#73C2FB" />
-        <Text style={styles.loadingText}>Fetching your leases...</Text>
-      </SafeAreaView>
+        <Text style={styles.loadingText}>Fetching your fleet status...</Text>
+      </View>
     );
   }
 
   if (isError) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
-        <View style={styles.errorIconBg}>
-          <Icon name="cloud-offline" size={32} color="#EF4444" />
+      <View style={styles.centerWrapper}>
+        <View style={styles.errorIconBox}>
+          <Ionicons name="cloud-offline-outline" size={32} color="#EF4444" />
         </View>
-        <Text style={styles.errorTitle}>Connection Error</Text>
-        <Text style={styles.message}>
-          We couldn&apos;t load your active leases. Please check your internet.
+        <Text style={styles.errorTitle}>Connection Interrupted</Text>
+        <Text style={styles.errorSubtitle}>
+          We couldn&apos;t reach the server. Please check your data connection.
         </Text>
         <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
-          <Text style={styles.retryText}>Try Again</Text>
+          <Text style={styles.retryText}>Retry Connection</Text>
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -53,42 +52,46 @@ const AllLeases = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
-      {/* Modern Header */}
+      {/* REFINED HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Icon name="chevron-back" size={24} color="#1F305E" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.navBtn}>
+          <Ionicons name="chevron-back" size={28} color="#1F305E" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Leases</Text>
-        <TouchableOpacity onPress={() => refetch()} style={styles.backBtn}>
-          <Icon name="refresh-outline" size={22} color="#1F305E" />
+
+        <Text style={styles.headerTitle}>Active Leases</Text>
+
+        <TouchableOpacity onPress={() => refetch()} style={styles.navBtn}>
+          <Ionicons name="sync-outline" size={22} color="#1F305E" />
         </TouchableOpacity>
       </View>
 
-      {/* Content Logic */}
+      {/* CONTENT LOGIC */}
       {!isSignedIn || leases?.length === 0 ? (
-        <View style={styles.noLeaseContainer}>
+        <View style={styles.emptyWrapper}>
           <View style={styles.emptyIconCircle}>
-            <Icon name="car-sport-outline" size={50} color="#1F305E" />
+            <Ionicons name="car-sport-outline" size={48} color="#CBD5E1" />
           </View>
-          <Text style={styles.noLeaseText}>No Active Leases</Text>
-          <Text style={styles.message}>
-            Rent a car to track your remaining time and lease details here.
+          <Text style={styles.emptyTitle}>No Active Rentals</Text>
+          <Text style={styles.emptySubtitle}>
+            When you lease a car, your timers and rental agreements will appear
+            here.
           </Text>
           <TouchableOpacity
-            style={styles.browseBtn}
+            style={styles.browseButton}
             onPress={() => router.push("/(tabs)/Home")}
           >
-            <Text style={styles.browseText}>Browse Cars</Text>
+            <Text style={styles.browseButtonText}>Explore Available Cars</Text>
           </TouchableOpacity>
         </View>
       ) : (
-        <View style={styles.contentContainer}>
-          <View style={styles.summaryInfo}>
-            <Icon name="time-outline" size={16} color="#6B7280" />
-            <Text style={styles.topDescription}>
-              You have {leases?.length} active lease
-              {leases?.length > 1 ? "s" : ""}
-            </Text>
+        <View style={styles.content}>
+          <View style={styles.badgeContainer}>
+            <View style={styles.activeBadge}>
+              <Text style={styles.activeBadgeText}>
+                {leases?.length} ACTIVE{" "}
+                {leases?.length > 1 ? "LEASES" : "LEASE"}
+              </Text>
+            </View>
           </View>
 
           <FlatList
@@ -96,7 +99,7 @@ const AllLeases = () => {
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => <CountDown item={item} />}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listPadding}
+            contentContainerStyle={styles.listContent}
           />
         </View>
       )}
@@ -109,127 +112,144 @@ export default AllLeases;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFFFFF",
+  },
+  centerWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 40,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "#F1F5F9",
   },
-  backBtn: {
+  navBtn: {
     width: 40,
     height: 40,
     justifyContent: "center",
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: RFValue(16),
-    fontFamily: "bold",
+    fontSize: 18,
+    fontWeight: "800",
     color: "#1F305E",
+    letterSpacing: -0.5,
   },
-  contentContainer: {
+  content: {
     flex: 1,
   },
-  summaryInfo: {
-    flexDirection: "row",
+  badgeContainer: {
     alignItems: "center",
-    justifyContent: "center",
     marginTop: 20,
     marginBottom: 10,
-    gap: 6,
   },
-  topDescription: {
-    color: "#6B7280",
-    fontSize: RFValue(13),
-    fontFamily: "medium",
+  activeBadge: {
+    backgroundColor: "#F0F9FF",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E0F2FE",
   },
-  listPadding: {
-    padding: 16,
-    paddingBottom: 30,
+  activeBadgeText: {
+    color: "#73C2FB",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1,
   },
-  noLeaseContainer: {
+  listContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  emptyWrapper: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 40,
+    paddingBottom: 80,
   },
   emptyIconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#E5E7EB",
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "#F8FAFC",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
   },
-  noLeaseText: {
-    fontSize: RFValue(18),
-    color: "#111827",
-    fontFamily: "bold",
-    marginBottom: 8,
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#1F305E",
+    textAlign: "center",
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: "#94A3B8",
+    textAlign: "center",
+    marginTop: 8,
+    lineHeight: 22,
+    fontWeight: "500",
   },
   loadingText: {
-    marginTop: 12,
-    fontSize: RFValue(13),
-    color: "#6B7280",
-    fontFamily: "medium",
+    marginTop: 16,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#94A3B8",
   },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F9FAFB",
-  },
-  errorIconBg: {
+  errorIconBox: {
     width: 64,
     height: 64,
-    borderRadius: 32,
+    borderRadius: 20,
     backgroundColor: "#FEF2F2",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
   },
   errorTitle: {
-    fontSize: RFValue(16),
-    fontFamily: "bold",
-    color: "#111827",
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1F305E",
   },
-  message: {
-    fontSize: RFValue(12),
+  errorSubtitle: {
+    fontSize: 14,
+    color: "#94A3B8",
     textAlign: "center",
-    color: "#6B7280",
     marginTop: 8,
-    fontFamily: "medium",
-    lineHeight: 18,
+    lineHeight: 20,
   },
   retryButton: {
     marginTop: 24,
     backgroundColor: "#1F305E",
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 32,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   retryText: {
-    color: "#fff",
-    fontSize: RFValue(13),
-    fontFamily: "bold",
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "700",
   },
-  browseBtn: {
-    marginTop: 24,
-    borderWidth: 1.5,
-    borderColor: "#1F305E",
-    paddingVertical: 10,
+  browseButton: {
+    marginTop: 28,
+    backgroundColor: "#F8FAFC",
+    paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 10,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
   },
-  browseText: {
+  browseButtonText: {
     color: "#1F305E",
-    fontFamily: "bold",
-    fontSize: RFValue(13),
+    fontWeight: "700",
+    fontSize: 14,
   },
 });

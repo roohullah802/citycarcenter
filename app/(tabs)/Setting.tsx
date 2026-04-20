@@ -4,7 +4,6 @@ import { useAuth, useUser } from "@clerk/expo";
 import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-  Dimensions,
   Image,
   ScrollView,
   StyleSheet,
@@ -13,15 +12,13 @@ import {
   View,
   StatusBar,
 } from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import LogoutModal from "../screens/Auth/Logout";
 import { useDocumentStatus } from "@/hooks/useDocuments";
 
-const { width } = Dimensions.get("window");
-
 const Settings = () => {
+  const insets = useSafeAreaInsets();
   const [isVisible, setIsVisible] = useState(false);
   const { user } = useUser();
   const { isSignedIn } = useAuth();
@@ -36,9 +33,8 @@ const Settings = () => {
       : require("../../assests/guest3.png");
 
   const getBadgeInfo = () => {
-    if (isLoading) return { label: "Loading...", color: "#9CA3AF" };
+    if (isLoading) return { label: "...", color: "#94A3B8" };
     if (isError || !data) return statusConfig.unverified;
-
     const currentStatus = data?.docStatus || "unverified";
     return statusConfig[currentStatus] ?? statusConfig.unverified;
   };
@@ -46,22 +42,21 @@ const Settings = () => {
   const { label: badgeLabel, color: badgeColor } = getBadgeInfo();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.mainContainer}>
       <StatusBar barStyle="dark-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 10 },
+        ]}
       >
-        <Text style={styles.header}>Settings</Text>
+        <Text style={styles.header}>Account Settings</Text>
 
-        {/* PROFILE SECTION */}
+        {/* PROFILE CARD */}
         <View style={styles.profileCard}>
-          <View>
-            <Image
-              source={avatarSource}
-              style={styles.avatar}
-              resizeMode="cover"
-            />
+          <View style={styles.avatarWrapper}>
+            <Image source={avatarSource} style={styles.avatar} />
             {isSignedIn && (
               <View style={[styles.badge, { backgroundColor: badgeColor }]}>
                 <Text style={styles.badgeText}>{badgeLabel}</Text>
@@ -73,185 +68,206 @@ const Settings = () => {
             <Text style={styles.name}>
               {user?.fullName ? user.fullName : "Guest User"}
             </Text>
-
-            {isSignedIn && user?.primaryEmailAddress ? (
-              <Text numberOfLines={1} ellipsizeMode="tail" style={styles.email}>
-                {user.primaryEmailAddress.emailAddress}
-              </Text>
-            ) : (
-              <Text style={styles.email}>Sign in to manage your account</Text>
-            )}
+            <Text numberOfLines={1} style={styles.email}>
+              {isSignedIn
+                ? user?.primaryEmailAddress?.emailAddress
+                : "Sign in for full access"}
+            </Text>
           </View>
 
           {!isSignedIn && (
             <TouchableOpacity
-              style={styles.loginButton}
+              style={styles.loginBtn}
               onPress={() => router.push("/screens/Auth/SocialAuth")}
             >
-              <Text style={styles.login}>Login</Text>
-              <Icon name="log-in-outline" size={20} color="#45B1E8" />
+              <Text style={styles.loginBtnText}>Login</Text>
+              <Ionicons name="log-in-outline" size={18} color="#73C2FB" />
             </TouchableOpacity>
           )}
         </View>
-        {/* Documents */}
 
+        {/* --- NEW MANUAL VERIFICATION SECTION --- */}
         {isSignedIn && (
-          <>
-            <Text style={styles.sectionTitle}>Documents</Text>
-            <View style={styles.card}>
-              <SettingsRow
-                icon="time-outline"
-                label="Documents"
-                onPress={() =>
-                  router.push("/screens/Setting/DocumentUploadScreen")
-                }
-              />
-            </View>
-          </>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Verification</Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.manualCard}
+              onPress={() =>
+                router.push("/screens/Setting/DocumentUploadScreen")
+              }
+            >
+              <View style={styles.iconContainer}>
+                <Ionicons
+                  name="shield-checkmark-outline"
+                  size={22}
+                  color="#1F305E"
+                />
+              </View>
+              <Text style={styles.cardText}>Identity Documents</Text>
+              <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+            </TouchableOpacity>
+          </View>
         )}
 
         {/* ACTIVITY HISTORY */}
-
         {isSignedIn && (
-          <>
-            <Text style={styles.sectionTitle}>Activity History</Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Activity & Transactions</Text>
             <View style={styles.card}>
               <SettingsRow
                 icon="receipt-outline"
-                label="Payment History"
+                label="Billing History"
                 onPress={() => router.push("/screens/Payments/PaymentDetails")}
               />
             </View>
-          </>
+          </View>
         )}
 
-        {/* HELPFUL DESK */}
-        <Text style={styles.sectionTitle}>Support & Help</Text>
-        <View style={styles.card}>
-          <SettingsRow
-            icon="help-circle-outline"
-            label="FAQs"
-            onPress={() => router.push("/screens/Setting/Faqs")}
-          />
-          <SettingsRow
-            icon="shield-checkmark-outline"
-            label="Terms & Privacy Policy"
-            onPress={() => router.push("/screens/Setting/PrivatePolicy")}
-          />
-          <SettingsRow
-            icon="chatbubble-ellipses-outline"
-            label="Report an Issue"
-            onPress={() => router.push("/screens/Setting/Report")}
-          />
+        {/* SUPPORT & HELP */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Support Center</Text>
+          <View style={styles.card}>
+            <SettingsRow
+              icon="help-circle-outline"
+              label="Common FAQs"
+              onPress={() => router.push("/screens/Setting/Faqs")}
+            />
+            <SettingsRow
+              icon="shield-checkmark-outline"
+              label="Legal & Privacy"
+              onPress={() => router.push("/screens/Setting/PrivatePolicy")}
+            />
+            <SettingsRow
+              icon="chatbubble-ellipses-outline"
+              label="Contact Support"
+              onPress={() => router.push("/screens/Setting/Report")}
+            />
+          </View>
         </View>
 
         {/* LOGOUT */}
         {isSignedIn && (
-          <View style={[styles.card, { marginTop: 10 }]}>
-            <SettingsRow
-              icon="log-out-outline"
-              label="Logout"
-              onPress={handleVisible}
-            />
-          </View>
+          <TouchableOpacity
+            style={styles.logoutWrapper}
+            onPress={handleVisible}
+          >
+            <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+            <Text style={styles.logoutText}>Sign Out</Text>
+          </TouchableOpacity>
         )}
       </ScrollView>
 
       <LogoutModal visible={isVisible} onClose={() => setIsVisible(false)} />
-    </SafeAreaView>
+    </View>
   );
 };
 
-export default Settings;
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9FAFB",
-  },
-  scrollContent: {
-    paddingHorizontal: width * 0.05,
-    paddingBottom: RFValue(40),
-  },
+  mainContainer: { flex: 1, backgroundColor: "#FFFFFF" },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
   header: {
-    fontSize: RFValue(22),
-    fontFamily: "bold",
-    color: "#111827",
-    marginVertical: RFValue(20),
+    fontSize: 26,
+    fontWeight: "800",
+    color: "#1F305E",
+    marginBottom: 24,
   },
   profileCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: RFValue(16),
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: RFValue(24),
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
+    backgroundColor: "#F8FAFC",
+    padding: 18,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
+    marginBottom: 32,
   },
+  avatarWrapper: { position: "relative" },
   avatar: {
-    width: RFValue(60),
-    height: RFValue(60),
-    borderRadius: RFValue(30),
-    backgroundColor: "#F3F4F6",
+    width: 64,
+    height: 64,
+    borderRadius: 18,
+    backgroundColor: "#E2E8F0",
   },
   badge: {
     position: "absolute",
-    bottom: -2,
+    bottom: -4,
     right: -4,
-    paddingHorizontal: RFValue(5),
-    paddingVertical: RFValue(3),
-    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 6,
     borderWidth: 2,
-    borderColor: "#fff",
+    borderColor: "#F8FAFC",
   },
   badgeText: {
-    color: "#fff",
-    fontSize: RFValue(5),
-    fontFamily: "bold",
+    color: "#FFF",
+    fontSize: 6,
+    fontWeight: "900",
     textTransform: "uppercase",
   },
-  profileDetails: { flex: 1, marginLeft: RFValue(16) },
-  name: { fontSize: RFValue(16), fontFamily: "bold", color: "#111827" },
-  email: {
-    fontSize: RFValue(12),
-    color: "#6B7280",
-    fontFamily: "medium",
-    marginTop: 2,
-  },
-  sectionTitle: {
-    fontSize: RFValue(11),
-    color: "#9CA3AF",
-    marginBottom: RFValue(8),
-    marginTop: RFValue(14),
-    fontFamily: "bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    overflow: "hidden",
-    marginBottom: RFValue(16),
-    shadowColor: "#000",
-    shadowOpacity: 0.02,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  loginButton: {
+  profileDetails: { flex: 1, marginLeft: 16 },
+  name: { fontSize: 18, fontWeight: "800", color: "#1F305E" },
+  email: { fontSize: 13, color: "#64748B", marginTop: 2, fontWeight: "500" },
+  loginBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F0F9FF",
+    backgroundColor: "#E0F2FE",
     paddingHorizontal: 12,
     paddingVertical: 8,
+    borderRadius: 12,
+  },
+  loginBtnText: {
+    fontWeight: "800",
+    color: "#73C2FB",
+    marginRight: 6,
+    fontSize: 13,
+  },
+  section: { marginBottom: 24 },
+  sectionTitle: {
+    fontSize: 11,
+    color: "#94A3B8",
+    fontWeight: "800",
+    letterSpacing: 1.2,
+    marginBottom: 10,
+    marginLeft: 4,
+    textTransform: "uppercase",
+  },
+  card: {
+    backgroundColor: "#FFF",
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
+    overflow: "hidden",
+  },
+  manualCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
+    padding: 16,
+    height: 64,
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
     borderRadius: 10,
+    backgroundColor: "#F8FAFC",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
-  login: {
-    fontFamily: "bold",
-    color: "#45B1E8",
-    marginRight: RFValue(6),
-    fontSize: RFValue(12),
+  cardText: { flex: 1, fontSize: 15, fontWeight: "700", color: "#1F305E" },
+  logoutWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    marginTop: 10,
+    gap: 8,
   },
+  logoutText: { fontSize: 15, fontWeight: "700", color: "#EF4444" },
 });
+
+export default Settings;

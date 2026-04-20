@@ -1,5 +1,6 @@
 import { useSSO } from "@clerk/expo";
 import * as Linking from "expo-linking";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -30,6 +31,7 @@ export default function SignInWithGoogle() {
 
       if (sessionId && setActive) {
         await setActive({ session: sessionId });
+        router.replace("/(tabs)/Home");
         return;
       }
 

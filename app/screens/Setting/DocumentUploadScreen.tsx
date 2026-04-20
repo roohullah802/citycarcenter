@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   changeBtn: { marginTop: 12, alignSelf: "center" },
   changeText: { color: "#1F305E", fontFamily: "bold", fontSize: RFValue(12) },
   submitBtn: {
-    backgroundColor: "#1F305E",
+    backgroundColor: "#73C2FB",
     height: 56,
     borderRadius: 16,
     justifyContent: "center",

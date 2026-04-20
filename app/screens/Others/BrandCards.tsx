@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 import BrandCard from "../../../components/BrandCard";
 import { useFetchBrands } from "@/hooks/useFetchBrands";
 
@@ -19,7 +19,6 @@ const TopBrandsScreen = () => {
   const [search, setSearch] = useState<string>("");
   const { data, isError, isLoading, refetch } = useFetchBrands();
 
-  // 1. Correctly filter the LIVE data from the hook
   const filteredBrands = useMemo(() => {
     const brandsArray = data?.brands || [];
     if (!search) return brandsArray;
@@ -33,80 +32,74 @@ const TopBrandsScreen = () => {
     return <BrandCard item={item} />;
   }, []);
 
-  // 2. Handle Loading State
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
+      <View style={styles.centeredWrapper}>
         <ActivityIndicator size="large" color="#73C2FB" />
-        <Text style={styles.loadingText}>Loading Brands...</Text>
-      </SafeAreaView>
+        <Text style={styles.statusText}>Discovering Brands...</Text>
+      </View>
     );
   }
 
-  // 3. Handle Error State
   if (isError) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
-        <Icon name="cloud-offline-outline" size={50} color="red" />
-        <Text style={styles.errorTitle}>Connection Error</Text>
-        <Text style={styles.message}>
-          Unable to fetch brands at the moment.
-        </Text>
+      <View style={styles.centeredWrapper}>
+        <Ionicons name="cloud-offline-outline" size={50} color="#FF6B6B" />
+        <Text style={styles.errorTitle}>Network Error</Text>
         <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
-          <Text style={styles.retryText}>Retry</Text>
+          <Text style={styles.retryText}>Try Again</Text>
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={"white"} barStyle={"dark-content"} />
+      <StatusBar barStyle="dark-content" />
 
-      {/* 4. Perfect Centered Header */}
+      {/* REFINED HEADER */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.backButton}
+          style={styles.navButton}
         >
-          <Icon name="arrow-back" size={24} color="#1F305E" />
+          <Ionicons name="chevron-back" size={28} color="#1F305E" />
         </TouchableOpacity>
 
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Top Brands</Text>
+        <Text style={styles.headerTitle}>Browse Brands</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
+      {/* PROFESSIONAL SEARCH BOX */}
+      <View style={styles.searchSection}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search-outline" size={20} color="#94A3B8" />
+          <TextInput
+            placeholder="Search manufacturers..."
+            value={search}
+            onChangeText={setSearch}
+            style={styles.input}
+            placeholderTextColor="#94A3B8"
+            clearButtonMode="while-editing"
+          />
         </View>
-
-        {/* Placeholder to keep title centered */}
-        <View style={styles.backButton} />
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchBox}>
-        <Icon name="search" size={18} color="#999" style={styles.searchIcon} />
-        <TextInput
-          placeholder="Search brands..."
-          value={search}
-          onChangeText={setSearch}
-          style={styles.input}
-          placeholderTextColor="#999"
-          clearButtonMode="while-editing"
-        />
-      </View>
-
-      {/* Grid */}
+      {/* BRAND GRID */}
       {filteredBrands.length === 0 ? (
-        <View style={styles.centered}>
-          <Icon name="search-outline" size={40} color="#ccc" />
-          <Text style={styles.noDataText}>No brands found</Text>
+        <View style={styles.emptyContainer}>
+          <Ionicons name="briefcase-outline" size={48} color="#CBD5E1" />
+          <Text style={styles.emptyText}>No matches found</Text>
         </View>
       ) : (
         <FlatList
           data={filteredBrands}
           numColumns={4}
           keyExtractor={(item, index) => item._id || index.toString()}
-          contentContainerStyle={styles.grid}
+          contentContainerStyle={styles.listContent}
           renderItem={renderBrand}
           showsVerticalScrollIndicator={false}
+          columnWrapperStyle={styles.columnGap}
         />
       )}
     </SafeAreaView>
@@ -116,87 +109,98 @@ const TopBrandsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between", // Essential for centering
-    paddingVertical: 16,
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
   },
-  backButton: {
+  navButton: {
     width: 40,
     height: 40,
     justifyContent: "center",
     alignItems: "flex-start",
   },
-  titleContainer: {
-    flex: 1,
-    alignItems: "center",
-  },
-  title: {
+  headerTitle: {
     fontSize: 18,
-    color: "#3f3f3fff",
-    fontFamily: "bold",
-    textAlign: "center",
+    fontWeight: "800",
+    color: "#1F305E",
+    letterSpacing: -0.5,
   },
-  searchBox: {
+  searchSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  searchBar: {
     flexDirection: "row",
-    backgroundColor: "#F2F2F2",
-    borderRadius: 12,
-    paddingHorizontal: 12,
     alignItems: "center",
-    marginBottom: 16,
-    height: 48,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    height: 52,
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
   },
-  searchIcon: { marginRight: 8 },
   input: {
     flex: 1,
-    fontSize: 14,
-    color: "#333",
-    fontFamily: "demiBold",
+    marginLeft: 12,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1F305E",
   },
-  grid: {
-    paddingBottom: 20,
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 40,
   },
-  centered: {
+  columnGap: {
+    justifyContent: "flex-start",
+    gap: 8,
+  },
+  centeredWrapper: {
     flex: 1,
+    backgroundColor: "#FFF",
     justifyContent: "center",
     alignItems: "center",
   },
-  loadingText: {
-    marginTop: 10,
-    color: "#73C2FB",
-    fontFamily: "medium",
+  statusText: {
+    marginTop: 12,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#94A3B8",
   },
   errorTitle: {
     fontSize: 18,
-    color: "red",
-    fontFamily: "bold",
-    marginTop: 10,
-  },
-  message: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 5,
-    fontFamily: "medium",
+    fontWeight: "800",
+    color: "#1F305E",
+    marginTop: 16,
   },
   retryButton: {
-    marginTop: 20,
+    marginTop: 24,
     backgroundColor: "#73C2FB",
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 12,
   },
   retryText: {
-    color: "#fff",
-    fontFamily: "bold",
+    color: "#FFF",
+    fontWeight: "700",
   },
-  noDataText: {
-    marginTop: 10,
-    color: "#999",
-    fontFamily: "medium",
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingBottom: 100,
+  },
+  emptyText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#94A3B8",
   },
 });
 

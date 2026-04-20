@@ -4,7 +4,6 @@ import { useLeaseById } from "@/hooks/useFetchLease";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useMemo } from "react";
 import {
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,12 +13,12 @@ import {
   ActivityIndicator,
   StatusBar,
 } from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 const LeaseDetails = () => {
   const { id } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const [menuVisible, setMenuVisible] = useState(false);
   const { data, isLoading, isError } = useLeaseById(id as string);
 
@@ -30,57 +29,57 @@ const LeaseDetails = () => {
     if (leaseDetails?.startDate && leaseDetails?.endDate) {
       const start = new Date(leaseDetails.startDate).getTime();
       const end = new Date(leaseDetails.endDate).getTime();
-      const diff = end - start;
-      return Math.max(0, Math.round(diff / (24 * 60 * 60 * 1000)));
+      return Math.max(0, Math.round((end - start) / (24 * 60 * 60 * 1000)));
     }
     return 0;
   }, [leaseDetails?.startDate, leaseDetails?.endDate]);
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color="#1F305E" />
-      </SafeAreaView>
+      <View style={styles.centerWrapper}>
+        <ActivityIndicator size="large" color="#73C2FB" />
+        <Text style={styles.loadingText}>Loading details...</Text>
+      </View>
     );
   }
 
   if (isError || !leaseDetails) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
-        <Icon name="alert-circle-outline" size={50} color="#EF4444" />
-        <Text style={styles.errorText}>Failed to load lease details</Text>
+      <View style={styles.centerWrapper}>
+        <Ionicons name="alert-circle-outline" size={50} color="#EF4444" />
+        <Text style={styles.errorText}>Unable to retrieve lease details</Text>
         <TouchableOpacity
           style={styles.retryButton}
           onPress={() => router.back()}
         >
           <Text style={styles.retryText}>Go Back</Text>
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
-      {/* HEADER: Kept outside ScrollView so it stays fixed at the top */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Icon name="chevron-back" size={24} color="#1F305E" />
+      {/* REFINED HEADER */}
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.navBtn}>
+          <Ionicons name="chevron-back" size={28} color="#1F305E" />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Lease Details</Text>
+        <Text style={styles.headerTitle}>Lease Overview</Text>
 
-        <View style={styles.menuWrapper}>
+        <View style={styles.menuContainer}>
           <TouchableOpacity
-            onPress={() => setMenuVisible((p) => !p)}
-            style={styles.backBtn}
+            onPress={() => setMenuVisible(!menuVisible)}
+            style={styles.navBtn}
           >
-            <Icon name="ellipsis-vertical" size={20} color="#1F305E" />
+            <Ionicons name="ellipsis-horizontal" size={22} color="#1F305E" />
           </TouchableOpacity>
 
           {menuVisible && (
-            <View style={styles.dropdownMenu}>
+            <View style={styles.dropdown}>
               <TouchableOpacity
                 style={styles.dropdownItem}
                 onPress={() => {
@@ -91,82 +90,108 @@ const LeaseDetails = () => {
                   });
                 }}
               >
-                <Icon name="receipt-outline" size={18} color="#4B5563" />
-                <Text style={styles.dropdownText}>Receipts</Text>
+                <Ionicons name="receipt-outline" size={18} color="#1F305E" />
+                <Text style={styles.dropdownText}>View Receipt</Text>
               </TouchableOpacity>
             </View>
           )}
         </View>
       </View>
 
-      {/* SCROLLVIEW: Main content area */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-        onScrollBeginDrag={() => setMenuVisible(false)} // Auto-close menu on scroll
+        onScrollBeginDrag={() => setMenuVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
           <View>
-            {/* Status Section */}
+            {/* STATUS BANNER */}
             <View style={styles.statusBanner}>
-              <Text style={styles.bannerLabel}>Current Status</Text>
+              <View>
+                <Text style={styles.sectionLabel}>LEASE STATUS</Text>
+                <Text style={styles.statusMainText}>
+                  Currently {capitalText(leaseDetails?.status)}
+                </Text>
+              </View>
               <View
                 style={[
                   styles.statusBadge,
                   {
                     backgroundColor:
-                      leaseDetails?.status === "active" ? "#ECFDF5" : "#FEF2F2",
+                      leaseDetails?.status === "active" ? "#F0FDF4" : "#FEF2F2",
                   },
                 ]}
               >
-                <Text
+                <View
                   style={[
-                    styles.statusText,
+                    styles.dot,
                     {
-                      color:
+                      backgroundColor:
                         leaseDetails?.status === "active"
-                          ? "#10B981"
+                          ? "#22C55E"
                           : "#EF4444",
                     },
                   ]}
+                />
+                <Text
+                  style={[
+                    styles.statusBadgeText,
+                    {
+                      color:
+                        leaseDetails?.status === "active"
+                          ? "#166534"
+                          : "#991B1B",
+                    },
+                  ]}
                 >
-                  {capitalText(leaseDetails?.status || "N/A")}
+                  {leaseDetails?.status?.toUpperCase()}
                 </Text>
               </View>
             </View>
 
-            {/* Lease Info Card */}
+            {/* LEASE SUMMARY CARD */}
             <View style={styles.card}>
-              <Text style={styles.cardHeading}>Lease Summary</Text>
-              <InfoRow label="Type" value="Limited Miles Lease" />
-              <InfoRow label="Duration" value={`${days} Days`} />
+              <View style={styles.cardHeader}>
+                <Ionicons
+                  name="document-text-outline"
+                  size={20}
+                  color="#73C2FB"
+                />
+                <Text style={styles.cardTitle}>Lease Summary</Text>
+              </View>
+              <InfoRow label="Contract Type" value="Limited Mileage" />
+              <InfoRow label="Total Duration" value={`${days} Days`} />
               <InfoRow
-                label="Starts"
+                label="Start Date"
                 value={formatDate(leaseDetails?.startDate)}
               />
               <InfoRow
-                label="Expires"
+                label="End Date"
                 value={formatDate(leaseDetails?.endDate)}
+                last
               />
             </View>
 
-            {/* Car Info Card */}
+            {/* VEHICLE CARD */}
             <View style={styles.card}>
-              <Text style={styles.cardHeading}>Vehicle Information</Text>
+              <View style={styles.cardHeader}>
+                <Ionicons name="car-outline" size={20} color="#73C2FB" />
+                <Text style={styles.cardTitle}>Vehicle Details</Text>
+              </View>
               <InfoRow
-                label="Car"
+                label="Model"
                 value={`${capitalText(carDetails?.brand)} ${capitalText(carDetails?.modelName)}`}
               />
               <InfoRow
-                label="Price/Day"
+                label="Daily Rate"
                 value={`$${carDetails?.pricePerDay}`}
               />
               <InfoRow
-                label="Allowed Miles"
+                label="Mile Limit"
                 value={`${carDetails?.allowedMilleage} mi`}
               />
               <InfoRow
-                label="Current Odometer"
+                label="Starting Odo"
                 value={`${carDetails?.initialMileage} mi`}
                 last
               />
@@ -174,110 +199,147 @@ const LeaseDetails = () => {
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const InfoRow = ({ label, value, last }: any) => (
-  <View style={[styles.infoRow, last && { borderBottomWidth: 0 }]}>
+  <View
+    style={[styles.infoRow, last && { borderBottomWidth: 0, paddingBottom: 0 }]}
+  >
     <Text style={styles.infoLabel}>{label}</Text>
     <Text style={styles.infoValue}>{value}</Text>
   </View>
 );
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F9FAFB" },
-  centered: { justifyContent: "center", alignItems: "center", flex: 1 },
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
+  centerWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#94A3B8",
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    height: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 15,
     backgroundColor: "#FFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "#F1F5F9",
     zIndex: 1000,
   },
-  headerTitle: { fontSize: RFValue(15), fontFamily: "bold", color: "#1F305E" },
-  backBtn: {
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1F305E",
+    letterSpacing: -0.5,
+  },
+  navBtn: {
     width: 40,
     height: 40,
     justifyContent: "center",
     alignItems: "center",
   },
-  menuWrapper: { zIndex: 2000 },
-  dropdownMenu: {
+  menuContainer: { zIndex: 2000 },
+  dropdown: {
     position: "absolute",
     top: 45,
     right: 0,
     backgroundColor: "#FFF",
-    borderRadius: 12,
-    width: 160,
+    borderRadius: 16,
+    width: 170,
     padding: 8,
-    ...Platform.select({
-      ios: { shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 10 },
-      android: { elevation: 5 },
-    }),
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
   },
   dropdownItem: {
     flexDirection: "row",
     alignItems: "center",
     padding: 12,
-    gap: 10,
+    gap: 12,
   },
-  dropdownText: {
-    fontSize: RFValue(12),
-    color: "#374151",
-    fontFamily: "medium",
-  },
-  scrollContent: { padding: 16, flexGrow: 1 },
+  dropdownText: { fontSize: 14, color: "#1F305E", fontWeight: "700" },
+  scrollContent: { padding: 20, paddingBottom: 40 },
   statusBanner: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#FFF",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
+    backgroundColor: "#F8FAFC",
+    padding: 20,
+    borderRadius: 20,
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: "#F1F5F9",
   },
-  bannerLabel: { fontSize: RFValue(12), color: "#6B7280", fontFamily: "bold" },
-  statusBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20 },
-  statusText: { fontSize: RFValue(10), fontFamily: "bold" },
+  sectionLabel: {
+    fontSize: 10,
+    color: "#94A3B8",
+    fontWeight: "800",
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  statusMainText: { fontSize: 16, fontWeight: "700", color: "#1F305E" },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  dot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
+  statusBadgeText: { fontSize: 11, fontWeight: "800" },
   card: {
     backgroundColor: "#FFF",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: "#F1F5F9",
   },
-  cardHeading: {
-    fontSize: RFValue(13),
-    fontFamily: "bold",
-    color: "#111827",
-    marginBottom: 12,
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    gap: 10,
   },
+  cardTitle: { fontSize: 16, fontWeight: "800", color: "#1F305E" },
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#F9FAFB",
+    borderBottomColor: "#F8FAFC",
   },
-  infoLabel: { fontSize: RFValue(12), color: "#6B7280", fontFamily: "medium" },
-  infoValue: { fontSize: RFValue(12), color: "#1F2937", fontFamily: "bold" },
-  errorText: { marginTop: 12, color: "#1F2937", fontFamily: "bold" },
+  infoLabel: { fontSize: 14, color: "#94A3B8", fontWeight: "600" },
+  infoValue: { fontSize: 14, color: "#1F305E", fontWeight: "700" },
+  errorText: {
+    fontSize: 16,
+    color: "#94A3B8",
+    marginTop: 16,
+    fontWeight: "600",
+  },
   retryButton: {
-    marginTop: 20,
+    marginTop: 24,
     backgroundColor: "#1F305E",
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 14,
   },
-  retryText: { color: "#FFF", fontFamily: "bold" },
+  retryText: { color: "#FFF", fontWeight: "700" },
 });
 
 export default LeaseDetails;

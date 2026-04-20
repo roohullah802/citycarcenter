@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 import BottomSheetFilterModal from "./BottomSheetFilterModel";
 import { useCars } from "@/hooks/useFetchCars";
 import { useFavorites } from "@/context/FavoutiteContext";
@@ -56,106 +56,133 @@ const SearchCarCards = () => {
     });
   }, [data?.data, searchText, selectedBrand, priceRange]);
 
-  const openFilterModal = () => ref.current?.open();
-  const onClose = () => ref.current?.close();
-
+  // --- 1. LOADING STATE ---
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
+      <View style={styles.centerWrapper}>
+        <StatusBar barStyle="dark-content" />
         <ActivityIndicator size="large" color="#73C2FB" />
-        <Text style={styles.loadingText}>Finding best rides...</Text>
-      </SafeAreaView>
+        <Text style={styles.loadingText}>Curating your collection...</Text>
+      </View>
     );
   }
 
+  // --- 2. ERROR STATE ---
   if (isError) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
-        <Icon name="cloud-offline-outline" size={50} color="#FF6B6B" />
-        <Text style={styles.errorTitle}>Something went wrong</Text>
-        <TouchableOpacity style={styles.retryBtn} onPress={() => refetch()}>
-          <Text style={styles.retryBtnText}>Retry</Text>
+      <View style={styles.centerWrapper}>
+        <StatusBar barStyle="dark-content" />
+        <View style={styles.errorIconCircle}>
+          <Ionicons name="cloud-offline-outline" size={40} color="#EF4444" />
+        </View>
+        <Text style={styles.emptyTitle}>Connection Interrupted</Text>
+        <Text style={styles.emptySubtitle}>
+          We couldn&apos;t retrieve the fleet data. Please check your internet
+          connection.
+        </Text>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.retryBtn}
+          onPress={() => refetch()}
+        >
+          <Text style={styles.retryBtnText}>Retry Now</Text>
+          <Ionicons
+            name="refresh-outline"
+            size={18}
+            color="#FFF"
+            style={{ marginLeft: 8 }}
+          />
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <StatusBar barStyle="dark-content" />
 
+        {/* HEADER */}
         <View style={styles.header}>
           <TouchableOpacity
-            style={styles.iconBtn}
+            style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Icon name="arrow-back" size={24} color="#1F305E" />
+            <Ionicons name="chevron-back" size={28} color="#1F305E" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Available Cars</Text>
-          <View style={styles.iconBtn} />
+          <Text style={styles.headerTitle}>Available Fleet</Text>
+          <View style={{ width: 40 }} />
         </View>
 
-        <View style={styles.searchRow}>
-          <View style={styles.searchContainer}>
-            <Icon name="search-outline" size={20} color="#999" />
+        {/* SEARCH & FILTER SECTION */}
+        <View style={styles.searchSection}>
+          <View style={styles.searchBarWrapper}>
+            <Ionicons name="search-outline" size={20} color="#94A3B8" />
             <TextInput
-              placeholder="Search by model..."
+              placeholder="Search model, e.g. 'Civic'..."
               value={searchText}
               onChangeText={setSearchText}
-              placeholderTextColor="#999"
+              placeholderTextColor="#94A3B8"
               style={styles.searchInput}
             />
           </View>
 
           <TouchableOpacity
+            activeOpacity={0.8}
             style={[
-              styles.filterBtn,
-              !!selectedBrand && styles.filterBtnActive,
+              styles.filterToggle,
+              !!selectedBrand && styles.filterToggleActive,
             ]}
-            onPress={openFilterModal}
+            onPress={() => ref.current?.open()}
           >
-            <Icon
+            <Ionicons
               name="options-outline"
               size={22}
-              color={selectedBrand ? "#fff" : "#73C2FB"}
+              color={selectedBrand ? "#FFF" : "#1F305E"}
             />
-            {selectedBrand ? <View style={styles.dot} /> : null}
+            {selectedBrand && <View style={styles.activeFilterIndicator} />}
           </TouchableOpacity>
         </View>
 
+        {/* RESULTS SECTION */}
         {filteredCars?.length === 0 ? (
-          <View style={styles.noData}>
-            <Icon name="car-outline" size={60} color="#E5E4E2" />
-            <Text style={styles.noDataText}>No cars match your criteria</Text>
+          <View style={styles.emptyState}>
+            <View style={styles.emptyIconCircle}>
+              <Ionicons name="car-sport-outline" size={40} color="#CBD5E1" />
+            </View>
+            <Text style={styles.emptyTitle}>No Matches Found</Text>
+            <Text style={styles.emptySubtitle}>
+              Try adjusting your filters or search terms.
+            </Text>
             <TouchableOpacity
               onPress={() => {
                 setSearchText("");
                 setSelectedBrand(null);
                 setPriceRange([1, 1000]);
               }}
+              style={styles.resetButton}
             >
-              <Text style={styles.clearFilters}>Clear all filters</Text>
+              <Text style={styles.resetButtonText}>Clear All Filters</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <FlatList
             data={filteredCars}
-            keyExtractor={(item) => item._id.toString()}
+            keyExtractor={(item) => item._id}
             renderItem={({ item }) => <CarCards item={item} />}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContainer}
+            contentContainerStyle={styles.listContent}
             extraData={favouriteIds}
+            refreshing={isLoading}
+            onRefresh={refetch} // Pull-to-refresh integration
           />
         )}
 
         <BottomSheetFilterModal
           setPriceRange={setPriceRange}
-          selectedBrand={selectedBrand}
-          setSelectedBrand={setSelectedBrand}
           priceRange={priceRange}
           ref={ref}
-          onClose={onClose}
+          onClose={() => ref.current?.close()}
         />
       </SafeAreaView>
     </TouchableWithoutFeedback>
@@ -163,119 +190,147 @@ const SearchCarCards = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
+  centerWrapper: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 40,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 10,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderColor: "#F1F5F9",
   },
-  iconBtn: {
+  backButton: {
     width: 40,
     height: 40,
     justifyContent: "center",
+    alignItems: "flex-start",
   },
   headerTitle: {
     fontSize: 18,
-    fontFamily: "bold",
-    color: "#3f3f3fff",
+    fontWeight: "800",
+    color: "#1F305E",
+    letterSpacing: -0.5,
   },
-  searchRow: {
+  searchSection: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 20,
-    marginTop: 10,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+    gap: 12,
   },
-  searchContainer: {
+  searchBarWrapper: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
-    borderRadius: 15,
-    paddingHorizontal: 15,
-    height: 50,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    height: 54,
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
   },
   searchInput: {
     flex: 1,
-    marginHorizontal: 10,
+    marginLeft: 12,
     fontSize: 15,
-    color: "#333",
-    fontFamily: "demiBold",
+    fontWeight: "600",
+    color: "#1F305E",
   },
-  filterBtn: {
-    width: 50,
-    height: 50,
-    backgroundColor: "#eef8ff",
-    borderRadius: 15,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  filterBtnActive: {
-    backgroundColor: "#73C2FB",
-  },
-  dot: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#FF6B6B",
+  filterToggle: {
+    width: 54,
+    height: 54,
+    backgroundColor: "#FFF",
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: "#fff",
-  },
-  listContainer: {
-    paddingBottom: 30,
-  },
-  centered: {
-    flex: 1,
+    borderColor: "#F1F5F9",
     justifyContent: "center",
     alignItems: "center",
   },
-  loadingText: {
-    marginTop: 15,
-    fontFamily: "medium",
-    color: "#73C2FB",
-  },
-  errorTitle: {
-    fontSize: 16,
-    fontFamily: "bold",
-    color: "#333",
-    marginTop: 10,
-  },
-  retryBtn: {
-    marginTop: 20,
+  filterToggleActive: { backgroundColor: "#1F305E", borderColor: "#1F305E" },
+  activeFilterIndicator: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     backgroundColor: "#73C2FB",
-    paddingHorizontal: 30,
-    paddingVertical: 10,
-    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#FFF",
   },
-  retryBtnText: {
-    color: "#fff",
-    fontFamily: "bold",
+  listContent: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 40 },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#94A3B8",
   },
-  noData: {
+  emptyState: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingBottom: 100,
+    paddingBottom: 80,
   },
-  noDataText: {
-    fontFamily: "demiBold",
-    marginTop: 15,
-    fontSize: 16,
-    color: "#999",
+  emptyIconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: "#F8FAFC",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
   },
-  clearFilters: {
-    color: "#73C2FB",
-    fontFamily: "bold",
-    marginTop: 10,
+  errorIconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 20,
+    backgroundColor: "#FEF2F2",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
   },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#1F305E",
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: "#94A3B8",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  resetButton: {
+    marginTop: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    backgroundColor: "#F1F5F9",
+  },
+  resetButtonText: { fontSize: 14, fontWeight: "700", color: "#1F305E" },
+  retryBtn: {
+    marginTop: 24,
+    backgroundColor: "#1F305E",
+    height: 54,
+    borderRadius: 16,
+    paddingHorizontal: 32,
+    flexDirection: "row",
+    alignItems: "center",
+    shadowColor: "#1F305E",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  retryBtnText: { color: "#FFF", fontSize: 15, fontWeight: "700" },
 });
 
 export default SearchCarCards;

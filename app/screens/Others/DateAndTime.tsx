@@ -1,9 +1,3 @@
-import { useAuth, useUser } from "@clerk/expo";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
-import { useStripe } from "@stripe/stripe-react-native";
-import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,92 +8,86 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import { useStripe } from "@stripe/stripe-react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { useAuth, useUser } from "@clerk/expo";
+
 import { showToast } from "../../../folder/toastService";
 import { useCreateIntent } from "@/hooks/usePayment";
 
 export default function DateAndTimeScreen() {
   const { carId } = useLocalSearchParams<{ carId: string }>();
   const insets = useSafeAreaInsets();
-
   const createIntent = useCreateIntent();
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { isSignedIn } = useAuth();
+  const { user } = useUser();
 
   // State
   const [pickUpDate, setPickUpDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Stripe
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const { isSignedIn } = useAuth();
-  const { user } = useUser();
+  // Constants
+  const LEASE_DAYS = 7;
 
   const returnDate = useMemo(() => {
     const result = new Date(pickUpDate);
-    if (isNaN(result.getTime())) return new Date();
-    result.setDate(result.getDate() + 7);
+    result.setDate(result.getDate() + LEASE_DAYS);
     return result;
   }, [pickUpDate]);
 
   const onChangeDate = useCallback(
     (event: DateTimePickerEvent, selectedDate?: Date) => {
-      if (Platform.OS !== "ios") setShowDatePicker(false);
-
-      let currentDate: Date | undefined;
-
-      if (Platform.OS === "ios") {
-        currentDate = selectedDate;
-      } else {
-        if (event.type === "set" && event.nativeEvent.timestamp) {
-          currentDate = new Date(event.nativeEvent.timestamp);
-        }
-      }
-
-      if (currentDate && !isNaN(currentDate.getTime())) {
-        setPickUpDate(currentDate);
-      }
+      if (Platform.OS === "android") setShowDatePicker(false);
+      if (selectedDate) setPickUpDate(selectedDate);
     },
     [],
   );
 
-  const formattedDate = (date: Date) => {
-    if (!date || isNaN(date.getTime())) return "";
+  const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
+      weekday: "short",
+      month: "short",
       day: "numeric",
+      year: "numeric",
     });
   };
 
-  const handlePress = async () => {
+  const handlePayment = async () => {
+    if (!isSignedIn) return showToast("Please login to continue");
+
     setLoading(true);
     try {
-      const validCarId = carId.replace(/"/g, "");
-      if (!isSignedIn) {
-        showToast("Please login first");
-        setLoading(false);
-        return;
-      }
+      const cleanCarId = carId.replace(/"/g, "");
+      const mongodbId = user?.publicMetadata?.mongodbId;
+
+      if (!mongodbId) throw new Error("User session expired. Please re-login.");
 
       const resp = await createIntent.mutateAsync({
         action: "createLease",
-        userId: user?.publicMetadata.mongodbId,
-        carId: validCarId,
+        userId: mongodbId,
+        carId: cleanCarId,
         startDate: pickUpDate.toISOString(),
         endDate: returnDate.toISOString(),
       });
 
-      const clientSecret = resp?.clientSecret;
-
-      if (!clientSecret) throw new Error("No client secret returned!");
+      if (!resp?.clientSecret) throw new Error("Payment gateway error");
 
       const { error: initError } = await initPaymentSheet({
         merchantDisplayName: "City Car Center",
-        paymentIntentClientSecret: clientSecret,
+        paymentIntentClientSecret: resp.clientSecret,
+        appearance: {
+          colors: { primary: "#73C2FB" },
+          shapes: { borderRadius: 12 },
+        },
       });
+
       if (initError) throw initError;
 
       const { error: presentError } = await presentPaymentSheet();
@@ -107,118 +95,234 @@ export default function DateAndTimeScreen() {
 
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {
-      showToast(error?.data?.message || error?.message || "Error Occurred!");
+      showToast(error?.message || "Transaction failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView>
-      <ScrollView
-        contentContainerStyle={{
-          paddingTop: insets.top + 20,
-          paddingBottom: insets.bottom + 20,
-          padding: 20,
-        }}
-      >
-        <Text style={styles.title}>Select Rental Dates</Text>
-
-        {/* Pick-up Date */}
+    <View style={styles.container}>
+      {/* Custom Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity
-          style={styles.dateCard}
-          onPress={() => setShowDatePicker(true)}
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
         >
-          <Text style={styles.dateLabel}>Pick-up Date</Text>
-          <Text style={styles.dateValue}>{formattedDate(pickUpDate)}</Text>
+          <Ionicons name="chevron-back" size={28} color="#1F305E" />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Lease Duration</Text>
+        <View style={{ width: 40 }} />
+      </View>
 
-        {/* Return Date */}
-        <View style={[styles.dateCard, styles.returnDateCard]}>
-          <Text style={styles.dateLabel}>Return Date</Text>
-          <Text style={styles.dateValue}>{formattedDate(returnDate)}</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.introSection}>
+          <Text style={styles.welcomeText}>Select your dates</Text>
+          <Text style={styles.subText}>
+            Standard lease duration is {LEASE_DAYS} days.
+          </Text>
         </View>
 
-        {/* Date Picker */}
+        {/* Date Selector Card */}
+        <View style={styles.mainCard}>
+          <TouchableOpacity
+            style={styles.dateRow}
+            onPress={() => setShowDatePicker(true)}
+            activeOpacity={0.6}
+          >
+            <View style={[styles.iconBox, { backgroundColor: "#E0F2FE" }]}>
+              <Ionicons name="calendar" size={22} color="#73C2FB" />
+            </View>
+            <View style={styles.dateInfo}>
+              <Text style={styles.dateLabel}>Pick-up Date</Text>
+              <Text style={styles.dateText}>{formatDate(pickUpDate)}</Text>
+            </View>
+            <Ionicons name="pencil-outline" size={18} color="#CBD5E1" />
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          <View style={styles.dateRow}>
+            <View style={[styles.iconBox, { backgroundColor: "#F1F5F9" }]}>
+              <Ionicons name="calendar" size={22} color="#64748B" />
+            </View>
+            <View style={styles.dateInfo}>
+              <Text style={styles.dateLabel}>Return Date</Text>
+              <Text style={styles.dateText}>{formatDate(returnDate)}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Highlight Box */}
+        <View style={styles.infoHighlight}>
+          <Ionicons name="shield-checkmark" size={20} color="#059669" />
+          <Text style={styles.infoHighlightText}>
+            Includes full maintenance and roadside assistance.
+          </Text>
+        </View>
+
         {showDatePicker && (
           <DateTimePicker
-            value={pickUpDate || new Date()}
+            value={pickUpDate}
             mode="date"
-            display="default"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
             minimumDate={new Date()}
             onChange={onChangeDate}
           />
         )}
+      </ScrollView>
 
-        {/* Payment Button */}
+      {/* Fixed Footer Button */}
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
         <TouchableOpacity
-          style={[styles.payButton, loading && { opacity: 0.7 }]}
-          onPress={handlePress}
+          style={[styles.payBtn, loading && styles.payBtnDisabled]}
+          onPress={handlePayment}
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#FFF" />
           ) : (
-            <Text style={styles.payButtonText}>Continue</Text>
+            <Text style={styles.payBtnText}>Confirm Lease</Text>
           )}
         </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#f9f9f9",
-    paddingTop: Platform.OS === "android" ? 20 : 40,
+    backgroundColor: "#FFFFFF",
   },
-  title: {
-    fontSize: 24,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingBottom: 15,
+    backgroundColor: "#FFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 18,
     fontWeight: "700",
     color: "#1F305E",
-    marginBottom: 30,
   },
-  dateCard: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+  scrollContent: {
+    padding: 24,
   },
-  returnDateCard: {
-    backgroundColor: "#eef5ff",
+  introSection: {
+    marginBottom: 32,
   },
-  dateLabel: {
-    fontSize: 14,
-    color: "#888",
-    marginBottom: 5,
-  },
-  dateValue: {
-    fontSize: 18,
-    fontWeight: "600",
+  welcomeText: {
+    fontSize: 26,
+    fontWeight: "800",
     color: "#1F305E",
   },
-  payButton: {
-    backgroundColor: "#73C2FB",
-    paddingVertical: 16,
-    borderRadius: 15,
-    alignItems: "center",
-    marginTop: 30,
-    shadowColor: "#73C2FB",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 8,
+  subText: {
+    fontSize: 15,
+    color: "#64748B",
+    marginTop: 6,
   },
-  payButtonText: {
-    color: "#fff",
-    fontSize: 16,
+  mainCard: {
+    backgroundColor: "#FFF",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    padding: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  dateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+  },
+  iconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  dateInfo: {
+    flex: 1,
+  },
+  dateLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#94A3B8",
+    textTransform: "uppercase",
+    marginBottom: 2,
+  },
+  dateText: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#1F305E",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#F1F5F9",
+    marginHorizontal: 16,
+  },
+  infoHighlight: {
+    flexDirection: "row",
+    backgroundColor: "#F0FDF4",
+    padding: 16,
+    borderRadius: 16,
+    marginTop: 24,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#DCFCE7",
+  },
+  infoHighlightText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#166534",
+    marginLeft: 10,
+    fontWeight: "500",
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#F1F5F9",
+  },
+  payBtn: {
+    backgroundColor: "#73C2FB",
+    height: 58,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#73C2FB",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  payBtnDisabled: {
+    backgroundColor: "#CBD5E1",
+    shadowOpacity: 0,
+  },
+  payBtnText: {
+    color: "#FFF",
+    fontSize: 17,
     fontWeight: "700",
   },
 });

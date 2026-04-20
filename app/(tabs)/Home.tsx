@@ -7,16 +7,16 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  StatusBar,
 } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 import { useGetCurrentLocation } from "../../folder/getAddress";
 import { useFetchBrands } from "@/hooks/useFetchBrands";
 import { useCars } from "@/hooks/useFetchCars";
@@ -24,50 +24,65 @@ import { useCars } from "@/hooks/useFetchCars";
 function HomeScreen() {
   const { isSignedIn } = useAuth();
   const { user } = useUser();
-
   const insets = useSafeAreaInsets();
   const modalRef = useRef<Modalize>(null);
-
   const location = useGetCurrentLocation();
 
   const {
     data: brands,
     isLoading: brandsLoading,
-    error: brandsError,
+    isError: brandsError,
+    refetch: refetchBrands,
   } = useFetchBrands();
-  const { data: cars, isLoading: carsLoading, error: carsError } = useCars();
 
-  const openProfileModal = () => {
-    modalRef.current?.open();
+  const {
+    data: cars,
+    isLoading: carsLoading,
+    isError: carsError,
+    refetch: refetchCars,
+  } = useCars();
+
+  const onRetry = () => {
+    refetchBrands();
+    refetchCars();
   };
 
   return (
     <>
+      <StatusBar barStyle="dark-content" />
       <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.container,
-          { paddingTop: insets.top + 30 },
+          { paddingTop: insets.top + 10, paddingBottom: 40 },
         ]}
       >
-        {/* HEADER */}
-
+        {/* HEADER SECTION */}
         <View style={styles.header}>
-          {isSignedIn ? (
-            <View>
-              <Text style={styles.locationLabel}>Location</Text>
-              <Text style={styles.locationValue} numberOfLines={1}>
-                {location || "Fetching location..."}
-              </Text>
-            </View>
-          ) : (
-            <Text style={styles.guest}>Welcome</Text>
-          )}
+          <View style={styles.headerInfo}>
+            {isSignedIn ? (
+              <>
+                <View style={styles.locationContainer}>
+                  <Ionicons name="location-sharp" size={14} color="#73C2FB" />
+                  <Text style={styles.locationLabel}>CURRENT LOCATION</Text>
+                </View>
+                <Text style={styles.locationValue} numberOfLines={1}>
+                  {location || "Detecting address..."}
+                </Text>
+              </>
+            ) : (
+              <Text style={styles.welcomeGuest}>Welcome to City Car</Text>
+            )}
+          </View>
 
-          <TouchableOpacity onPress={openProfileModal}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => modalRef.current?.open()}
+          >
             <Image
               source={
-                isSignedIn
-                  ? { uri: user?.imageUrl }
+                isSignedIn && user?.imageUrl
+                  ? { uri: user.imageUrl }
                   : require("../../assests/guest3.png")
               }
               style={styles.profileImage}
@@ -75,275 +90,255 @@ function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* SEARCH */}
+        {/* HERO TITLE */}
+        <View style={styles.heroSection}>
+          <Text style={styles.title}>
+            Find your ideal ride in{"\n"}
+            <Text style={styles.highlightText}>just a few clicks.</Text>
+          </Text>
+        </View>
 
-        <Text style={styles.title}>
-          Find your ideal ride in just a few clicks{"\n"}
-          <Text style={styles.boldText}>quick, easy, and reliable</Text>
-        </Text>
-
+        {/* SEARCH BAR */}
         <TouchableOpacity
           onPress={() => router.push("/screens/Others/SearchCarCards")}
-          activeOpacity={0.5}
-          style={styles.searchBarContainer}
+          activeOpacity={0.8}
+          style={styles.searchBar}
         >
-          <Text style={[styles.searchInput, { color: "#E5E4E2" }]}>Search</Text>
-
-          <Icon
-            name="search"
-            size={18}
-            color="#999"
-            style={styles.searchIcon}
-          />
+          <Ionicons name="search-outline" size={20} color="#94A3B8" />
+          <Text style={styles.searchPlaceholder}>
+            Search for your favorite car...
+          </Text>
+          <View style={styles.filterIcon}>
+            <Ionicons name="options-outline" size={18} color="#FFF" />
+          </View>
         </TouchableOpacity>
 
-        {/* BRANDS */}
-
-        <View>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Brands</Text>
-
-            <TouchableOpacity
-              onPress={() => router.push("/screens/Others/BrandCards")}
-            >
-              <Text style={styles.seeAll}>See All</Text>
+        {/* ERROR STATE VIEW */}
+        {(brandsError || carsError) && (
+          <View style={styles.errorContainer}>
+            <Ionicons name="cloud-offline-outline" size={40} color="#EF4444" />
+            <Text style={styles.errorTitle}>Something went wrong</Text>
+            <Text style={styles.errorSub}>
+              We couldn&apos;t load the latest fleet. Check your connection.
+            </Text>
+            <TouchableOpacity style={styles.retryBtn} onPress={onRetry}>
+              <Text style={styles.retryBtnText}>Try Again</Text>
             </TouchableOpacity>
           </View>
+        )}
 
-          {brandsLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color="#73C2FB" />
-              <Text style={styles.loadingText}>Loading brands...</Text>
+        {/* BRANDS SECTION */}
+        {!brandsError && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Top Brands</Text>
+              <TouchableOpacity
+                onPress={() => router.push("/screens/Others/BrandCards")}
+              >
+                <Text style={styles.seeAll}>See All</Text>
+              </TouchableOpacity>
             </View>
-          ) : brandsError ? (
-            <Text style={styles.errorText}>Failed to load brands</Text>
-          ) : (
-            <FlatList
-              data={brands?.brands}
-              renderItem={({ item }) => <BrandItems item={item} />}
-              keyExtractor={(item) => item.brand}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-            />
-          )}
-        </View>
 
-        {/* CARS */}
-
-        <View>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Available Near You</Text>
-
-            <TouchableOpacity
-              onPress={() => router.push("/screens/Others/SearchCarCards")}
-            >
-              <Text style={styles.seeAll}>See All</Text>
-            </TouchableOpacity>
+            {brandsLoading ? (
+              <ActivityIndicator style={styles.loader} color="#73C2FB" />
+            ) : (
+              <FlatList
+                data={brands?.brands}
+                renderItem={({ item }) => <BrandItems item={item} />}
+                keyExtractor={(item, index) => index.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalList}
+              />
+            )}
           </View>
+        )}
 
-          {carsLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color="#73C2FB" />
-              <Text style={styles.loadingText}>Loading cars...</Text>
+        {/* CARS SECTION */}
+        {!carsError && (
+          <View style={[styles.section, { marginTop: 10 }]}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Available Near You</Text>
+              <TouchableOpacity
+                onPress={() => router.push("/screens/Others/SearchCarCards")}
+              >
+                <Text style={styles.seeAll}>See All</Text>
+              </TouchableOpacity>
             </View>
-          ) : carsError ? (
-            <Text style={styles.errorText}>Failed to load cars</Text>
-          ) : (
-            <FlatList
-              data={cars?.data}
-              renderItem={({ item }) => <CarItems item={item} />}
-              keyExtractor={(item) => item._id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-            />
-          )}
-        </View>
+
+            {carsLoading ? (
+              <ActivityIndicator style={styles.loader} color="#73C2FB" />
+            ) : (
+              <FlatList
+                data={cars?.data}
+                renderItem={({ item }) => <CarItems item={item} />}
+                keyExtractor={(item) => item._id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalList}
+              />
+            )}
+          </View>
+        )}
       </ScrollView>
 
       {/* PROFILE MODAL */}
-
-      <Modalize
-        ref={modalRef}
-        adjustToContentHeight
-        handleStyle={{ backgroundColor: "#73C2FB" }}
-        modalStyle={{ padding: 30 }}
-      >
-        <View style={styles.modalContent}>
+      <Modalize ref={modalRef} adjustToContentHeight handlePosition="inside">
+        <View style={styles.modalInner}>
           <Image
             source={
-              isSignedIn
-                ? { uri: user?.imageUrl }
+              isSignedIn && user?.imageUrl
+                ? { uri: user.imageUrl }
                 : require("../../assests/guest3.png")
             }
             style={styles.modalProfileImage}
           />
-
-          <Text style={styles.modalName}>{user?.fullName}</Text>
-
-          <Text style={styles.modalEmail}>
-            {user?.primaryEmailAddress?.emailAddress}
+          <Text style={styles.modalName}>
+            {isSignedIn ? user?.fullName : "Guest User"}
           </Text>
+          <Text style={styles.modalEmail}>
+            {isSignedIn
+              ? user?.primaryEmailAddress?.emailAddress
+              : "Login to sync your data"}
+          </Text>
+          <View style={styles.modalDivider} />
+          <TouchableOpacity
+            style={styles.modalButton}
+            onPress={() => modalRef.current?.close()}
+          >
+            <Text style={styles.modalButtonText}>Close Profile</Text>
+          </TouchableOpacity>
         </View>
       </Modalize>
     </>
   );
 }
 
-export default HomeScreen;
-
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#FFFFFF",
-    paddingTop: Platform.OS === "android" ? 20 : 30,
-  },
-
-  loadingScreen: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-
+  container: { flexGrow: 1, backgroundColor: "#FFFFFF" },
   header: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  locationLabel: {
-    fontSize: 11,
-    color: "#3f3f3fff",
-    fontFamily: "bold",
-  },
-
-  locationValue: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "gray",
-    fontFamily: "demiBold",
-    width: 230,
-  },
-
-  guest: {
-    fontFamily: "bold",
-    fontSize: 20,
-    color: "#3f3f3fff",
-  },
-
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-
-  title: {
-    paddingHorizontal: 16,
-    fontSize: 14,
-    marginTop: 20,
-    color: "#3f3f3fff",
-    fontFamily: "bold",
-  },
-
-  boldText: {
-    fontWeight: "bold",
-  },
-
-  searchBarContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 10,
-    marginHorizontal: 16,
-    marginTop: 20,
-    paddingHorizontal: 10,
-    borderWidth: 0.3,
-    borderColor: "#C0C0C0",
-    padding: 3,
-  },
-
-  searchInput: {
-    flex: 1,
-    height: 40,
-    fontSize: 14,
-    color: "#333",
-  },
-
-  searchIcon: {
-    marginLeft: 10,
-    fontSize: 25,
-    color: "#E5E4E2",
-  },
-
-  sectionHeader: {
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
     alignItems: "center",
     marginBottom: 20,
   },
-
-  sectionTitle: {
-    fontSize: 16,
-    fontFamily: "bold",
-    color: "#3f3f3fff",
-  },
-
-  seeAll: {
-    fontSize: 12,
-    color: "#73C2FB",
-    fontFamily: "demiBold",
-  },
-
-  horizontalList: {
-    paddingHorizontal: 16,
-  },
-
-  modalContent: {
+  headerInfo: { flex: 1 },
+  locationContainer: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 20,
-    marginBottom: 100,
+    marginBottom: 4,
   },
-
+  locationLabel: {
+    fontSize: 10,
+    color: "#94A3B8",
+    fontWeight: "800",
+    letterSpacing: 1,
+    marginLeft: 4,
+  },
+  locationValue: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1F305E",
+    maxWidth: "90%",
+  },
+  welcomeGuest: { fontSize: 22, fontWeight: "800", color: "#1F305E" },
+  profileImage: {
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+  },
+  heroSection: { paddingHorizontal: 20, marginBottom: 20 },
+  title: { fontSize: 22, fontWeight: "400", color: "#1F305E", lineHeight: 28 },
+  highlightText: { fontWeight: "800", color: "#73C2FB" },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+    marginHorizontal: 20,
+    paddingLeft: 16,
+    paddingRight: 8,
+    height: 54,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
+  },
+  searchPlaceholder: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 14,
+    color: "#94A3B8",
+    fontWeight: "500",
+  },
+  filterIcon: { backgroundColor: "#1F305E", padding: 8, borderRadius: 8 },
+  section: { marginTop: 24 },
+  sectionHeader: {
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  sectionTitle: { fontSize: 18, fontWeight: "800", color: "#1F305E" },
+  seeAll: { fontSize: 13, color: "#73C2FB", fontWeight: "700" },
+  horizontalList: { paddingLeft: 20, paddingBottom: 10 },
+  loader: { marginVertical: 20 },
+  errorContainer: {
+    margin: 20,
+    padding: 20,
+    backgroundColor: "#FEF2F2",
+    borderRadius: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#FEE2E2",
+  },
+  errorTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#1F305E",
+    marginTop: 10,
+  },
+  errorSub: {
+    fontSize: 13,
+    color: "#991B1B",
+    textAlign: "center",
+    marginTop: 4,
+    lineHeight: 18,
+  },
+  retryBtn: {
+    marginTop: 16,
+    backgroundColor: "#1F305E",
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  retryBtnText: { color: "#FFF", fontWeight: "700", fontSize: 14 },
+  modalInner: { alignItems: "center", padding: 24, paddingBottom: 40 },
   modalProfileImage: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    marginBottom: 15,
+    marginBottom: 16,
   },
-
-  modalName: {
-    fontSize: 16,
-    fontFamily: "bold",
-    color: "black",
-    marginBottom: 5,
+  modalName: { fontSize: 20, fontWeight: "800", color: "#1F305E" },
+  modalEmail: { fontSize: 14, color: "#64748B", marginTop: 4 },
+  modalDivider: {
+    height: 1,
+    width: "100%",
+    backgroundColor: "#F1F5F9",
+    marginVertical: 24,
   },
-
-  modalEmail: {
-    fontSize: 14,
-    color: "gray",
-    fontFamily: "demiBold",
-  },
-  errorText: {
-    textAlign: "center",
-    color: "red",
-    fontSize: 12,
-    marginVertical: 10,
-  },
-
-  loadingContainer: {
-    height: 100,
+  modalButton: {
+    width: "100%",
+    height: 54,
+    backgroundColor: "#1F305E",
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    width: "100%",
   },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 12,
-    color: "#73C2FB",
-    fontFamily: "demiBold",
-  },
+  modalButtonText: { fontSize: 16, fontWeight: "700", color: "#FFF" },
 });
+
+export default HomeScreen;

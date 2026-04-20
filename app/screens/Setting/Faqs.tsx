@@ -11,12 +11,11 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  StatusBar,
 } from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
-// Enable LayoutAnimation for Android
 if (
   Platform.OS === "android" &&
   UIManager.setLayoutAnimationEnabledExperimental
@@ -31,6 +30,7 @@ interface FAQItem {
 }
 
 const FAQScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
   const { data, isError, isLoading, refetch } = useFaqs();
 
@@ -44,184 +44,157 @@ const FAQScreen: React.FC = () => {
   const renderItem = ({ item, index }: { item: FAQItem; index: number }) => {
     const isExpanded = expandedIndex === index;
     return (
-      <View style={[styles.card, isExpanded && styles.activeCard]}>
+      <View style={[styles.accordionCard, isExpanded && styles.activeCard]}>
         <TouchableOpacity
           onPress={() => handleToggle(index)}
           style={styles.questionRow}
           activeOpacity={0.7}
         >
-          <Text style={[styles.question, isExpanded && styles.activeQuestion]}>
+          <Text
+            style={[
+              styles.questionText,
+              isExpanded && styles.activeQuestionText,
+            ]}
+          >
             {item.question}
           </Text>
-          <Icon
-            name={isExpanded ? "chevron-up" : "chevron-down"}
-            size={20}
-            color={isExpanded ? "#1F305E" : "#9CA3AF"}
-          />
+          <View
+            style={[styles.iconCircle, isExpanded && styles.activeIconCircle]}
+          >
+            <Ionicons
+              name={isExpanded ? "remove" : "add"}
+              size={18}
+              color={isExpanded ? "#FFF" : "#94A3B8"}
+            />
+          </View>
         </TouchableOpacity>
         {isExpanded && (
-          <View style={styles.answerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.answer}>{item.answer}</Text>
+          <View style={styles.answerWrapper}>
+            <Text style={styles.answerText}>{item.answer}</Text>
           </View>
         )}
       </View>
     );
   };
 
-  const renderEmptyComponent = () => {
-    if (isLoading) {
-      return (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#1F305E" />
-          <Text style={styles.message}>Loading FAQs...</Text>
-        </View>
-      );
-    }
-
-    if (isError) {
-      return (
-        <View style={styles.centered}>
-          <View style={styles.errorIconBg}>
-            <Icon name="alert-circle" size={30} color="#EF4444" />
-          </View>
-          <Text style={styles.errorTitle}>Oops! Failed to load</Text>
-          <Text style={styles.message}>
-            Check your connection and try again.
-          </Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={() => refetch()}
-          >
-            <Text style={styles.retryText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
-    return (
-      <View style={styles.centered}>
-        <Icon name="help-circle-outline" size={60} color="#E5E7EB" />
-        <Text style={styles.message}>No questions found.</Text>
-      </View>
-    );
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Icon name="chevron-back" size={24} color="#1F305E" />
+    <View style={styles.mainContainer}>
+      <StatusBar barStyle="dark-content" />
+
+      {/* HEADER */}
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <TouchableOpacity style={styles.navBtn} onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={28} color="#1F305E" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Support</Text>
+        <Text style={styles.headerTitle}>FAQs</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <View style={styles.content}>
-        <Text style={styles.mainHeading}>Frequently Asked Questions</Text>
-
-        <FlatList
-          data={faqData}
-          renderItem={renderItem}
-          keyExtractor={(item) => item._id}
-          ListEmptyComponent={renderEmptyComponent}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listPadding}
-        />
-      </View>
-    </SafeAreaView>
+      <FlatList
+        data={faqData}
+        renderItem={renderItem}
+        keyExtractor={(item) => item._id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={
+          isLoading ? (
+            <ActivityIndicator style={{ marginTop: 40 }} color="#73C2FB" />
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="alert-circle-outline" size={48} color="#CBD5E1" />
+              <Text style={styles.emptyText}>
+                {isError ? "Connection Error" : "No questions available"}
+              </Text>
+              {isError && (
+                <TouchableOpacity
+                  style={styles.retryBtn}
+                  onPress={() => refetch()}
+                >
+                  <Text style={styles.retryBtnText}>Retry</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )
+        }
+      />
+    </View>
   );
 };
 
-export default FAQScreen;
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F9FAFB" },
+  mainContainer: { flex: 1, backgroundColor: "#FFFFFF" },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    backgroundColor: "#FFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "#F1F5F9",
   },
-  backBtn: { width: 40, height: 40, justifyContent: "center" },
-  headerTitle: { fontSize: RFValue(16), fontFamily: "bold", color: "#1F305E" },
-  content: { flex: 1, paddingHorizontal: 16 },
-  mainHeading: {
-    fontSize: RFValue(18),
-    fontFamily: "bold",
-    color: "#111827",
-    marginTop: 20,
-    marginBottom: 20,
+  navBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
+  headerTitle: { fontSize: 18, fontWeight: "800", color: "#1F305E" },
+  listContent: { padding: 20, paddingBottom: 40 },
+  accordionCard: {
+    backgroundColor: "#FFF",
+    borderRadius: 16,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
     overflow: "hidden",
   },
-  activeCard: { borderColor: "#1F305E", elevation: 2, shadowOpacity: 0.05 },
+  activeCard: { borderColor: "#73C2FB", backgroundColor: "#F8FAFC" },
   questionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+    padding: 18,
   },
-  question: {
-    fontSize: RFValue(13),
-    fontFamily: "demiBold",
-    color: "#374151",
+  questionText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1F305E",
     flex: 1,
     paddingRight: 10,
   },
-  activeQuestion: { color: "#1F305E" },
-  answerContainer: { paddingHorizontal: 16, paddingBottom: 16 },
-  divider: { height: 1, backgroundColor: "#F3F4F6", marginBottom: 12 },
-  answer: {
-    fontSize: RFValue(12),
-    color: "#6B7280",
-    fontFamily: "medium",
-    lineHeight: 20,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 80,
-  },
-  message: {
-    fontSize: RFValue(13),
-    color: "#9CA3AF",
-    marginTop: 10,
-    fontFamily: "medium",
-  },
-  errorIconBg: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#FEF2F2",
+  activeQuestionText: { fontWeight: "700" },
+  iconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#F1F5F9",
     justifyContent: "center",
     alignItems: "center",
   },
-  errorTitle: {
-    fontSize: RFValue(15),
-    fontFamily: "bold",
-    color: "#111827",
-    marginTop: 15,
+  activeIconCircle: { backgroundColor: "#73C2FB" },
+  answerWrapper: { paddingHorizontal: 18, paddingBottom: 18 },
+  answerText: {
+    fontSize: 14,
+    color: "#64748B",
+    lineHeight: 22,
+    fontWeight: "500",
   },
-  retryButton: {
+  emptyContainer: { alignItems: "center", marginTop: 60 },
+  emptyText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: "#94A3B8",
+    fontWeight: "600",
+  },
+  retryBtn: {
     marginTop: 20,
     backgroundColor: "#1F305E",
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
   },
-  retryText: { color: "#fff", fontSize: RFValue(13), fontFamily: "bold" },
-  listPadding: { paddingBottom: 40 },
+  retryBtnText: { color: "#FFF", fontWeight: "700" },
 });
+
+export default FAQScreen;

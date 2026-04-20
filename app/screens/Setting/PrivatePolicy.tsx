@@ -10,45 +10,25 @@ import {
   View,
   StatusBar,
 } from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 const TermsPrivacyScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const { data, isError, isLoading, refetch } = usePolicy();
 
   const policyData = useMemo(() => data?.policy || [], [data]);
 
-  const renderedPolicySections = useMemo(() => {
-    if (!isLoading && policyData.length === 0) {
-      return (
-        <View style={styles.center}>
-          <Icon name="document-text-outline" size={60} color="#E5E7EB" />
-          <Text style={styles.message}>No policy data found.</Text>
-        </View>
-      );
-    }
-
-    return policyData.map((section: any, index: number) => (
-      <View key={section._id || index} style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>
-          {index + 1}. {section.title}
-        </Text>
-        <Text style={styles.sectionContent}>{section.content}</Text>
-      </View>
-    ));
-  }, [policyData, isLoading]);
-
   return (
-    <SafeAreaView style={styles.mainWrapper}>
+    <View style={styles.mainWrapper}>
       <StatusBar barStyle="dark-content" />
 
       {/* PROFESSIONAL HEADER */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Icon name="chevron-back" size={24} color="#1F305E" />
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <TouchableOpacity style={styles.navBtn} onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={28} color="#1F305E" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Terms & Privacy</Text>
+        <Text style={styles.headerTitle}>Legal</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -57,144 +37,157 @@ const TermsPrivacyScreen: React.FC = () => {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.topInfo}>
-          <Text style={styles.mainHeading}>Privacy Policy</Text>
-          <Text style={styles.subHeader}>Last updated: June 23, 2025</Text>
+        {/* HERO SECTION */}
+        <View style={styles.heroSection}>
+          <Text style={styles.mainTitle}>Terms & Privacy</Text>
+          <View style={styles.updateBadge}>
+            <Text style={styles.updateText}>LAST UPDATED: JUNE 23, 2025</Text>
+          </View>
           <Text style={styles.introText}>
-            Please read these terms and conditions carefully before using our
-            service.
+            These guidelines outline the rules and regulations for the use of
+            City Car Center&apos;s platform and services.
           </Text>
         </View>
 
-        {/* CONDITIONAL RENDERING */}
+        {/* CONTENT LOGIC */}
         {isLoading ? (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color="#1F305E" />
-            <Text style={styles.message}>Loading Policy...</Text>
+          <View style={styles.centerWrapper}>
+            <ActivityIndicator size="large" color="#73C2FB" />
+            <Text style={styles.statusText}>Loading document...</Text>
           </View>
         ) : isError ? (
-          <View style={styles.center}>
-            <View style={styles.errorIconBg}>
-              <Icon name="cloud-offline" size={30} color="#EF4444" />
-            </View>
-            <Text style={styles.errorTitle}>Connection Error</Text>
-            <Text style={styles.message}>Unable to fetch policy details.</Text>
+          <View style={styles.centerWrapper}>
+            <Ionicons name="cloud-offline-outline" size={48} color="#EF4444" />
+            <Text style={styles.errorTitle}>Connection Failed</Text>
             <TouchableOpacity style={styles.retryBtn} onPress={() => refetch()}>
-              <Text style={styles.retryText}>Retry</Text>
+              <Text style={styles.retryBtnText}>Reload Policy</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          renderedPolicySections
+          policyData.map((section: any, index: number) => (
+            <View key={section._id || index} style={styles.policyCard}>
+              <Text style={styles.sectionHeading}>
+                {index + 1}. {section.title}
+              </Text>
+              <Text style={styles.sectionContent}>{section.content}</Text>
+            </View>
+          ))
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   mainWrapper: {
     flex: 1,
-    backgroundColor: "#F9FAFB", // Light grey background for readability
+    backgroundColor: "#FFFFFF",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    backgroundColor: "#FFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "#F1F5F9",
   },
-  backBtn: { width: 40, height: 40, justifyContent: "center" },
+  navBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   headerTitle: {
-    fontSize: RFValue(16),
-    fontFamily: "bold",
+    fontSize: 18,
+    fontWeight: "800",
     color: "#1F305E",
   },
   container: { flex: 1 },
   contentContainer: {
-    padding: 20,
-    paddingBottom: RFValue(40),
+    padding: 24,
+    paddingBottom: 60,
   },
-  topInfo: {
-    marginBottom: 25,
+  heroSection: {
+    marginBottom: 32,
   },
-  mainHeading: {
-    fontSize: RFValue(22),
-    fontFamily: "bold",
-    color: "#111827",
-    marginBottom: 4,
+  mainTitle: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#1F305E",
+    letterSpacing: -0.5,
   },
-  subHeader: {
-    fontSize: RFValue(12),
-    color: "#6B7280",
-    fontFamily: "medium",
-    marginBottom: 12,
-  },
-  introText: {
-    fontSize: RFValue(13),
-    color: "#4B5563",
-    lineHeight: 20,
-    fontFamily: "medium",
-  },
-  sectionCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
+  updateBadge: {
+    backgroundColor: "#F8FAFC",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    marginTop: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#F1F5F9",
   },
-  sectionTitle: {
-    fontSize: RFValue(14),
+  updateText: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#94A3B8",
+    letterSpacing: 1,
+  },
+  introText: {
+    fontSize: 15,
+    color: "#64748B",
+    lineHeight: 24,
+    fontWeight: "500",
+  },
+  policyCard: {
+    backgroundColor: "#FFF",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: "#F1F5F9",
+  },
+  sectionHeading: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#1F305E",
     marginBottom: 10,
-    color: "#111827",
-    fontFamily: "bold",
   },
   sectionContent: {
-    fontSize: RFValue(13),
-    color: "#4B5563",
-    lineHeight: RFValue(20),
-    fontFamily: "medium",
+    fontSize: 14,
+    color: "#475569",
+    lineHeight: 22,
+    fontWeight: "500",
   },
-  center: {
+  centerWrapper: {
     marginTop: 60,
     justifyContent: "center",
     alignItems: "center",
   },
-  errorIconBg: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#FEF2F2",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
+  statusText: {
+    marginTop: 12,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#94A3B8",
   },
   errorTitle: {
-    fontSize: RFValue(15),
-    color: "#111827",
-    fontFamily: "bold",
-  },
-  message: {
-    fontSize: RFValue(13),
-    textAlign: "center",
-    color: "#9CA3AF",
-    marginTop: 8,
-    fontFamily: "medium",
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#1F305E",
+    marginTop: 12,
   },
   retryBtn: {
     marginTop: 20,
     backgroundColor: "#1F305E",
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 30,
-    borderRadius: 10,
+    borderRadius: 14,
   },
-  retryText: {
-    color: "#fff",
-    fontSize: RFValue(13),
-    fontFamily: "bold",
+  retryBtnText: {
+    color: "#FFF",
+    fontWeight: "700",
   },
 });
 
