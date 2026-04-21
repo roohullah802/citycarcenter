@@ -55,9 +55,9 @@ export default function RootLayout() {
         </ClerkLoading>
         <ClerkLoaded>
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <QueryClientProvider client={queryClient}>
-              <FavoritesProvider>
-                <ToastProvider>
+            <ToastProvider>
+              <QueryClientProvider client={queryClient}>
+                <FavoritesProvider>
                   <StripeProvider
                     publishableKey={
                       process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -65,9 +65,9 @@ export default function RootLayout() {
                   >
                     <StackLayout />
                   </StripeProvider>
-                </ToastProvider>
-              </FavoritesProvider>
-            </QueryClientProvider>
+                </FavoritesProvider>
+              </QueryClientProvider>
+            </ToastProvider>
           </GestureHandlerRootView>
         </ClerkLoaded>
       </ClerkProvider>

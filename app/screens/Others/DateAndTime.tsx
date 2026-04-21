@@ -23,7 +23,7 @@ import { useCreateIntent } from "@/hooks/usePayment";
 export default function DateAndTimeScreen() {
   const { carId } = useLocalSearchParams<{ carId: string }>();
   const insets = useSafeAreaInsets();
-  const createIntent = useCreateIntent();
+  const { mutateAsync: createIntent, isPending: loading } = useCreateIntent();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { isSignedIn } = useAuth();
   const { user } = useUser();
@@ -31,7 +31,6 @@ export default function DateAndTimeScreen() {
   // State
   const [pickUpDate, setPickUpDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   // Constants
   const LEASE_DAYS = 7;
@@ -62,20 +61,21 @@ export default function DateAndTimeScreen() {
   const handlePayment = async () => {
     if (!isSignedIn) return showToast("Please login to continue");
 
-    setLoading(true);
     try {
       const cleanCarId = carId.replace(/"/g, "");
       const mongodbId = user?.publicMetadata?.mongodbId;
 
       if (!mongodbId) throw new Error("User session expired. Please re-login.");
 
-      const resp = await createIntent.mutateAsync({
+      const resp = await createIntent({
         action: "createLease",
         userId: mongodbId,
         carId: cleanCarId,
         startDate: pickUpDate.toISOString(),
         endDate: returnDate.toISOString(),
       });
+
+      console.log(resp);
 
       if (!resp?.clientSecret) throw new Error("Payment gateway error");
 
@@ -95,9 +95,12 @@ export default function DateAndTimeScreen() {
 
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {
-      showToast(error?.message || "Transaction failed");
-    } finally {
-      setLoading(false);
+      const serverMessage = error?.response?.data?.message;
+      const axiosMessage = error?.message;
+      const finalMessage =
+        serverMessage || axiosMessage || "Transaction failed";
+
+      showToast(finalMessage);
     }
   };
 
