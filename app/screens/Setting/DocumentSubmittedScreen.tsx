@@ -4,15 +4,12 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
   Image,
   StatusBar,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const { width } = Dimensions.get("window");
 
 const DocumentsSubmittedScreen: React.FC = () => {
   const router = useRouter();
