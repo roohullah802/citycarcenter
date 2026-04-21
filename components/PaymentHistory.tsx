@@ -9,8 +9,6 @@ const statusConfig: any = {
 };
 
 const PaymentHistory = ({ item }: { item: any }) => {
-  console.log("it ", item);
-
   const config = statusConfig[item.status] || statusConfig.expired;
 
   const formatDate = (date: string) => {

@@ -10,8 +10,6 @@ import {
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 
 const CountDown = ({ item }: any) => {
-  console.log(item.car.modelName);
-
   const remainingSeconds = useMemo(() => {
     const end = new Date(item?.endDate).getTime();
     const now = new Date().getTime();

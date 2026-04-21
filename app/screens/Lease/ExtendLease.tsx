@@ -16,11 +16,15 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useCreateIntent } from "@/hooks/usePayment";
+import { useUser } from "@clerk/expo";
 
 const ExtendLeaseScreen = () => {
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const createIntent = useCreateIntent();
+  const { user } = useUser();
 
   const [manualDays, setManualDays] = useState<string>("1");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -39,9 +43,18 @@ const ExtendLeaseScreen = () => {
 
     setIsLoading(true);
     try {
-      const response = { clientSecret: "" };
+      const mongodbId = user?.publicMetadata?.mongodbId;
 
-      const clientSecret = response?.clientSecret;
+      if (!mongodbId) throw new Error("User session expired. Please re-login.");
+
+      const result = await createIntent.mutateAsync({
+        action: "extendLease",
+        userId: mongodbId,
+        leaseId: id,
+        days: days,
+      });
+
+      const clientSecret = result?.clientSecret;
       if (!clientSecret) throw new Error("Could not initialize payment");
 
       const { error: initError } = await initPaymentSheet({
@@ -64,7 +77,14 @@ const ExtendLeaseScreen = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [manualDays, initPaymentSheet, presentPaymentSheet]);
+  }, [
+    manualDays,
+    initPaymentSheet,
+    presentPaymentSheet,
+    createIntent,
+    id,
+    user,
+  ]);
 
   return (
     <View style={styles.container}>
