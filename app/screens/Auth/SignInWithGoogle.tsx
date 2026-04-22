@@ -18,7 +18,9 @@ export default function SignInWithGoogle() {
   const handlePress = async () => {
     setLoading(true);
     try {
-      const redirectUrl = Linking.createURL("/", { scheme: "citycarcenter" });
+      const redirectUrl = Linking.createURL("/", {
+        scheme: "citycarcenter",
+      });
       const { createdSessionId, setActive, signIn, signUp } =
         await startSSOFlow({
           strategy: "oauth_google",

@@ -55,8 +55,8 @@ export default function RootLayout() {
         </ClerkLoading>
         <ClerkLoaded>
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <ToastProvider>
-              <QueryClientProvider client={queryClient}>
+            <QueryClientProvider client={queryClient}>
+              <ToastProvider>
                 <FavoritesProvider>
                   <StripeProvider
                     publishableKey={
@@ -66,8 +66,8 @@ export default function RootLayout() {
                     <StackLayout />
                   </StripeProvider>
                 </FavoritesProvider>
-              </QueryClientProvider>
-            </ToastProvider>
+              </ToastProvider>
+            </QueryClientProvider>
           </GestureHandlerRootView>
         </ClerkLoaded>
       </ClerkProvider>

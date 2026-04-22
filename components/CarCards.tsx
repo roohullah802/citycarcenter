@@ -1,4 +1,5 @@
 import { useFavorites } from "@/context/FavoutiteContext";
+import { useAuth } from "@clerk/expo";
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -13,6 +14,8 @@ import Icon from "react-native-vector-icons/Ionicons";
 
 function CarCards({ item }: any) {
   const { handleFav, isFavourite } = useFavorites();
+  const { isSignedIn } = useAuth();
+
   const isFav = isFavourite(item?._id);
   return (
     <Pressable
@@ -46,12 +49,16 @@ function CarCards({ item }: any) {
           <View style={styles.actionsRow}>
             <TouchableOpacity
               style={styles.rentBtn}
-              onPress={() =>
-                router.push({
-                  pathname: "/screens/Others/DateAndTime",
-                  params: { carId: item?._id },
-                })
-              }
+              onPress={() => {
+                if (!isSignedIn) {
+                  router.push("/screens/Auth/SocialAuth");
+                } else {
+                  router.push({
+                    pathname: "/screens/Others/DateAndTime",
+                    params: { carId: item?._id },
+                  });
+                }
+              }}
             >
               <Text style={styles.rentBtnText}>Rent Now</Text>
             </TouchableOpacity>

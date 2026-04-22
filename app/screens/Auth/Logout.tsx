@@ -1,5 +1,5 @@
 import { useAuth } from "@clerk/expo";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -29,8 +29,8 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
     setLoading(true);
     try {
       await signOut();
-      onClose(); // Close modal before navigating
-      router.replace("/screens/Auth/SocialAuth"); // Replace prevents going 'back' to settings
+      onClose();
+      router.replace("/screens/Auth/SocialAuth");
     } catch (error: any) {
       showToast(error?.message || "Logout failed!");
     } finally {
@@ -40,7 +40,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
 
   return (
     <Modal
-      animationType="fade" // Fade is often smoother for professional alerts
+      animationType="fade"
       transparent
       visible={visible}
       onRequestClose={onClose}
@@ -90,14 +90,14 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)", // Darker for better focus
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: width * 0.1,
   },
   modalBox: {
     backgroundColor: "#fff",
-    borderRadius: 20, // More rounded for modern look
+    borderRadius: 20,
     padding: RFValue(24),
     width: "100%",
     alignItems: "center",
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   iconWrapper: {
-    backgroundColor: "#FEF2F2", // Very light red
+    backgroundColor: "#FEF2F2",
     borderRadius: 50,
     padding: RFValue(16),
     marginBottom: RFValue(16),
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: RFValue(12),
     borderRadius: 12,
-    backgroundColor: "#F3F4F6", // Neutral light grey
+    backgroundColor: "#F3F4F6",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: RFValue(12),
     borderRadius: 12,
-    backgroundColor: "#EF4444", // Professional red
+    backgroundColor: "#EF4444",
     alignItems: "center",
     justifyContent: "center",
   },

@@ -138,11 +138,13 @@ const Settings = () => {
               label="Legal & Privacy"
               onPress={() => router.push("/screens/Setting/PrivatePolicy")}
             />
-            <SettingsRow
-              icon="chatbubble-ellipses-outline"
-              label="Contact Support"
-              onPress={() => router.push("/screens/Setting/Report")}
-            />
+            {isSignedIn && (
+              <SettingsRow
+                icon="chatbubble-ellipses-outline"
+                label="Contact Support"
+                onPress={() => router.push("/screens/Setting/Report")}
+              />
+            )}
           </View>
         </View>
 
@@ -201,7 +203,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: "#FFF",
-    fontSize: 6,
+    fontSize: 5,
     fontWeight: "900",
     textTransform: "uppercase",
   },

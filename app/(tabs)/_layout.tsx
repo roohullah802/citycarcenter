@@ -1,16 +1,13 @@
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import React, { useEffect } from "react";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAuth } from "@clerk/expo";
-import { ActivityIndicator } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
 import { setAuthToken } from "@/folder/axiosInstance";
+import { ActivityIndicator, View } from "react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -28,13 +25,20 @@ export default function TabLayout() {
     if (isSignedIn) syncToken();
   }, [getToken, isSignedIn, isLoaded]);
 
-  if (!isLoaded || !isSignedIn) {
+  useEffect(() => {
+    const loadUser = () => {
+      if (!isSignedIn) {
+        return <Redirect href={"/screens/Auth/SocialAuth"} />;
+      }
+    };
+    loadUser();
+  }, [isSignedIn]);
+
+  if (!isLoaded) {
     return (
-      <SafeAreaView
-        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-      >
-        <ActivityIndicator size={"large"} />
-      </SafeAreaView>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#73C2FB" />
+      </View>
     );
   }
 

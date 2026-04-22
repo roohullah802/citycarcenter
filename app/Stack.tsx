@@ -6,7 +6,6 @@ export default function StackLayout() {
       screenOptions={{ headerShown: false, animation: "fade_from_bottom" }}
     >
       <Stack.Screen name="(tabs)" />
-      {/* Other screens */}
       <Stack.Screen name="screens/Others/BrandCards" />
       <Stack.Screen name="screens/Others/SearchCarCards" />
       <Stack.Screen name="screens/Others/CarCardsByBrand" />

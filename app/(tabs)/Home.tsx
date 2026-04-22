@@ -1,8 +1,8 @@
 import BrandItems from "@/components/BrandItems";
 import CarItems from "@/components/CarItems";
 import { useAuth, useUser } from "@clerk/expo";
-import { router } from "expo-router";
-import React, { useRef } from "react";
+import { Redirect, router } from "expo-router";
+import React, { useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   FlatList,
