@@ -1,8 +1,8 @@
 import BrandItems from "@/components/BrandItems";
 import CarItems from "@/components/CarItems";
-import { useAuth, useUser } from "@clerk/expo";
-import { Redirect, router } from "expo-router";
-import React, { useEffect, useRef } from "react";
+import { useUser } from "@clerk/expo";
+import { router } from "expo-router";
+import React, { useRef } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -22,8 +22,7 @@ import { useFetchBrands } from "@/hooks/useFetchBrands";
 import { useCars } from "@/hooks/useFetchCars";
 
 function HomeScreen() {
-  const { isSignedIn } = useAuth();
-  const { user } = useUser();
+  const { isSignedIn, user } = useUser();
   const insets = useSafeAreaInsets();
   const modalRef = useRef<Modalize>(null);
   const location = useGetCurrentLocation();
@@ -71,7 +70,7 @@ function HomeScreen() {
                 </Text>
               </>
             ) : (
-              <Text style={styles.welcomeGuest}>Welcome to City Car</Text>
+              <Text style={styles.welcomeGuest}>Welcome</Text>
             )}
           </View>
 

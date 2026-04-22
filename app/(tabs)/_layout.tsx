@@ -12,8 +12,9 @@ import { ActivityIndicator, View } from "react-native";
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
-  const { isLoaded, isSignedIn } = useAuth();
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth({
+    treatPendingAsSignedOut: false,
+  });
 
   useEffect(() => {
     async function syncToken() {
