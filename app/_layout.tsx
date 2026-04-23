@@ -1,6 +1,6 @@
 import "react-native-url-polyfill/auto";
 import ToastProvider from "@/folder/toastService";
-import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/expo";
+import { ClerkLoaded, ClerkProvider } from "@clerk/expo";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
@@ -50,11 +50,11 @@ export default function RootLayout() {
     <>
       <StatusBar style="dark" />
       <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-        <ClerkLoading>
+        {/* <ClerkLoading>
           <SafeAreaView style={style.cnt}>
-            <ActivityIndicator size="large" color={"#73C2FB"} />
+            <ActivityIndicator size="small" color={"yellow"} />
           </SafeAreaView>
-        </ClerkLoading>
+        </ClerkLoading> */}
         <ClerkLoaded>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <QueryClientProvider client={queryClient}>
