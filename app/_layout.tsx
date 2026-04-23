@@ -15,6 +15,8 @@ import StackLayout from "./Stack";
 import { StatusBar } from "expo-status-bar";
 import { FavoritesProvider } from "../context/FavoutiteContext";
 
+SplashScreen.preventAutoHideAsync();
+
 export const unstable_settings = {
   anchor: "(tabs)",
 };
@@ -39,7 +41,7 @@ export default function RootLayout() {
   if (!fontsLoaded) {
     return (
       <SafeAreaView style={style.cnt}>
-        <ActivityIndicator size={"large"} />
+        <ActivityIndicator size={"small"} color={"#73C2FB"} />
       </SafeAreaView>
     );
   }
@@ -50,7 +52,7 @@ export default function RootLayout() {
       <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
         <ClerkLoading>
           <SafeAreaView style={style.cnt}>
-            <ActivityIndicator size="large" />
+            <ActivityIndicator size="large" color={"#73C2FB"} />
           </SafeAreaView>
         </ClerkLoading>
         <ClerkLoaded>
