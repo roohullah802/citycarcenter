@@ -1,6 +1,6 @@
 import "react-native-url-polyfill/auto";
 import ToastProvider from "@/folder/toastService";
-import { ClerkLoaded, ClerkProvider } from "@clerk/expo";
+import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/expo";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
@@ -10,7 +10,6 @@ import { ActivityIndicator, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { tokenCache } from "../folder/tokenCache";
-import "../utils/pollyFills";
 import StackLayout from "./Stack";
 import { StatusBar } from "expo-status-bar";
 import { FavoritesProvider } from "../context/FavoutiteContext";
@@ -50,11 +49,11 @@ export default function RootLayout() {
     <>
       <StatusBar style="dark" />
       <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-        {/* <ClerkLoading>
+        <ClerkLoading>
           <SafeAreaView style={style.cnt}>
-            <ActivityIndicator size="small" color={"yellow"} />
+            <ActivityIndicator size="large" color={"red"} />
           </SafeAreaView>
-        </ClerkLoading> */}
+        </ClerkLoading>
         <ClerkLoaded>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <QueryClientProvider client={queryClient}>
