@@ -38,7 +38,7 @@ function CarImages() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator color="#73C2FB" size="large" />
+        <ActivityIndicator color="rgba(31, 48, 94, 0.88)" size="large" />
       </View>
     );
   }
@@ -100,7 +100,7 @@ const IndividualImage = ({ url }: { url: string }) => {
     <View style={styles.imageWrapper}>
       {isImgLoading && (
         <View style={styles.imageLoader}>
-          <ActivityIndicator color="#73C2FB" size="small" />
+          <ActivityIndicator color="rgba(31, 48, 94, 0.88)" size="small" />
         </View>
       )}
       <Image
@@ -187,10 +187,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(115, 194, 251, 0.2)",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#73C2FB",
+    borderColor: "rgba(31, 48, 94, 0.88)",
   },
   retryText: {
-    color: "#73C2FB",
+    color: "rgba(31, 48, 94, 0.88)",
     fontWeight: "800",
   },
 });

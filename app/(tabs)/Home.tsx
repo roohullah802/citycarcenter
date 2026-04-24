@@ -2,7 +2,7 @@ import BrandItems from "@/components/BrandItems";
 import CarItems from "@/components/CarItems";
 import { useUser } from "@clerk/expo";
 import { router } from "expo-router";
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
   StatusBar,
+  Platform,
 } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,11 +22,24 @@ import { useGetCurrentLocation } from "../../folder/getAddress";
 import { useFetchBrands } from "@/hooks/useFetchBrands";
 import { useCars } from "@/hooks/useFetchCars";
 
+// Skeleton Loader Component
+const SkeletonLoader = ({ style }: { style?: any }) => (
+  <View style={[styles.skeleton, style]} />
+);
+
 function HomeScreen() {
   const { isSignedIn, user } = useUser();
   const insets = useSafeAreaInsets();
   const modalRef = useRef<Modalize>(null);
   const location = useGetCurrentLocation();
+  const [greeting, setGreeting] = useState("Good Morning");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good Morning");
+    else if (hour < 18) setGreeting("Good Afternoon");
+    else setGreeting("Good Evening");
+  }, []);
 
   const {
     data: brands,
@@ -48,7 +62,7 @@ function HomeScreen() {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
@@ -59,38 +73,44 @@ function HomeScreen() {
         {/* HEADER SECTION */}
         <View style={styles.header}>
           <View style={styles.headerInfo}>
-            {isSignedIn ? (
-              <>
-                <View style={styles.locationContainer}>
-                  <Ionicons name="location-sharp" size={14} color="#73C2FB" />
-                  <Text style={styles.locationLabel}>CURRENT LOCATION</Text>
-                </View>
+            <Text style={styles.greetingText}>
+              {greeting}, {isSignedIn ? user?.firstName || "Guest" : "Guest"}
+            </Text>
+            {isSignedIn && (
+              <View style={styles.locationContainer}>
+                <Ionicons name="location-sharp" size={14} color="rgba(31, 48, 94, 0.88)" />
                 <Text style={styles.locationValue} numberOfLines={1}>
                   {location || "Detecting address..."}
                 </Text>
-              </>
-            ) : (
-              <Text style={styles.welcomeGuest}>Welcome</Text>
+              </View>
             )}
           </View>
 
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => modalRef.current?.open()}
-          >
-            <Image
-              source={
-                isSignedIn && user?.imageUrl
-                  ? { uri: user.imageUrl }
-                  : require("../../assests/guest3.png")
-              }
-              style={styles.profileImage}
-            />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.notificationBtn}>
+              <Ionicons name="notifications-outline" size={22} color="rgba(31, 48, 94, 0.88)" />
+              <View style={styles.notificationDot} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => modalRef.current?.open()}
+            >
+              <Image
+                source={
+                  isSignedIn && user?.imageUrl
+                    ? { uri: user.imageUrl }
+                    : require("../../assests/guest3.png")
+                }
+                style={styles.profileImage}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* HERO TITLE */}
         <View style={styles.heroSection}>
+          <View style={styles.heroBgCircle} />
           <Text style={styles.title}>
             Find your ideal ride in{"\n"}
             <Text style={styles.highlightText}>just a few clicks.</Text>
@@ -139,7 +159,14 @@ function HomeScreen() {
             </View>
 
             {brandsLoading ? (
-              <ActivityIndicator style={styles.loader} color="#73C2FB" />
+              <View style={{ flexDirection: "row", paddingLeft: 20 }}>
+                {[1, 2, 3, 4].map((i) => (
+                  <View key={i} style={{ marginRight: 14 }}>
+                    <SkeletonLoader style={{ width: 68, height: 68, borderRadius: 18 }} />
+                    <SkeletonLoader style={{ width: 50, height: 10, marginTop: 8, alignSelf: "center" }} />
+                  </View>
+                ))}
+              </View>
             ) : (
               <FlatList
                 data={brands?.brands}
@@ -166,7 +193,13 @@ function HomeScreen() {
             </View>
 
             {carsLoading ? (
-              <ActivityIndicator style={styles.loader} color="#73C2FB" />
+               <View style={{ flexDirection: "row", paddingLeft: 20 }}>
+               {[1, 2].map((i) => (
+                 <View key={i} style={{ marginRight: 16 }}>
+                   <SkeletonLoader style={{ width: 260, height: 280, borderRadius: 20 }} />
+                 </View>
+               ))}
+             </View>
             ) : (
               <FlatList
                 data={cars?.data}
@@ -182,16 +215,23 @@ function HomeScreen() {
       </ScrollView>
 
       {/* PROFILE MODAL */}
-      <Modalize ref={modalRef} adjustToContentHeight handlePosition="inside">
+      <Modalize ref={modalRef} adjustToContentHeight handlePosition="inside" modalStyle={styles.modalStyle}>
         <View style={styles.modalInner}>
-          <Image
-            source={
-              isSignedIn && user?.imageUrl
-                ? { uri: user.imageUrl }
-                : require("../../assests/guest3.png")
-            }
-            style={styles.modalProfileImage}
-          />
+          <View style={styles.modalProfileWrapper}>
+            <Image
+              source={
+                isSignedIn && user?.imageUrl
+                  ? { uri: user.imageUrl }
+                  : require("../../assests/guest3.png")
+              }
+              style={styles.modalProfileImage}
+            />
+            {isSignedIn && (
+              <View style={styles.verifiedBadge}>
+                <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+              </View>
+            )}
+          </View>
           <Text style={styles.modalName}>
             {isSignedIn ? user?.fullName : "Guest User"}
           </Text>
@@ -214,55 +254,99 @@ function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: "#FFFFFF" },
+  container: { flexGrow: 1, backgroundColor: "#F8FAFC" },
   header: {
     paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 24,
   },
   headerInfo: { flex: 1 },
+  greetingText: {
+    fontSize: 14,
+    color: "#64748B",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
   locationContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
-  },
-  locationLabel: {
-    fontSize: 10,
-    color: "#94A3B8",
-    fontWeight: "800",
-    letterSpacing: 1,
-    marginLeft: 4,
   },
   locationValue: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#1F305E",
+    fontSize: 15,
+    fontWeight: "800",
+    color: "rgba(31, 48, 94, 0.88)",
+    marginLeft: 4,
     maxWidth: "90%",
   },
-  welcomeGuest: { fontSize: 22, fontWeight: "800", color: "#1F305E" },
-  profileImage: {
-    width: 45,
-    height: 45,
-    borderRadius: 22.5,
-    borderWidth: 1,
-    borderColor: "#F1F5F9",
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
-  heroSection: { paddingHorizontal: 20, marginBottom: 20 },
-  title: { fontSize: 22, fontWeight: "400", color: "#1F305E", lineHeight: 28 },
-  highlightText: { fontWeight: "800", color: "#73C2FB" },
+  notificationBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#EEF2F6",
+  },
+  notificationDot: {
+    position: "absolute",
+    top: 10,
+    right: 12,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#EF4444",
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
+  },
+  profileImage: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 2,
+    borderColor: "rgba(31, 48, 94, 0.88)",
+  },
+  heroSection: { paddingHorizontal: 20, marginBottom: 24, position: "relative" },
+  heroBgCircle: {
+    position: "absolute",
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: "#E0F2FE",
+    opacity: 0.5,
+    top: -40,
+    right: -20,
+    zIndex: -1,
+  },
+  title: { fontSize: 28, fontWeight: "300", color: "rgba(31, 48, 94, 0.88)", lineHeight: 36, letterSpacing: -0.5 },
+  highlightText: { fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#FFFFFF",
     marginHorizontal: 20,
     paddingLeft: 16,
     paddingRight: 8,
-    height: 54,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: "#F1F5F9",
+    height: 56,
+    borderRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#94A3B8",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   searchPlaceholder: {
     flex: 1,
@@ -271,19 +355,18 @@ const styles = StyleSheet.create({
     color: "#94A3B8",
     fontWeight: "500",
   },
-  filterIcon: { backgroundColor: "#1F305E", padding: 8, borderRadius: 8 },
-  section: { marginTop: 24 },
+  filterIcon: { backgroundColor: "rgba(31, 48, 94, 0.88)", padding: 10, borderRadius: 12 },
+  section: { marginTop: 32 },
   sectionHeader: {
     paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-end",
     marginBottom: 16,
   },
-  sectionTitle: { fontSize: 18, fontWeight: "800", color: "#1F305E" },
-  seeAll: { fontSize: 13, color: "#73C2FB", fontWeight: "700" },
+  sectionTitle: { fontSize: 20, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)", letterSpacing: -0.5 },
+  seeAll: { fontSize: 13, color: "rgba(31, 48, 94, 0.88)", fontWeight: "700", marginBottom: 2 },
   horizontalList: { paddingLeft: 20, paddingBottom: 10 },
-  loader: { marginVertical: 20 },
   errorContainer: {
     margin: 20,
     padding: 20,
@@ -296,7 +379,7 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginTop: 10,
   },
   errorSub: {
@@ -308,21 +391,31 @@ const styles = StyleSheet.create({
   },
   retryBtn: {
     marginTop: 16,
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 10,
   },
   retryBtnText: { color: "#FFF", fontWeight: "700", fontSize: 14 },
-  modalInner: { alignItems: "center", padding: 24, paddingBottom: 40 },
+  modalStyle: { borderTopLeftRadius: 32, borderTopRightRadius: 32 },
+  modalInner: { alignItems: "center", padding: 32, paddingBottom: 40 },
+  modalProfileWrapper: { position: "relative", marginBottom: 16 },
   modalProfileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 16,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    borderWidth: 3,
+    borderColor: "#EEF2F6",
   },
-  modalName: { fontSize: 20, fontWeight: "800", color: "#1F305E" },
-  modalEmail: { fontSize: 14, color: "#64748B", marginTop: 4 },
+  verifiedBadge: {
+    position: "absolute",
+    bottom: 0,
+    right: -4,
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+  },
+  modalName: { fontSize: 22, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
+  modalEmail: { fontSize: 15, color: "#64748B", marginTop: 4, fontWeight: "500" },
   modalDivider: {
     height: 1,
     width: "100%",
@@ -331,13 +424,17 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     width: "100%",
-    height: 54,
-    backgroundColor: "#1F305E",
-    borderRadius: 12,
+    height: 56,
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
   },
   modalButtonText: { fontSize: 16, fontWeight: "700", color: "#FFF" },
+  skeleton: {
+    backgroundColor: "#E2E8F0",
+    opacity: 0.7,
+  },
 });
 
 export default HomeScreen;

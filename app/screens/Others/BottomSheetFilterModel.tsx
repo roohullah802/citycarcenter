@@ -1,6 +1,6 @@
 import Slider from "@react-native-community/slider";
 import React, { forwardRef, useCallback, useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Platform } from "react-native";
 import { Modalize } from "react-native-modalize";
 
 interface FilterModalProps {
@@ -64,9 +64,9 @@ const BottomSheetFilterModal = React.memo(
                 minimumValue={1}
                 maximumValue={1000}
                 step={10}
-                minimumTrackTintColor="#73C2FB"
+                minimumTrackTintColor="rgba(31, 48, 94, 0.88)"
                 maximumTrackTintColor="#F1F5F9"
-                thumbTintColor="#73C2FB"
+                thumbTintColor="rgba(31, 48, 94, 0.88)"
                 value={localPrice[1]}
                 onValueChange={(value) => setLocalPrice([1, value])}
               />
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     letterSpacing: -0.5,
   },
   clearText: {
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   rangeIndicator: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   slider: {
     width: "100%",
@@ -180,16 +180,20 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   applyButton: {
-    backgroundColor: "#73C2FB",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     height: 60,
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#1F305E",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.15,
+        shadowRadius: 10,
+      },
+      android: { elevation: 6 },
+    }),
   },
   applyButtonText: {
     color: "#FFF",

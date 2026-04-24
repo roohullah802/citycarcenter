@@ -6,6 +6,7 @@ import React from "react";
 import {
   Dimensions,
   Image,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -15,6 +16,7 @@ import {
 import Icon from "react-native-vector-icons/Ionicons";
 
 const { width } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.7;
 
 function CarItems({ item }: any) {
   const { isSignedIn } = useAuth();
@@ -30,45 +32,77 @@ function CarItems({ item }: any) {
           params: { id: item._id },
         })
       }
+      style={({ pressed }) => [pressed && { opacity: 0.95 }]}
     >
       <View style={styles.carCard}>
-        <Image
-          source={{ uri: item?.images?.[0]?.url }}
-          style={styles.carImage}
-          resizeMode="cover"
-        />
+        {/* Image Section */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: item?.images?.[0]?.url }}
+            style={styles.carImage}
+            resizeMode="cover"
+          />
 
-        <Text numberOfLines={1} style={styles.carName}>
-          {capitalText(item.modelName)}
-        </Text>
+          {/* Price Badge */}
+          <View style={styles.priceBadge}>
+            <Text style={styles.priceAmount}>${item.pricePerDay}</Text>
+            <Text style={styles.priceUnit}>/day</Text>
+          </View>
 
-        <View style={styles.carFooter}>
-          <Text style={styles.carPrice}>${item.pricePerDay}/day</Text>
-
+          {/* Favorite Button */}
           <TouchableOpacity
-            style={styles.leaseButton}
-            onPress={() => {
-              if (!isSignedIn) {
-                router.push("/screens/Auth/SocialAuth");
-              } else {
-                router.push({
-                  pathname: "/screens/Others/DateAndTime",
-                  params: { carId: item._id },
-                });
-              }
-            }}
+            style={styles.favoriteBtn}
+            onPress={() => handleFav(item?._id)}
+            activeOpacity={0.7}
           >
-            <Text style={styles.leaseButtonText}>Rent Now</Text>
+            <Icon
+              name={isFav ? "heart" : "heart-outline"}
+              color={isFav ? "#EF4444" : "#FFFFFF"}
+              size={20}
+            />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.favoriteIcon}>
-          <TouchableOpacity onPress={() => handleFav(item?._id)}>
-            <Icon
-              name={isFav ? "heart" : "heart-outline"}
-              color="#73C2FB"
-              size={26}
-            />
+        {/* Info Section */}
+        <View style={styles.infoSection}>
+          <Text numberOfLines={1} style={styles.carName}>
+            {capitalText(item.modelName)}
+          </Text>
+
+          {/* Specs Row */}
+          <View style={styles.specsRow}>
+            <View style={styles.specItem}>
+              <Icon name="people-outline" size={13} color="#94A3B8" />
+              <Text style={styles.specText}>
+                {item.seats || 5} Seats
+              </Text>
+            </View>
+            <View style={styles.specDot} />
+            <View style={styles.specItem}>
+              <Icon name="speedometer-outline" size={13} color="#94A3B8" />
+              <Text style={styles.specText}>
+                {item.fuelType || "Petrol"}
+              </Text>
+            </View>
+          </View>
+
+          {/* Rent Button */}
+          <TouchableOpacity
+            style={styles.rentButton}
+            activeOpacity={0.8}
+            onPress={() => {
+              if (!isSignedIn) {
+                router.push("/screens/Auth/SocialAuth");
+                return;
+              }
+              router.push({
+                pathname: "/screens/Others/DateAndTime",
+                params: { carId: item._id },
+              });
+            }}
+          >
+            <Text style={styles.rentButtonText}>Rent Now</Text>
+            <Icon name="arrow-forward" size={14} color="#FFF" />
           </TouchableOpacity>
         </View>
       </View>
@@ -79,59 +113,111 @@ function CarItems({ item }: any) {
 export default CarItems;
 
 const styles = StyleSheet.create({
-  favoriteIcon: {
-    position: "absolute",
-    top: 20,
-    right: 10,
+  carCard: {
+    width: CARD_WIDTH,
+    marginRight: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    overflow: "hidden",
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.08,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
-
-  leaseButtonText: {
-    color: "#fff",
-    fontSize: 9,
-    fontWeight: "600",
-  },
-  leaseButton: {
-    backgroundColor: "#73C2FB",
-    paddingHorizontal: 20,
-    paddingVertical: 17,
-    borderRadius: 8,
-  },
-
-  carPrice: {
-    fontSize: 11,
-    color: "#3f3f3fff",
-    fontFamily: "demiBold",
-  },
-
-  carFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
-  },
-
-  carName: {
-    fontSize: 15,
-    marginTop: 10,
-    fontFamily: "bold",
-    color: "#3f3f3fff",
-    marginLeft: 10,
-    marginRight: 10,
-    marginBottom: 20,
+  imageContainer: {
+    position: "relative",
   },
   carImage: {
     width: "100%",
-    height: 150,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    height: 165,
   },
-  carCard: {
-    width: width * 0.62,
-    marginRight: 16,
-    backgroundColor: "#eef5ff",
-    borderRadius: 20,
-    overflow: "hidden",
-    marginBottom: 55,
-    paddingBottom: 10,
+  priceBadge: {
+    position: "absolute",
+    bottom: 12,
+    left: 12,
+    flexDirection: "row",
+    alignItems: "baseline",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  priceAmount: {
+    fontSize: 16,
+    fontFamily: "bold",
+    color: "#FFFFFF",
+  },
+  priceUnit: {
+    fontSize: 11,
+    fontFamily: "medium",
+    color: "#94A3B8",
+    marginLeft: 2,
+  },
+  favoriteBtn: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  infoSection: {
+    padding: 14,
+  },
+  carName: {
+    fontSize: 16,
+    fontFamily: "bold",
+    color: "rgba(31, 48, 94, 0.88)",
+    marginBottom: 8,
+  },
+  specsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  specItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  specText: {
+    fontSize: 12,
+    fontFamily: "medium",
+    color: "#94A3B8",
+  },
+  specDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: "#CBD5E1",
+    marginHorizontal: 8,
+  },
+  rentButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 6,
+  },
+  rentButtonText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontFamily: "bold",
+    letterSpacing: 0.3,
   },
 });

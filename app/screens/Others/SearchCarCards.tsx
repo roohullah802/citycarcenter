@@ -12,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   View,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -61,7 +62,7 @@ const SearchCarCards = () => {
     return (
       <View style={styles.centerWrapper}>
         <StatusBar barStyle="dark-content" />
-        <ActivityIndicator size="large" color="#73C2FB" />
+        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
         <Text style={styles.loadingText}>Curating your collection...</Text>
       </View>
     );
@@ -108,7 +109,7 @@ const SearchCarCards = () => {
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="chevron-back" size={28} color="#1F305E" />
+            <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Available Fleet</Text>
           <View style={{ width: 40 }} />
@@ -138,7 +139,7 @@ const SearchCarCards = () => {
             <Ionicons
               name="options-outline"
               size={22}
-              color={selectedBrand ? "#FFF" : "#1F305E"}
+              color={selectedBrand ? "#FFF" : "rgba(31, 48, 94, 0.88)"}
             />
             {selectedBrand && <View style={styles.activeFilterIndicator} />}
           </TouchableOpacity>
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     letterSpacing: -0.5,
   },
   searchSection: {
@@ -230,31 +231,49 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
-    borderRadius: 14,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
     paddingHorizontal: 16,
     height: 54,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: "#F1F5F9",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+      },
+      android: { elevation: 2 },
+    }),
   },
   searchInput: {
     flex: 1,
     marginLeft: 12,
     fontSize: 15,
     fontWeight: "600",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   filterToggle: {
     width: 54,
     height: 54,
-    backgroundColor: "#FFF",
-    borderRadius: 14,
-    borderWidth: 1.5,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 1,
     borderColor: "#F1F5F9",
     justifyContent: "center",
     alignItems: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+      },
+      android: { elevation: 2 },
+    }),
   },
-  filterToggleActive: { backgroundColor: "#1F305E", borderColor: "#1F305E" },
+  filterToggleActive: { backgroundColor: "rgba(31, 48, 94, 0.88)", borderColor: "rgba(31, 48, 94, 0.88)" },
   activeFilterIndicator: {
     position: "absolute",
     top: -4,
@@ -262,7 +281,7 @@ const styles = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: "#73C2FB",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     borderWidth: 2,
     borderColor: "#FFF",
   },
@@ -300,7 +319,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginBottom: 8,
   },
   emptySubtitle: {
@@ -316,19 +335,24 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: "#F1F5F9",
   },
-  resetButtonText: { fontSize: 14, fontWeight: "700", color: "#1F305E" },
+  resetButtonText: { fontSize: 14, fontWeight: "700", color: "rgba(31, 48, 94, 0.88)" },
   retryBtn: {
     marginTop: 24,
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     height: 54,
     borderRadius: 16,
     paddingHorizontal: 32,
     flexDirection: "row",
     alignItems: "center",
-    shadowColor: "#1F305E",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 4,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.15,
+        shadowRadius: 10,
+      },
+      android: { elevation: 4 },
+    }),
   },
   retryBtnText: { color: "#FFF", fontSize: 15, fontWeight: "700" },
 });

@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
 
   actionsRow: { flexDirection: "row", justifyContent: "flex-end", gap: 12 },
   primaryBtn: {
-    backgroundColor: "#0ea5e9",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -146,9 +146,10 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     flex: 1,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowColor: "rgba(31, 48, 94, 0.88)",
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
 });

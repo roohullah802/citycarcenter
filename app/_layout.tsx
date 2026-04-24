@@ -40,7 +40,7 @@ export default function RootLayout() {
   if (!fontsLoaded) {
     return (
       <SafeAreaView style={style.cnt}>
-        <ActivityIndicator size={"small"} color={"#73C2FB"} />
+        <ActivityIndicator size={"small"} color={"rgba(31, 48, 94, 0.88)"} />
       </SafeAreaView>
     );
   }

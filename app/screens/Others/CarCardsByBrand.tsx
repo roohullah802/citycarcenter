@@ -40,7 +40,7 @@ const CarCardsByBrand = () => {
   if (isLoading) {
     return (
       <View style={styles.centerWrapper}>
-        <ActivityIndicator size="large" color="#73C2FB" />
+        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
         <Text style={styles.statusText}>Accessing {brand} inventory...</Text>
       </View>
     );
@@ -66,7 +66,7 @@ const CarCardsByBrand = () => {
         {/* REFINED PROFESSIONAL HEADER */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.navBtn} onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={28} color="#1F305E" />
+            <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
           </TouchableOpacity>
 
           <View style={styles.headerTitleContainer}>
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     textTransform: "capitalize",
     letterSpacing: -0.5,
   },
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   countText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#73C2FB",
+    color: "rgba(31, 48, 94, 0.88)",
     textTransform: "uppercase",
   },
   searchSection: {
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 15,
     fontWeight: "600",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   listContent: {
     paddingHorizontal: 20,
@@ -211,12 +211,12 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginTop: 16,
   },
   retryBtn: {
     marginTop: 24,
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 16,
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   emptySubtitle: {
     fontSize: 14,

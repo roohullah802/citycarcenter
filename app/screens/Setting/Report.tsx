@@ -54,7 +54,7 @@ const ReportIssueScreen: React.FC = () => {
         {/* PROFESSIONAL HEADER */}
         <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.navBtn}>
-            <Ionicons name="chevron-back" size={28} color="#1F305E" />
+            <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Report Issue</Text>
           <View style={{ width: 40 }} />
@@ -85,7 +85,7 @@ const ReportIssueScreen: React.FC = () => {
               <Ionicons
                 name="mail-outline"
                 size={20}
-                color={isFocused === "email" ? "#73C2FB" : "#94A3B8"}
+                color={isFocused === "email" ? "rgba(31, 48, 94, 0.88)" : "#94A3B8"}
                 style={styles.icon}
               />
               <TextInput
@@ -175,10 +175,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  headerTitle: { fontSize: 18, fontWeight: "800", color: "#1F305E" },
+  headerTitle: { fontSize: 18, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
   scrollContent: { padding: 24 },
   heroSection: { marginBottom: 32 },
-  heroTitle: { fontSize: 26, fontWeight: "800", color: "#1F305E" },
+  heroTitle: { fontSize: 26, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
   heroSubtitle: {
     fontSize: 15,
     color: "#64748B",
@@ -197,15 +197,24 @@ const styles = StyleSheet.create({
   inputBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1.5,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
     borderColor: "#F1F5F9",
     borderRadius: 16,
     paddingHorizontal: 16,
     height: 56,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+      },
+      android: { elevation: 2 },
+    }),
   },
   inputBoxFocused: {
-    borderColor: "#73C2FB",
+    borderColor: "rgba(31, 48, 94, 0.88)",
     backgroundColor: "#FFF",
   },
   icon: { marginRight: 12 },
@@ -213,30 +222,39 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: "600",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   textAreaBox: {
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1.5,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
     borderColor: "#F1F5F9",
     borderRadius: 20,
     padding: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+      },
+      android: { elevation: 2 },
+    }),
   },
   textArea: {
     height: 160,
     fontSize: 15,
     fontWeight: "600",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   submitBtn: {
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     height: 60,
     borderRadius: 18,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
-    shadowColor: "#1F305E",
+    shadowColor: "rgba(31, 48, 94, 0.88)",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,

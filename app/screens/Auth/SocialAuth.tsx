@@ -72,7 +72,7 @@ export default function SocialAuthScreen() {
       >
         <View style={styles.modalContent}>
           <View style={styles.modalIcon}>
-            <Ionicons name="shield-checkmark" size={32} color="#73C2FB" />
+            <Ionicons name="shield-checkmark" size={32} color="rgba(31, 48, 94, 0.88)" />
           </View>
 
           <Text style={styles.modalHeading}>Enterprise-Grade Security</Text>
@@ -118,12 +118,12 @@ const styles = StyleSheet.create({
   brandMark: {
     width: 48,
     height: 48,
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 24,
-    shadowColor: "#1F305E",
+    shadowColor: "rgba(31, 48, 94, 0.88)",
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 5,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   heroText: {
     fontSize: 30,
     fontWeight: "300",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     lineHeight: 38,
     letterSpacing: -0.5,
   },
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   brandSub: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#73C2FB",
+    color: "rgba(31, 48, 94, 0.88)",
     letterSpacing: 2,
     marginTop: 12,
   },
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   authTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginBottom: 8,
   },
   authDescription: {
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   modalHeading: {
     fontSize: 22,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginBottom: 12,
   },
   modalBody: {

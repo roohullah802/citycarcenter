@@ -15,6 +15,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -44,7 +45,7 @@ const CarDetails = () => {
     return (
       <View style={styles.centerWrapper}>
         <StatusBar barStyle="dark-content" />
-        <ActivityIndicator size="large" color="#73C2FB" />
+        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
         <Text style={styles.loadingText}>Loading Vehicle Details...</Text>
       </View>
     );
@@ -112,7 +113,7 @@ const CarDetails = () => {
                 styles.pill,
                 {
                   width: index === activeIndex ? 20 : 8,
-                  backgroundColor: index === activeIndex ? "#73C2FB" : "#FFF",
+                  backgroundColor: index === activeIndex ? "rgba(31, 48, 94, 0.88)" : "#FFF",
                 },
               ]}
             />
@@ -124,7 +125,7 @@ const CarDetails = () => {
             style={styles.roundBtn}
             onPress={() => router.back()}
           >
-            <Ionicons name="chevron-back" size={24} color="#1F305E" />
+            <Ionicons name="chevron-back" size={24} color="rgba(31, 48, 94, 0.88)" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.roundBtn}
@@ -133,7 +134,7 @@ const CarDetails = () => {
             <Ionicons
               name={isFav ? "heart" : "heart-outline"}
               size={24}
-              color={isFav ? "#EF4444" : "#1F305E"}
+              color={isFav ? "#EF4444" : "rgba(31, 48, 94, 0.88)"}
             />
           </TouchableOpacity>
         </View>
@@ -260,7 +261,7 @@ const CarDetails = () => {
 
 const StatBox = ({ icon, label, value }: any) => (
   <View style={styles.statBox}>
-    <Ionicons name={icon} size={18} color="#73C2FB" />
+    <Ionicons name={icon} size={18} color="rgba(31, 48, 94, 0.88)" />
     <Text style={styles.statLabel}>{label}</Text>
     <Text style={styles.statValue}>{value}</Text>
   </View>
@@ -268,7 +269,7 @@ const StatBox = ({ icon, label, value }: any) => (
 
 const FeatureItem = ({ icon, label, value }: any) => (
   <View style={styles.featureCard}>
-    <MaterialCommunityIcons name={icon} size={24} color="#1F305E" />
+    <MaterialCommunityIcons name={icon} size={24} color="rgba(31, 48, 94, 0.88)" />
     <View style={{ marginLeft: 12 }}>
       <Text style={styles.featLabel}>{label}</Text>
       <Text style={styles.featValue}>{value}</Text>
@@ -294,7 +295,7 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginTop: 16,
   },
   errorSubtitle: {
@@ -306,7 +307,7 @@ const styles = StyleSheet.create({
   },
   retryBtn: {
     marginTop: 24,
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 14,
@@ -346,6 +347,15 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 32,
     marginTop: -32,
     padding: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: -6 },
+        shadowOpacity: 0.08,
+        shadowRadius: 16,
+      },
+      android: { elevation: 8 },
+    }),
   },
   titleSection: {
     flexDirection: "row",
@@ -357,14 +367,14 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#73C2FB",
+    color: "rgba(31, 48, 94, 0.88)",
     letterSpacing: 1,
     textTransform: "uppercase",
   },
   modelName: {
     fontSize: 26,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginTop: 4,
   },
   ratingBadge: {
@@ -375,15 +385,26 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 10,
   },
-  ratingText: { marginLeft: 4, fontWeight: "700", color: "#1F305E" },
+  ratingText: { marginLeft: 4, fontWeight: "700", color: "rgba(31, 48, 94, 0.88)" },
 
   statsBar: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#FFFFFF",
     padding: 16,
     borderRadius: 20,
     marginBottom: 32,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 10,
+      },
+      android: { elevation: 2 },
+    }),
   },
   statBox: { alignItems: "center" },
   statLabel: {
@@ -396,7 +417,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginTop: 2,
   },
 
@@ -404,19 +425,30 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginBottom: 12,
   },
   description: { fontSize: 15, color: "#64748B", lineHeight: 24 },
-  readMore: { color: "#73C2FB", fontWeight: "700", marginTop: 8 },
+  readMore: { color: "rgba(31, 48, 94, 0.88)", fontWeight: "700", marginTop: 8 },
 
   featureGrid: { gap: 12 },
   featureCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#FFFFFF",
     padding: 16,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+      },
+      android: { elevation: 2 },
+    }),
   },
   featLabel: {
     fontSize: 11,
@@ -424,7 +456,7 @@ const styles = StyleSheet.create({
     color: "#94A3B8",
     textTransform: "uppercase",
   },
-  featValue: { fontSize: 15, fontWeight: "700", color: "#1F305E" },
+  featValue: { fontSize: 15, fontWeight: "700", color: "rgba(31, 48, 94, 0.88)" },
 
   footer: {
     position: "absolute",
@@ -439,6 +471,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#F1F5F9",
     zIndex: 50,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+      },
+      android: { elevation: 10 },
+    }),
   },
   footerLabel: {
     fontSize: 12,
@@ -446,15 +487,24 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     textTransform: "uppercase",
   },
-  footerPrice: { fontSize: 22, fontWeight: "800", color: "#1F305E" },
+  footerPrice: { fontSize: 22, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
   perDay: { fontSize: 14, color: "#94A3B8", fontWeight: "400" },
   bookBtn: {
-    backgroundColor: "#73C2FB",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingHorizontal: 28,
     paddingVertical: 16,
     borderRadius: 18,
     flexDirection: "row",
     alignItems: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: { elevation: 4 },
+    }),
   },
   bookBtnText: { color: "#FFF", fontSize: 16, fontWeight: "700" },
 });

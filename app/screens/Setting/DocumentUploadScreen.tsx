@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   StatusBar,
   Alert,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -110,7 +111,7 @@ export default function DocumentUploadScreen() {
       <StatusBar barStyle="dark-content" />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
-          <Ionicons name="chevron-back" size={24} color="#1F305E" />
+          <Ionicons name="chevron-back" size={24} color="rgba(31, 48, 94, 0.88)" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Verification</Text>
         <View style={{ width: 40 }} />
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#F3F4F6",
   },
   iconBtn: { width: 40, height: 40, justifyContent: "center" },
-  headerTitle: { fontSize: RFValue(16), fontFamily: "bold", color: "#1F305E" },
+  headerTitle: { fontSize: RFValue(16), fontFamily: "bold", color: "rgba(31, 48, 94, 0.88)" },
   scrollContent: { padding: 20 },
   textSection: { marginBottom: 20 },
   title: { fontSize: RFValue(20), fontFamily: "bold", color: "#111827" },
@@ -219,14 +220,23 @@ const styles = StyleSheet.create({
     fontFamily: "medium",
   },
   card: {
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#F1F5F9",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+      },
+      android: { elevation: 2 },
+    }),
   },
-  activeCard: { borderColor: "#1F305E", backgroundColor: "#F0F7FF" },
+  activeCard: { borderColor: "rgba(31, 48, 94, 0.88)", backgroundColor: "#F0F7FF" },
   cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
   label: { fontSize: RFValue(13), fontFamily: "bold", color: "#374151" },
   requiredDot: {
@@ -263,15 +273,24 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   changeBtn: { marginTop: 12, alignSelf: "center" },
-  changeText: { color: "#1F305E", fontFamily: "bold", fontSize: RFValue(12) },
+  changeText: { color: "rgba(31, 48, 94, 0.88)", fontFamily: "bold", fontSize: RFValue(12) },
   submitBtn: {
-    backgroundColor: "#73C2FB",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     height: 56,
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
     marginBottom: 30,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.15,
+        shadowRadius: 10,
+      },
+      android: { elevation: 4 },
+    }),
   },
   disabledBtn: { backgroundColor: "#E5E7EB" },
   submitText: { color: "#FFF", fontSize: RFValue(14), fontFamily: "bold" },

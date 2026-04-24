@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   StatusBar,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginBottom: 12,
     textAlign: "center",
   },
@@ -138,11 +139,20 @@ const styles = StyleSheet.create({
   },
   receiptCard: {
     width: "100%",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 24,
     borderWidth: 1,
     borderColor: "#F1F5F9",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
+      },
+      android: { elevation: 3 },
+    }),
   },
   receiptRow: {
     flexDirection: "row",
@@ -157,7 +167,7 @@ const styles = StyleSheet.create({
   },
   receiptValue: {
     fontSize: 14,
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     fontWeight: "700",
   },
   statusBadge: {
@@ -183,18 +193,22 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   primaryButton: {
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     height: 60,
     borderRadius: 18,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
-    shadowColor: "#1F305E",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+      },
+      android: { elevation: 6 },
+    }),
   },
   primaryButtonText: {
     color: "#FFF",

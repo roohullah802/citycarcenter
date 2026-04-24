@@ -35,7 +35,7 @@ const TopBrandsScreen = () => {
   if (isLoading) {
     return (
       <View style={styles.centeredWrapper}>
-        <ActivityIndicator size="large" color="#73C2FB" />
+        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
         <Text style={styles.statusText}>Discovering Brands...</Text>
       </View>
     );
@@ -63,7 +63,7 @@ const TopBrandsScreen = () => {
           onPress={() => router.back()}
           style={styles.navButton}
         >
-          <Ionicons name="chevron-back" size={28} color="#1F305E" />
+          <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Browse Brands</Text>
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     letterSpacing: -0.5,
   },
   searchSection: {
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 15,
     fontWeight: "600",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   listContent: {
     paddingHorizontal: 16,
@@ -176,12 +176,12 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginTop: 16,
   },
   retryButton: {
     marginTop: 24,
-    backgroundColor: "#73C2FB",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 12,

@@ -69,7 +69,7 @@ function CarCards({ item }: any) {
             >
               <Icon
                 name={isFav ? "heart" : "heart-outline"}
-                color="#73C2FB"
+                color="rgba(31, 48, 94, 0.88)"
                 size={18}
               />
             </TouchableOpacity>
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   rentBtn: {
-    backgroundColor: "#73C2FB",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     width: 90,
     paddingVertical: 7,
     borderRadius: 20,

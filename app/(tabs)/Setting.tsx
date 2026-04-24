@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
   StatusBar,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -81,7 +82,7 @@ const Settings = () => {
               onPress={() => router.push("/screens/Auth/SocialAuth")}
             >
               <Text style={styles.loginBtnText}>Login</Text>
-              <Ionicons name="log-in-outline" size={18} color="#73C2FB" />
+              <Ionicons name="log-in-outline" size={18} color="rgba(31, 48, 94, 0.88)" />
             </TouchableOpacity>
           )}
         </View>
@@ -101,7 +102,7 @@ const Settings = () => {
                 <Ionicons
                   name="shield-checkmark-outline"
                   size={22}
-                  color="#1F305E"
+                  color="rgba(31, 48, 94, 0.88)"
                 />
               </View>
               <Text style={styles.cardText}>Identity Documents</Text>
@@ -171,18 +172,27 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 26,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginBottom: 24,
   },
   profileCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
-    padding: 18,
-    borderRadius: 20,
-    borderWidth: 1.5,
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    borderRadius: 24,
+    borderWidth: 1,
     borderColor: "#F1F5F9",
     marginBottom: 32,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
+      },
+      android: { elevation: 3 },
+    }),
   },
   avatarWrapper: { position: "relative" },
   avatar: {
@@ -208,7 +218,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   profileDetails: { flex: 1, marginLeft: 16 },
-  name: { fontSize: 18, fontWeight: "800", color: "#1F305E" },
+  name: { fontSize: 18, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
   email: { fontSize: 13, color: "#64748B", marginTop: 2, fontWeight: "500" },
   loginBtn: {
     flexDirection: "row",
@@ -220,7 +230,7 @@ const styles = StyleSheet.create({
   },
   loginBtnText: {
     fontWeight: "800",
-    color: "#73C2FB",
+    color: "rgba(31, 48, 94, 0.88)",
     marginRight: 6,
     fontSize: 13,
   },
@@ -235,21 +245,39 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   card: {
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: "#F1F5F9",
     overflow: "hidden",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+      },
+      android: { elevation: 2 },
+    }),
   },
   manualCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: "#F1F5F9",
     padding: 16,
     height: 64,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+      },
+      android: { elevation: 2 },
+    }),
   },
   iconContainer: {
     width: 36,
@@ -260,7 +288,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
-  cardText: { flex: 1, fontSize: 15, fontWeight: "700", color: "#1F305E" },
+  cardText: { flex: 1, fontSize: 15, fontWeight: "700", color: "rgba(31, 48, 94, 0.88)" },
   logoutWrapper: {
     flexDirection: "row",
     alignItems: "center",

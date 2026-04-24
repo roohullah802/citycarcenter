@@ -55,13 +55,13 @@ const ExtendLeaseScreen = () => {
       });
 
       const clientSecret = result?.clientSecret;
-      if (!clientSecret) throw new Error("Could not initialize payment");
+      if (!clientSecret) throw new Error(result?.message || result?.error || "Could not initialize payment");
 
       const { error: initError } = await initPaymentSheet({
         merchantDisplayName: "City Car Center",
         paymentIntentClientSecret: clientSecret,
         appearance: {
-          colors: { primary: "#73C2FB" },
+          colors: { primary: "#1F305E" },
           shapes: { borderRadius: 12 },
         },
       });
@@ -73,7 +73,17 @@ const ExtendLeaseScreen = () => {
 
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {
-      showToast(error?.message || "Extension failed");
+      const serverData = error?.response?.data;
+      const serverMessage = serverData?.message || serverData?.error || serverData;
+      let finalMessage = serverMessage || error?.message || "Extension failed";
+
+      if (Array.isArray(finalMessage)) {
+        finalMessage = finalMessage.join(", ");
+      } else if (typeof finalMessage === "object") {
+        finalMessage = JSON.stringify(finalMessage);
+      }
+
+      showToast(String(finalMessage));
     } finally {
       setIsLoading(false);
     }
@@ -303,16 +313,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
   },
   primaryButton: {
-    backgroundColor: "#73C2FB",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     height: 60,
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#73C2FB",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 6,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.15,
+        shadowRadius: 10,
+      },
+      android: { elevation: 6 },
+    }),
   },
   buttonDisabled: {
     backgroundColor: "#CBD5E1",

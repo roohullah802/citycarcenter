@@ -21,7 +21,7 @@ const PaymentDetails = () => {
   if (isLoading) {
     return (
       <View style={styles.centerWrapper}>
-        <ActivityIndicator size="large" color="#73C2FB" />
+        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
         <Text style={styles.statusText}>Retrieving transactions...</Text>
       </View>
     );
@@ -48,13 +48,13 @@ const PaymentDetails = () => {
       {/* REFINED HEADER */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.navBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={28} color="#1F305E" />
+          <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Payment History</Text>
 
         <TouchableOpacity style={styles.navBtn} onPress={() => refetch()}>
-          <Ionicons name="sync-outline" size={22} color="#1F305E" />
+          <Ionicons name="sync-outline" size={22} color="rgba(31, 48, 94, 0.88)" />
         </TouchableOpacity>
       </View>
 
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     letterSpacing: -0.5,
   },
   listContent: {
@@ -144,11 +144,11 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   retryBtn: {
     marginTop: 24,
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 16,
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     textAlign: "center",
   },
   emptySubtitle: {

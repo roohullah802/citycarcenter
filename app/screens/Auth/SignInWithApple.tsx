@@ -1,5 +1,6 @@
 import { useSSO } from "@clerk/expo";
 import * as Linking from "expo-linking";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -29,6 +30,7 @@ export default function SignInWithApple() {
 
       if (sessionId && setActive) {
         await setActive({ session: sessionId });
+        router.replace("/(tabs)/Home");
         return;
       }
       if (signUp && signUp.status === "missing_requirements") {
@@ -39,6 +41,7 @@ export default function SignInWithApple() {
 
         if (transfer.createdSessionId && setActive) {
           await setActive({ session: transfer.createdSessionId });
+          router.replace("/(tabs)/Home");
         }
       }
     } catch (error: any) {
@@ -67,7 +70,7 @@ export default function SignInWithApple() {
             <ActivityIndicator
               style={{ justifyContent: "center", alignItems: "center" }}
               size={"small"}
-              color={"#73C2FB"}
+              color={"rgba(31, 48, 94, 0.88)"}
             />
           ) : (
             "Sign-in with Apple"

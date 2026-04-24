@@ -39,7 +39,7 @@ const FavouriteCars: React.FC = () => {
   if (isLoading) {
     return (
       <View style={styles.centerWrapper}>
-        <ActivityIndicator size="large" color="#73C2FB" />
+        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
         <Text style={styles.loadingText}>Loading your collection...</Text>
       </View>
     );
@@ -57,7 +57,7 @@ const FavouriteCars: React.FC = () => {
               onPress={() => router.back()}
               style={styles.navBtn}
             >
-              <Ionicons name="chevron-back" size={28} color="#1F305E" />
+              <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
             </TouchableOpacity>
 
             <Text style={styles.headerTitle}>My Favorites</Text>
@@ -66,7 +66,7 @@ const FavouriteCars: React.FC = () => {
               onPress={() => setIsSearching(true)}
               style={styles.navBtn}
             >
-              <Ionicons name="search-outline" size={24} color="#1F305E" />
+              <Ionicons name="search-outline" size={24} color="rgba(31, 48, 94, 0.88)" />
             </TouchableOpacity>
           </View>
         ) : (
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     letterSpacing: -0.5,
   },
   navBtn: {
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     fontWeight: "600",
     marginLeft: 8,
   },
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     textAlign: "center",
   },
   emptySubtitle: {

@@ -77,13 +77,13 @@ export default function DateAndTimeScreen() {
 
       console.log(resp);
 
-      if (!resp?.clientSecret) throw new Error("Payment gateway error");
+      if (!resp?.clientSecret) throw new Error(resp?.message || resp?.error || "Payment gateway error");
 
       const { error: initError } = await initPaymentSheet({
         merchantDisplayName: "City Car Center",
         paymentIntentClientSecret: resp.clientSecret,
         appearance: {
-          colors: { primary: "#73C2FB" },
+          colors: { primary: "#1F305E" },
           shapes: { borderRadius: 12 },
         },
       });
@@ -95,12 +95,17 @@ export default function DateAndTimeScreen() {
 
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {
-      const serverMessage = error?.response?.data?.message;
-      const axiosMessage = error?.message;
-      const finalMessage =
-        serverMessage || axiosMessage || "Transaction failed";
+      const serverData = error?.response?.data;
+      const serverMessage = serverData?.message || serverData?.error || serverData;
+      let finalMessage = serverMessage || error?.message || "Transaction failed";
 
-      showToast(finalMessage);
+      if (Array.isArray(finalMessage)) {
+        finalMessage = finalMessage.join(", ");
+      } else if (typeof finalMessage === "object") {
+        finalMessage = JSON.stringify(finalMessage);
+      }
+
+      showToast(String(finalMessage));
     }
   };
 
@@ -240,16 +245,20 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   mainCard: {
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     borderWidth: 1,
     borderColor: "#F1F5F9",
     padding: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    elevation: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
+      },
+      android: { elevation: 3 },
+    }),
   },
   dateRow: {
     flexDirection: "row",
@@ -308,16 +317,20 @@ const styles = StyleSheet.create({
     borderTopColor: "#F1F5F9",
   },
   payBtn: {
-    backgroundColor: "#73C2FB",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     height: 58,
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#73C2FB",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+      },
+      android: { elevation: 4 },
+    }),
   },
   payBtnDisabled: {
     backgroundColor: "#CBD5E1",

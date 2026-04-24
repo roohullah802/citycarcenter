@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import React, { useMemo } from "react";
 import {
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -8,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
+import { Ionicons } from "@expo/vector-icons";
 
 const CountDown = ({ item }: any) => {
   const remainingSeconds = useMemo(() => {
@@ -39,18 +41,31 @@ const CountDown = ({ item }: any) => {
           params: { id: item?._id },
         })
       }
-      style={styles.leaseCard}
+      style={({ pressed }) => [
+        styles.leaseCard,
+        pressed && { opacity: 0.95, transform: [{ scale: 0.99 }] },
+      ]}
     >
       <View style={styles.infoContainer}>
         <View>
-          <Text style={styles.statusLabel}>CURRENT LEASE</Text>
+          <View style={styles.statusBadge}>
+            <View style={styles.statusDot} />
+            <Text style={styles.statusLabel}>ACTIVE RENTAL</Text>
+          </View>
           <Text style={styles.modelName} numberOfLines={1}>
-            {item?.car.modelName?.toUpperCase() || "CAR MODEL"}
+            {item?.car?.modelName || "PREMIUM CAR"}
           </Text>
+          <View style={styles.brandRow}>
+            <Ionicons name="car-sport-outline" size={14} color="#94A3B8" />
+            <Text style={styles.brandText} numberOfLines={1}>
+              {item?.car?.brand || "Brand"}
+            </Text>
+          </View>
         </View>
 
         <TouchableOpacity
           style={styles.extendButton}
+          activeOpacity={0.8}
           onPress={() =>
             router.push({
               pathname: "/screens/Lease/ExtendLease",
@@ -58,7 +73,8 @@ const CountDown = ({ item }: any) => {
             })
           }
         >
-          <Text style={styles.extendText}>Extend Lease</Text>
+          <Ionicons name="time-outline" size={14} color="#FFF" />
+          <Text style={styles.extendText}>Extend</Text>
         </TouchableOpacity>
       </View>
 
@@ -66,11 +82,11 @@ const CountDown = ({ item }: any) => {
         <CountdownCircleTimer
           isPlaying
           duration={remainingSeconds}
-          colors={["#73C2FB", "#F7B801", "#A30000"]}
+          colors={["#1F305E", "#F59E0B", "#EF4444"]}
           colorsTime={[remainingSeconds, remainingSeconds / 2, 0]}
-          size={80}
-          strokeWidth={6}
-          trailColor="#F0F0F0"
+          size={90}
+          strokeWidth={7}
+          trailColor="#F1F5F9"
         >
           {({ remainingTime }) => renderTimerContent(remainingTime)}
         </CountdownCircleTimer>
@@ -82,73 +98,106 @@ const CountDown = ({ item }: any) => {
 const styles = StyleSheet.create({
   leaseCard: {
     flexDirection: "row",
-    backgroundColor: "#fff",
-    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
     padding: 20,
-    marginHorizontal: 6,
-    marginVertical: 10,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#f8f8f8",
+    borderColor: "#F1F5F9",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   infoContainer: {
     flex: 1,
     justifyContent: "space-between",
+    paddingRight: 10,
   },
   timerWrapper: {
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 15,
+    marginLeft: 10,
+  },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0FDF4",
+    alignSelf: "flex-start",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#DCFCE7",
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#10B981",
+    marginRight: 4,
   },
   statusLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: "800",
-    color: "#73C2FB",
-    letterSpacing: 1.2,
-    marginBottom: 4,
+    color: "#059669",
+    letterSpacing: 0.5,
   },
   modelName: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "800",
+    color: "rgba(31, 48, 94, 0.88)",
+    marginBottom: 4,
   },
-  detailText: {
-    fontSize: 12,
-    color: "#999",
-    marginTop: 4,
+  brandRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  brandText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#94A3B8",
   },
   extendButton: {
-    backgroundColor: "#73C2FB15",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
     alignSelf: "flex-start",
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: "#73C2FB",
+    gap: 6,
   },
   extendText: {
-    color: "#73C2FB",
-    fontSize: 12,
+    color: "#FFFFFF",
+    fontSize: 13,
     fontWeight: "700",
   },
   timerInside: {
     alignItems: "center",
   },
   timerValue: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "800",
-    color: "#333",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   timerSub: {
-    fontSize: 10,
-    color: "#999",
-    fontWeight: "600",
+    fontSize: 11,
+    color: "#94A3B8",
+    fontWeight: "700",
     textTransform: "uppercase",
+    marginTop: 2,
   },
 });
 

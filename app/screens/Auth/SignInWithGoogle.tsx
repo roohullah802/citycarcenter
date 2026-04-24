@@ -73,7 +73,7 @@ export default function SignInWithGoogle() {
             <ActivityIndicator
               style={{ justifyContent: "center", alignItems: "center" }}
               size={"small"}
-              color={"#73C2FB"}
+              color={"rgba(31, 48, 94, 0.88)"}
             />
           ) : (
             "Sign-in with Google"

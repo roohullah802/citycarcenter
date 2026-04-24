@@ -52,7 +52,7 @@ const DocumentsSubmittedScreen: React.FC = () => {
         {/* STATUS CARD */}
         <View style={styles.statusCard}>
           <View style={styles.statusRow}>
-            <Ionicons name="time-outline" size={20} color="#73C2FB" />
+            <Ionicons name="time-outline" size={20} color="rgba(31, 48, 94, 0.88)" />
             <Text style={styles.statusLabel}>Verification Status</Text>
           </View>
           <View style={styles.badge}>
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginBottom: 12,
     textAlign: "center",
   },
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   statusLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   badge: {
     backgroundColor: "#FEF3C7",
@@ -186,13 +186,13 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   primaryButton: {
-    backgroundColor: "#73C2FB",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     height: 60,
     borderRadius: 18,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#1F305E",
+    shadowColor: "rgba(31, 48, 94, 0.88)",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,

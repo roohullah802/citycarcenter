@@ -25,7 +25,7 @@ const AllLeases = () => {
   if (isLoading) {
     return (
       <View style={styles.centerWrapper}>
-        <ActivityIndicator size="large" color="#73C2FB" />
+        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
         <Text style={styles.loadingText}>Fetching your fleet status...</Text>
       </View>
     );
@@ -55,13 +55,13 @@ const AllLeases = () => {
       {/* REFINED HEADER */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.navBtn}>
-          <Ionicons name="chevron-back" size={28} color="#1F305E" />
+          <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Active Leases</Text>
 
         <TouchableOpacity onPress={() => refetch()} style={styles.navBtn}>
-          <Ionicons name="sync-outline" size={22} color="#1F305E" />
+          <Ionicons name="sync-outline" size={22} color="rgba(31, 48, 94, 0.88)" />
         </TouchableOpacity>
       </View>
 
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     letterSpacing: -0.5,
   },
   content: {
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     borderColor: "#E0F2FE",
   },
   activeBadgeText: {
-    color: "#73C2FB",
+    color: "rgba(31, 48, 94, 0.88)",
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 1,
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     textAlign: "center",
   },
   emptySubtitle: {
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   errorSubtitle: {
     fontSize: 14,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     marginTop: 24,
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 16,
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     borderColor: "#F1F5F9",
   },
   browseButtonText: {
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     fontWeight: "700",
     fontSize: 14,
   },

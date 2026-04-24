@@ -12,6 +12,7 @@ import {
   View,
   ActivityIndicator,
   StatusBar,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -37,7 +38,7 @@ const LeaseDetails = () => {
   if (isLoading) {
     return (
       <View style={styles.centerWrapper}>
-        <ActivityIndicator size="large" color="#73C2FB" />
+        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
         <Text style={styles.loadingText}>Loading details...</Text>
       </View>
     );
@@ -62,10 +63,10 @@ const LeaseDetails = () => {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
-      {/* REFINED HEADER */}
+      {/* HEADER */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.navBtn}>
-          <Ionicons name="chevron-back" size={28} color="#1F305E" />
+          <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Lease Overview</Text>
@@ -75,7 +76,7 @@ const LeaseDetails = () => {
             onPress={() => setMenuVisible(!menuVisible)}
             style={styles.navBtn}
           >
-            <Ionicons name="ellipsis-horizontal" size={22} color="#1F305E" />
+            <Ionicons name="ellipsis-horizontal" size={24} color="rgba(31, 48, 94, 0.88)" />
           </TouchableOpacity>
 
           {menuVisible && (
@@ -90,7 +91,7 @@ const LeaseDetails = () => {
                   });
                 }}
               >
-                <Ionicons name="receipt-outline" size={18} color="#1F305E" />
+                <Ionicons name="receipt-outline" size={18} color="rgba(31, 48, 94, 0.88)" />
                 <Text style={styles.dropdownText}>View Receipt</Text>
               </TouchableOpacity>
             </View>
@@ -118,7 +119,7 @@ const LeaseDetails = () => {
                   styles.statusBadge,
                   {
                     backgroundColor:
-                      leaseDetails?.status === "active" ? "#F0FDF4" : "#FEF2F2",
+                      leaseDetails?.status === "active" ? "#ECFDF5" : "#FEF2F2",
                   },
                 ]}
               >
@@ -128,7 +129,7 @@ const LeaseDetails = () => {
                     {
                       backgroundColor:
                         leaseDetails?.status === "active"
-                          ? "#22C55E"
+                          ? "#10B981"
                           : "#EF4444",
                     },
                   ]}
@@ -139,7 +140,7 @@ const LeaseDetails = () => {
                     {
                       color:
                         leaseDetails?.status === "active"
-                          ? "#166534"
+                          ? "#065F46"
                           : "#991B1B",
                     },
                   ]}
@@ -152,11 +153,13 @@ const LeaseDetails = () => {
             {/* LEASE SUMMARY CARD */}
             <View style={styles.card}>
               <View style={styles.cardHeader}>
-                <Ionicons
-                  name="document-text-outline"
-                  size={20}
-                  color="#73C2FB"
-                />
+                <View style={styles.iconBox}>
+                  <Ionicons
+                    name="document-text-outline"
+                    size={20}
+                    color="rgba(31, 48, 94, 0.88)"
+                  />
+                </View>
                 <Text style={styles.cardTitle}>Lease Summary</Text>
               </View>
               <InfoRow label="Contract Type" value="Limited Mileage" />
@@ -175,7 +178,9 @@ const LeaseDetails = () => {
             {/* VEHICLE CARD */}
             <View style={styles.card}>
               <View style={styles.cardHeader}>
-                <Ionicons name="car-outline" size={20} color="#73C2FB" />
+                <View style={styles.iconBox}>
+                  <Ionicons name="car-outline" size={20} color="rgba(31, 48, 94, 0.88)" />
+                </View>
                 <Text style={styles.cardTitle}>Vehicle Details</Text>
               </View>
               <InfoRow
@@ -213,12 +218,12 @@ const InfoRow = ({ label, value, last }: any) => (
 );
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFFFF" },
+  container: { flex: 1, backgroundColor: "#F8FAFC" },
   centerWrapper: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: "#F8FAFC",
   },
   loadingText: {
     marginTop: 12,
@@ -232,15 +237,22 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingBottom: 15,
-    backgroundColor: "#FFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    backgroundColor: "#FFFFFF",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#1F305E",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+      },
+      android: { elevation: 3 },
+    }),
     zIndex: 1000,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     letterSpacing: -0.5,
   },
   navBtn: {
@@ -254,17 +266,21 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 45,
     right: 0,
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     width: 170,
     padding: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 10,
     borderWidth: 1,
     borderColor: "#F1F5F9",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#1F305E",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.1,
+        shadowRadius: 20,
+      },
+      android: { elevation: 10 },
+    }),
   },
   dropdownItem: {
     flexDirection: "row",
@@ -272,18 +288,27 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 12,
   },
-  dropdownText: { fontSize: 14, color: "#1F305E", fontWeight: "700" },
+  dropdownText: { fontSize: 14, color: "rgba(31, 48, 94, 0.88)", fontWeight: "700" },
   scrollContent: { padding: 20, paddingBottom: 40 },
   statusBanner: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#FFFFFF",
     padding: 20,
-    borderRadius: 20,
+    borderRadius: 24,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: "#F1F5F9",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#1F305E",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.04,
+        shadowRadius: 12,
+      },
+      android: { elevation: 2 },
+    }),
   },
   sectionLabel: {
     fontSize: 10,
@@ -292,7 +317,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: 4,
   },
-  statusMainText: { fontSize: 16, fontWeight: "700", color: "#1F305E" },
+  statusMainText: { fontSize: 16, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
   statusBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -303,20 +328,39 @@ const styles = StyleSheet.create({
   dot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
   statusBadgeText: { fontSize: 11, fontWeight: "800" },
   card: {
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
-    padding: 20,
+    padding: 24,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: "#F1F5F9",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#1F305E",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.04,
+        shadowRadius: 12,
+      },
+      android: { elevation: 2 },
+    }),
   },
   cardHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
-    gap: 10,
+    marginBottom: 24,
+    gap: 12,
   },
-  cardTitle: { fontSize: 16, fontWeight: "800", color: "#1F305E" },
+  iconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: "#F8FAFC",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+  },
+  cardTitle: { fontSize: 16, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -324,8 +368,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#F8FAFC",
   },
-  infoLabel: { fontSize: 14, color: "#94A3B8", fontWeight: "600" },
-  infoValue: { fontSize: 14, color: "#1F305E", fontWeight: "700" },
+  infoLabel: { fontSize: 14, color: "#64748B", fontWeight: "600" },
+  infoValue: { fontSize: 14, color: "rgba(31, 48, 94, 0.88)", fontWeight: "800" },
   errorText: {
     fontSize: 16,
     color: "#94A3B8",
@@ -334,7 +378,7 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     marginTop: 24,
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 14,

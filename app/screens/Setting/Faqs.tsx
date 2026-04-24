@@ -84,7 +84,7 @@ const FAQScreen: React.FC = () => {
       {/* HEADER */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity style={styles.navBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={28} color="#1F305E" />
+          <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>FAQs</Text>
         <View style={{ width: 40 }} />
@@ -98,7 +98,7 @@ const FAQScreen: React.FC = () => {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           isLoading ? (
-            <ActivityIndicator style={{ marginTop: 40 }} color="#73C2FB" />
+            <ActivityIndicator style={{ marginTop: 40 }} color="rgba(31, 48, 94, 0.88)" />
           ) : (
             <View style={styles.emptyContainer}>
               <Ionicons name="alert-circle-outline" size={48} color="#CBD5E1" />
@@ -139,17 +139,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  headerTitle: { fontSize: 18, fontWeight: "800", color: "#1F305E" },
+  headerTitle: { fontSize: 18, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
   listContent: { padding: 20, paddingBottom: 40 },
   accordionCard: {
-    backgroundColor: "#FFF",
-    borderRadius: 16,
-    marginBottom: 12,
-    borderWidth: 1.5,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    marginBottom: 16,
+    borderWidth: 1,
     borderColor: "#F1F5F9",
     overflow: "hidden",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+      },
+      android: { elevation: 2 },
+    }),
   },
-  activeCard: { borderColor: "#73C2FB", backgroundColor: "#F8FAFC" },
+  activeCard: { borderColor: "rgba(31, 48, 94, 0.88)", backgroundColor: "#F8FAFC" },
   questionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -159,7 +168,7 @@ const styles = StyleSheet.create({
   questionText: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     flex: 1,
     paddingRight: 10,
   },
@@ -172,7 +181,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  activeIconCircle: { backgroundColor: "#73C2FB" },
+  activeIconCircle: { backgroundColor: "rgba(31, 48, 94, 0.88)" },
   answerWrapper: { paddingHorizontal: 18, paddingBottom: 18 },
   answerText: {
     fontSize: 14,
@@ -189,7 +198,7 @@ const styles = StyleSheet.create({
   },
   retryBtn: {
     marginTop: 20,
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,

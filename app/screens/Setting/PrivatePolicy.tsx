@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
   StatusBar,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,7 +27,7 @@ const TermsPrivacyScreen: React.FC = () => {
       {/* PROFESSIONAL HEADER */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity style={styles.navBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={28} color="#1F305E" />
+          <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Legal</Text>
         <View style={{ width: 40 }} />
@@ -52,7 +53,7 @@ const TermsPrivacyScreen: React.FC = () => {
         {/* CONTENT LOGIC */}
         {isLoading ? (
           <View style={styles.centerWrapper}>
-            <ActivityIndicator size="large" color="#73C2FB" />
+            <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
             <Text style={styles.statusText}>Loading document...</Text>
           </View>
         ) : isError ? (
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
   },
   container: { flex: 1 },
   contentContainer: {
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
   mainTitle: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     letterSpacing: -0.5,
   },
   updateBadge: {
@@ -142,17 +143,26 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   policyCard: {
-    backgroundColor: "#FFF",
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1.5,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 20,
+    borderWidth: 1,
     borderColor: "#F1F5F9",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
+      },
+      android: { elevation: 2 },
+    }),
   },
   sectionHeading: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginBottom: 10,
   },
   sectionContent: {
@@ -175,12 +185,12 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#1F305E",
+    color: "rgba(31, 48, 94, 0.88)",
     marginTop: 12,
   },
   retryBtn: {
     marginTop: 20,
-    backgroundColor: "#1F305E",
+    backgroundColor: "rgba(31, 48, 94, 0.88)",
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 14,
