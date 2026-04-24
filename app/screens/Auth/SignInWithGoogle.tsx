@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Colors } from "@/utils/Colors";
 
 export default function SignInWithGoogle() {
   const { startSSOFlow } = useSSO();
@@ -73,7 +74,7 @@ export default function SignInWithGoogle() {
             <ActivityIndicator
               style={{ justifyContent: "center", alignItems: "center" }}
               size={"small"}
-              color={"rgba(31, 48, 94, 0.88)"}
+              color={Colors.primary}
             />
           ) : (
             "Sign-in with Google"
@@ -91,7 +92,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 14,
     borderWidth: 0.2,
-    borderColor: "gray",
+    borderColor: Colors.muted,
     marginBottom: 12,
   },
   iconWrap: { width: 48, alignItems: "center", justifyContent: "center" },
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
     paddingLeft: 6,
   },
   buttonLabel: {
-    color: "#222",
+    color: Colors.textDark,
     fontWeight: "600",
     letterSpacing: -0.6,
     fontSize: 12,

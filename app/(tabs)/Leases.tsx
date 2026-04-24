@@ -14,6 +14,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const AllLeases = () => {
   const { isSignedIn } = useAuth();
@@ -24,8 +26,8 @@ const AllLeases = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.centerWrapper}>
-        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
+      <View style={[GlobalStyles.surface, GlobalStyles.center]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
         <Text style={styles.loadingText}>Fetching your fleet status...</Text>
       </View>
     );
@@ -33,9 +35,9 @@ const AllLeases = () => {
 
   if (isError) {
     return (
-      <View style={styles.centerWrapper}>
+      <View style={[GlobalStyles.surface, GlobalStyles.center, { paddingHorizontal: 40 }]}>
         <View style={styles.errorIconBox}>
-          <Ionicons name="cloud-offline-outline" size={32} color="#EF4444" />
+          <Ionicons name="cloud-offline-outline" size={32} color={Colors.danger} />
         </View>
         <Text style={styles.errorTitle}>Connection Interrupted</Text>
         <Text style={styles.errorSubtitle}>
@@ -49,19 +51,19 @@ const AllLeases = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={GlobalStyles.container}>
       <StatusBar barStyle="dark-content" />
 
       {/* REFINED HEADER */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.navBtn}>
-          <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
+          <Ionicons name="chevron-back" size={28} color={Colors.primary} />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Active Leases</Text>
+        <Text style={GlobalStyles.headerTitle}>Active Leases</Text>
 
         <TouchableOpacity onPress={() => refetch()} style={styles.navBtn}>
-          <Ionicons name="sync-outline" size={22} color="rgba(31, 48, 94, 0.88)" />
+          <Ionicons name="sync-outline" size={22} color={Colors.primary} />
         </TouchableOpacity>
       </View>
 

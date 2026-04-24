@@ -17,6 +17,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useCreateIntent } from "@/hooks/usePayment";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 import { useUser } from "@clerk/expo";
 
 const ExtendLeaseScreen = () => {
@@ -61,7 +63,7 @@ const ExtendLeaseScreen = () => {
         merchantDisplayName: "City Car Center",
         paymentIntentClientSecret: clientSecret,
         appearance: {
-          colors: { primary: "#1F305E" },
+          colors: { primary: Colors.primary },
           shapes: { borderRadius: 12 },
         },
       });
@@ -97,18 +99,18 @@ const ExtendLeaseScreen = () => {
   ]);
 
   return (
-    <View style={styles.container}>
+    <View style={GlobalStyles.container}>
       <StatusBar barStyle="dark-content" />
 
       {/* Professional Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+      <View style={[GlobalStyles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.backButton}
         >
-          <Ionicons name="chevron-back" size={28} color="#1F305E" />
+          <Ionicons name="chevron-back" size={28} color={Colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Extend Lease</Text>
+        <Text style={GlobalStyles.headerTitle}>Extend Lease</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -129,9 +131,9 @@ const ExtendLeaseScreen = () => {
           </View>
 
           <Text style={styles.sectionTitle}>Duration</Text>
-          <View style={styles.inputWrapper}>
+          <View style={[GlobalStyles.inputBox, GlobalStyles.shadowLight, { height: 80, borderRadius: 24, marginBottom: 32 }]}>
             <View style={styles.inputIcon}>
-              <Ionicons name="calendar-outline" size={24} color="#73C2FB" />
+              <Ionicons name="calendar-outline" size={24} color={Colors.info} />
             </View>
             <TextInput
               style={styles.input}
@@ -139,7 +141,7 @@ const ExtendLeaseScreen = () => {
               value={manualDays}
               onChangeText={handleManualInput}
               placeholder="0"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={Colors.muted}
               autoFocus={true}
             />
             <View style={styles.suffixBadge}>
@@ -151,7 +153,7 @@ const ExtendLeaseScreen = () => {
             <Ionicons
               name="shield-checkmark-outline"
               size={22}
-              color="#1F305E"
+              color={Colors.primary}
             />
             <Text style={styles.infoHighlightText}>
               Daily rates apply based on your original agreement. Insurance
@@ -178,7 +180,7 @@ const ExtendLeaseScreen = () => {
           activeOpacity={0.8}
         >
           {isLoading ? (
-            <ActivityIndicator size={"small"} color={"#FFF"} />
+            <ActivityIndicator size={"small"} color={Colors.white} />
           ) : (
             <Text style={styles.buttonText}>Confirm & Pay</Text>
           )}
@@ -191,30 +193,11 @@ const ExtendLeaseScreen = () => {
 export default ExtendLeaseScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 15,
-    backgroundColor: "#FFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
-  },
   backButton: {
     width: 40,
     height: 40,
     justifyContent: "center",
     alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1F305E",
   },
   scrollContent: {
     padding: 24,
@@ -225,19 +208,19 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#1F305E",
+    color: Colors.primary,
     letterSpacing: -0.5,
   },
   subText: {
     fontSize: 15,
-    color: "#64748B",
+    color: Colors.subtitle,
     marginTop: 8,
     lineHeight: 22,
   },
   sectionTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#94A3B8",
+    color: Colors.muted,
     textTransform: "uppercase",
     letterSpacing: 1.2,
     marginBottom: 16,
@@ -245,9 +228,9 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: Colors.surface,
     borderWidth: 2,
-    borderColor: "#F1F5F9",
+    borderColor: Colors.border,
     borderRadius: 24,
     paddingHorizontal: 20,
     height: 80,
@@ -260,7 +243,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 24,
     fontWeight: "800",
-    color: "#1F305E",
+    color: Colors.primary,
   },
   suffixBadge: {
     backgroundColor: "#E0F2FE",
@@ -271,7 +254,7 @@ const styles = StyleSheet.create({
   daySuffix: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#1F305E",
+    color: Colors.primary,
   },
   infoHighlight: {
     flexDirection: "row",
@@ -286,7 +269,7 @@ const styles = StyleSheet.create({
   infoHighlightText: {
     flex: 1,
     fontSize: 14,
-    color: "#1F305E",
+    color: Colors.primary,
     marginLeft: 12,
     lineHeight: 20,
     fontWeight: "500",
@@ -297,30 +280,30 @@ const styles = StyleSheet.create({
   tipTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#64748B",
+    color: Colors.subtitle,
     marginBottom: 4,
   },
   tipText: {
     fontSize: 13,
-    color: "#94A3B8",
+    color: Colors.muted,
     lineHeight: 18,
   },
   footer: {
     paddingHorizontal: 24,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
-    backgroundColor: "#FFF",
+    borderTopColor: Colors.border,
+    backgroundColor: Colors.white,
   },
   primaryButton: {
-    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    backgroundColor: Colors.primary,
     height: 60,
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowColor: Colors.shadow,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.15,
         shadowRadius: 10,
@@ -333,7 +316,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0,
   },
   buttonText: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: 18,
     fontWeight: "700",
   },

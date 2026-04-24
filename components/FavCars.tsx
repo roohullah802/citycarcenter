@@ -11,6 +11,8 @@ import {
   View,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 function FavCars({ item }: any) {
   const { isFavourite, handleFav } = useFavorites();
@@ -41,6 +43,14 @@ function FavCars({ item }: any) {
               <Text style={styles.priceAmount}>${item?.pricePerDay}</Text>
               <Text style={styles.priceUnit}>/day</Text>
             </View>
+
+            {/* Rented Badge */}
+            {item?.available === false && (
+              <View style={styles.rentedBadge}>
+                <Icon name="lock-closed" size={12} color={Colors.white} />
+                <Text style={styles.rentedBadgeText}>RENTED</Text>
+              </View>
+            )}
           </View>
 
           <View style={styles.details}>
@@ -55,7 +65,7 @@ function FavCars({ item }: any) {
               >
                 <Icon
                   name={isFav ? "heart" : "heart-outline"}
-                  color={isFav ? "#EF4444" : "#94A3B8"}
+                  color={isFav ? Colors.primary : Colors.muted}
                   size={20}
                 />
               </TouchableOpacity>
@@ -74,17 +84,21 @@ function FavCars({ item }: any) {
             </View>
 
             <TouchableOpacity
-              style={styles.rentBtn}
+              style={[styles.rentBtn, item?.available === false && styles.disabledBtn]}
               activeOpacity={0.8}
-              onPress={() =>
+              onPress={() => {
+                if (item?.available === false) return;
                 router.push({
                   pathname: "/screens/Others/DateAndTime",
                   params: { carId: item?._id },
-                })
-              }
+                });
+              }}
+              disabled={item?.available === false}
             >
-              <Text style={styles.rentBtnText}>Rent Now</Text>
-              <Icon name="arrow-forward" size={14} color="#FFF" />
+              <Text style={styles.rentBtnText}>
+                {item?.available === false ? "Currently Rented" : "Rent Now"}
+              </Text>
+              {item?.available !== false && <Icon name="arrow-forward" size={14} color="#FFF" />}
             </TouchableOpacity>
           </View>
         </View>
@@ -103,22 +117,12 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.white,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#F1F5F9",
+    borderColor: Colors.border,
     overflow: "hidden",
-    ...Platform.select({
-      ios: {
-        shadowColor: "rgba(31, 48, 94, 0.88)",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    ...GlobalStyles.shadowMedium,
   },
   imageContainer: {
     position: "relative",
@@ -135,7 +139,7 @@ const styles = StyleSheet.create({
     left: 12,
     flexDirection: "row",
     alignItems: "baseline",
-    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    backgroundColor: Colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,
@@ -200,7 +204,7 @@ const styles = StyleSheet.create({
   },
   rentBtn: {
     flexDirection: "row",
-    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    backgroundColor: Colors.primary,
     paddingVertical: 12,
     borderRadius: 12,
     justifyContent: "center",
@@ -211,5 +215,28 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
     color: "#FFFFFF",
+  },
+  rentedBadge: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    backgroundColor: Colors.danger,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    gap: 4,
+    ...GlobalStyles.shadowLight,
+  },
+  rentedBadgeText: {
+    color: Colors.white,
+    fontSize: 10,
+    fontFamily: "bold",
+    letterSpacing: 0.5,
+  },
+  disabledBtn: {
+    backgroundColor: Colors.muted,
+    opacity: 0.8,
   },
 });

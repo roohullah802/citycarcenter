@@ -1,26 +1,26 @@
 import BrandItems from "@/components/BrandItems";
 import CarItems from "@/components/CarItems";
+import { useFetchBrands } from "@/hooks/useFetchBrands";
+import { useCars } from "@/hooks/useFetchCars";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 import { useUser } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
-  StatusBar,
-  Platform,
+  View
 } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import { useGetCurrentLocation } from "../../folder/getAddress";
-import { useFetchBrands } from "@/hooks/useFetchBrands";
-import { useCars } from "@/hooks/useFetchCars";
 
 // Skeleton Loader Component
 const SkeletonLoader = ({ style }: { style?: any }) => (
@@ -55,6 +55,7 @@ function HomeScreen() {
     refetch: refetchCars,
   } = useCars();
 
+
   const onRetry = () => {
     refetchBrands();
     refetchCars();
@@ -65,8 +66,9 @@ function HomeScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
       <ScrollView
         showsVerticalScrollIndicator={false}
+        style={GlobalStyles.surface}
         contentContainerStyle={[
-          styles.container,
+          GlobalStyles.scrollContainer,
           { paddingTop: insets.top + 10, paddingBottom: 40 },
         ]}
       >
@@ -87,10 +89,6 @@ function HomeScreen() {
           </View>
 
           <View style={styles.headerActions}>
-            <TouchableOpacity style={styles.notificationBtn}>
-              <Ionicons name="notifications-outline" size={22} color="rgba(31, 48, 94, 0.88)" />
-              <View style={styles.notificationDot} />
-            </TouchableOpacity>
 
             <TouchableOpacity
               activeOpacity={0.7}
@@ -121,14 +119,14 @@ function HomeScreen() {
         <TouchableOpacity
           onPress={() => router.push("/screens/Others/SearchCarCards")}
           activeOpacity={0.8}
-          style={styles.searchBar}
+          style={[GlobalStyles.inputBox, GlobalStyles.shadowLight, { marginHorizontal: 20, paddingLeft: 16, paddingRight: 8 }]}
         >
-          <Ionicons name="search-outline" size={20} color="#94A3B8" />
+          <Ionicons name="search-outline" size={20} color={Colors.muted} />
           <Text style={styles.searchPlaceholder}>
             Search for your favorite car...
           </Text>
           <View style={styles.filterIcon}>
-            <Ionicons name="options-outline" size={18} color="#FFF" />
+            <Ionicons name="options-outline" size={18} color={Colors.white} />
           </View>
         </TouchableOpacity>
 
@@ -142,6 +140,25 @@ function HomeScreen() {
             </Text>
             <TouchableOpacity style={styles.retryBtn} onPress={onRetry}>
               <Text style={styles.retryBtnText}>Try Again</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ERROR STATE */}
+        {(brandsError || carsError) && (
+          <View style={styles.errorContainer}>
+            <View style={[GlobalStyles.center, { marginBottom: 12 }]}>
+              <Ionicons name="cloud-offline-outline" size={44} color={Colors.danger} />
+            </View>
+            <Text style={styles.errorTitle}>Something went wrong</Text>
+            <Text style={styles.errorSub}>
+              We're having trouble connecting to our servers. Please check your internet and try again.
+            </Text>
+            <TouchableOpacity
+              style={[styles.retryBtn, { backgroundColor: Colors.primary }]}
+              onPress={onRetry}
+            >
+              <Text style={styles.retryBtnText}>Retry Connection</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -193,13 +210,13 @@ function HomeScreen() {
             </View>
 
             {carsLoading ? (
-               <View style={{ flexDirection: "row", paddingLeft: 20 }}>
-               {[1, 2].map((i) => (
-                 <View key={i} style={{ marginRight: 16 }}>
-                   <SkeletonLoader style={{ width: 260, height: 280, borderRadius: 20 }} />
-                 </View>
-               ))}
-             </View>
+              <View style={{ flexDirection: "row", paddingLeft: 20 }}>
+                {[1, 2].map((i) => (
+                  <View key={i} style={{ marginRight: 16 }}>
+                    <SkeletonLoader style={{ width: 260, height: 280, borderRadius: 20 }} />
+                  </View>
+                ))}
+              </View>
             ) : (
               <FlatList
                 data={cars?.data}
@@ -254,7 +271,6 @@ function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: "#F8FAFC" },
   header: {
     paddingHorizontal: 20,
     flexDirection: "row",
@@ -327,35 +343,14 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 28, fontWeight: "300", color: "rgba(31, 48, 94, 0.88)", lineHeight: 36, letterSpacing: -0.5 },
   highlightText: { fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 20,
-    paddingLeft: 16,
-    paddingRight: 8,
-    height: 56,
-    borderRadius: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#94A3B8",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
   searchPlaceholder: {
     flex: 1,
     marginLeft: 12,
     fontSize: 14,
-    color: "#94A3B8",
+    color: Colors.muted,
     fontWeight: "500",
   },
-  filterIcon: { backgroundColor: "rgba(31, 48, 94, 0.88)", padding: 10, borderRadius: 12 },
+  filterIcon: { backgroundColor: Colors.primary, padding: 10, borderRadius: 12 },
   section: { marginTop: 32 },
   sectionHeader: {
     paddingHorizontal: 20,

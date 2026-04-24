@@ -1,16 +1,13 @@
 import { Redirect, Tabs } from "expo-router";
 import React, { useEffect } from "react";
-
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { ActivityIndicator, View, Platform, StyleSheet } from "react-native";
 import { useAuth } from "@clerk/expo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 import { setAuthToken } from "@/folder/axiosInstance";
-import { ActivityIndicator, View } from "react-native";
+import { Colors } from "@/utils/Colors";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const { getToken, isLoaded, isSignedIn } = useAuth({
     treatPendingAsSignedOut: false,
@@ -19,43 +16,47 @@ export default function TabLayout() {
   useEffect(() => {
     async function syncToken() {
       const token = await getToken();
-
       setAuthToken(token);
     }
-
     if (isSignedIn) syncToken();
   }, [getToken, isSignedIn, isLoaded]);
 
-  useEffect(() => {
-    const loadUser = () => {
-      if (!isSignedIn) {
-        return <Redirect href={"/screens/Auth/SocialAuth"} />;
-      }
-    };
-    loadUser();
-  }, [isSignedIn]);
-
   if (!isLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
 
+  const activeColor = Colors.primary;
+  const inactiveColor = "#94A3B8";
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: activeColor,
+        tabBarInactiveTintColor: inactiveColor,
         headerShown: false,
         tabBarStyle: {
-          height: 60 + insets.bottom,
-          paddingBottom: insets.bottom,
-          paddingTop: 8,
-          backgroundColor: Colors[colorScheme ?? "light"].background,
+          backgroundColor: "#FFFFFF",
+          borderTopWidth: 1,
+          borderTopColor: "#F1F5F9",
+          height: Platform.OS === "ios" ? 85 + insets.bottom / 2 : 70 + insets.bottom,
+          paddingTop: 10,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 12,
+          elevation: 0, // Clean look on Android
+          shadowOpacity: 0, // Clean look on iOS
         },
-        tabBarLabelStyle: { fontSize: 10, marginBottom: 0 },
-        tabBarIconStyle: { width: 25, height: 25 },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "700",
+          fontFamily: "medium",
+          marginTop: 2,
+        },
+        tabBarIconStyle: {
+          marginBottom: 0,
+        },
         tabBarShowLabel: true,
       }}
     >
@@ -63,8 +64,12 @@ export default function TabLayout() {
         name="Home"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) => (
-            <Icon size={25} name="home" color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              size={24} 
+              name={focused ? "home" : "home-outline"} 
+              color={color} 
+            />
           ),
         }}
       />
@@ -72,29 +77,50 @@ export default function TabLayout() {
         name="Leases"
         options={{
           title: "Leases",
-          tabBarIcon: ({ color }) => (
-            <Icon size={25} name="stopwatch" color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              size={24} 
+              name={focused ? "car-sport" : "car-sport-outline"} 
+              color={color} 
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="FavouriteCars"
         options={{
-          title: "Favourite",
-          tabBarIcon: ({ color }) => (
-            <Icon size={25} name="heart" color={color} />
+          title: "Favorites",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              size={24} 
+              name={focused ? "heart" : "heart-outline"} 
+              color={color} 
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="Setting"
         options={{
-          title: "Setting",
-          tabBarIcon: ({ color }) => (
-            <Icon size={25} name="settings" color={color} />
+          title: "Settings",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              size={24} 
+              name={focused ? "settings" : "settings-outline"} 
+              color={color} 
+            />
           ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center",
+    backgroundColor: "#FFFFFF"
+  }
+});

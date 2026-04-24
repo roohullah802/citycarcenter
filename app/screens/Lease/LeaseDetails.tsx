@@ -16,6 +16,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const LeaseDetails = () => {
   const { id } = useLocalSearchParams();
@@ -37,8 +39,8 @@ const LeaseDetails = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.centerWrapper}>
-        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
+      <View style={[GlobalStyles.surface, GlobalStyles.center]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
         <Text style={styles.loadingText}>Loading details...</Text>
       </View>
     );
@@ -46,8 +48,8 @@ const LeaseDetails = () => {
 
   if (isError || !leaseDetails) {
     return (
-      <View style={styles.centerWrapper}>
-        <Ionicons name="alert-circle-outline" size={50} color="#EF4444" />
+      <View style={[GlobalStyles.surface, GlobalStyles.center]}>
+        <Ionicons name="alert-circle-outline" size={50} color={Colors.danger} />
         <Text style={styles.errorText}>Unable to retrieve lease details</Text>
         <TouchableOpacity
           style={styles.retryButton}
@@ -60,23 +62,23 @@ const LeaseDetails = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={GlobalStyles.surface}>
       <StatusBar barStyle="dark-content" />
 
       {/* HEADER */}
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+      <View style={[GlobalStyles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.navBtn}>
-          <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
+          <Ionicons name="chevron-back" size={28} color={Colors.primary} />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Lease Overview</Text>
+        <Text style={GlobalStyles.headerTitle}>Lease Overview</Text>
 
         <View style={styles.menuContainer}>
           <TouchableOpacity
             onPress={() => setMenuVisible(!menuVisible)}
             style={styles.navBtn}
           >
-            <Ionicons name="ellipsis-horizontal" size={24} color="rgba(31, 48, 94, 0.88)" />
+            <Ionicons name="ellipsis-horizontal" size={24} color={Colors.primary} />
           </TouchableOpacity>
 
           {menuVisible && (
@@ -91,7 +93,7 @@ const LeaseDetails = () => {
                   });
                 }}
               >
-                <Ionicons name="receipt-outline" size={18} color="rgba(31, 48, 94, 0.88)" />
+                <Ionicons name="receipt-outline" size={18} color={Colors.primary} />
                 <Text style={styles.dropdownText}>View Receipt</Text>
               </TouchableOpacity>
             </View>
@@ -107,7 +109,7 @@ const LeaseDetails = () => {
         <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
           <View>
             {/* STATUS BANNER */}
-            <View style={styles.statusBanner}>
+            <View style={[GlobalStyles.card, { marginBottom: 20, flexDirection: 'row', justifyContent: 'space-between' }]}>
               <View>
                 <Text style={styles.sectionLabel}>LEASE STATUS</Text>
                 <Text style={styles.statusMainText}>
@@ -129,8 +131,8 @@ const LeaseDetails = () => {
                     {
                       backgroundColor:
                         leaseDetails?.status === "active"
-                          ? "#10B981"
-                          : "#EF4444",
+                          ? Colors.success
+                          : Colors.danger,
                     },
                   ]}
                 />
@@ -151,13 +153,13 @@ const LeaseDetails = () => {
             </View>
 
             {/* LEASE SUMMARY CARD */}
-            <View style={styles.card}>
+            <View style={[GlobalStyles.card, { marginBottom: 20 }]}>
               <View style={styles.cardHeader}>
                 <View style={styles.iconBox}>
                   <Ionicons
                     name="document-text-outline"
                     size={20}
-                    color="rgba(31, 48, 94, 0.88)"
+                    color={Colors.primary}
                   />
                 </View>
                 <Text style={styles.cardTitle}>Lease Summary</Text>
@@ -179,7 +181,7 @@ const LeaseDetails = () => {
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <View style={styles.iconBox}>
-                  <Ionicons name="car-outline" size={20} color="rgba(31, 48, 94, 0.88)" />
+                  <Ionicons name="car-outline" size={20} color={Colors.primary} />
                 </View>
                 <Text style={styles.cardTitle}>Vehicle Details</Text>
               </View>
@@ -218,42 +220,11 @@ const InfoRow = ({ label, value, last }: any) => (
 );
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F8FAFC" },
-  centerWrapper: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F8FAFC",
-  },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
     fontWeight: "600",
-    color: "#94A3B8",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    backgroundColor: "#FFFFFF",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#1F305E",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-      },
-      android: { elevation: 3 },
-    }),
-    zIndex: 1000,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "rgba(31, 48, 94, 0.88)",
-    letterSpacing: -0.5,
+    color: Colors.muted,
   },
   navBtn: {
     width: 40,
@@ -266,15 +237,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 45,
     right: 0,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.white,
     borderRadius: 16,
     width: 170,
     padding: 8,
     borderWidth: 1,
-    borderColor: "#F1F5F9",
+    borderColor: Colors.border,
     ...Platform.select({
       ios: {
-        shadowColor: "#1F305E",
+        shadowColor: Colors.primary,
         shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.1,
         shadowRadius: 20,
@@ -288,21 +259,21 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 12,
   },
-  dropdownText: { fontSize: 14, color: "rgba(31, 48, 94, 0.88)", fontWeight: "700" },
+  dropdownText: { fontSize: 14, color: Colors.primary, fontWeight: "700" },
   scrollContent: { padding: 20, paddingBottom: 40 },
   statusBanner: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.white,
     padding: 20,
     borderRadius: 24,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#F1F5F9",
+    borderColor: Colors.border,
     ...Platform.select({
       ios: {
-        shadowColor: "#1F305E",
+        shadowColor: Colors.primary,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.04,
         shadowRadius: 12,
@@ -312,12 +283,12 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 10,
-    color: "#94A3B8",
+    color: Colors.muted,
     fontWeight: "800",
     letterSpacing: 1,
     marginBottom: 4,
   },
-  statusMainText: { fontSize: 16, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
+  statusMainText: { fontSize: 16, fontWeight: "800", color: Colors.primary },
   statusBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -328,15 +299,15 @@ const styles = StyleSheet.create({
   dot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
   statusBadgeText: { fontSize: 11, fontWeight: "800" },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.white,
     borderRadius: 24,
     padding: 24,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#F1F5F9",
+    borderColor: Colors.border,
     ...Platform.select({
       ios: {
-        shadowColor: "#1F305E",
+        shadowColor: Colors.primary,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.04,
         shadowRadius: 12,
@@ -358,32 +329,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#F1F5F9",
+    borderColor: Colors.border,
   },
-  cardTitle: { fontSize: 16, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
+  cardTitle: { fontSize: 16, fontWeight: "800", color: Colors.primary },
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#F8FAFC",
+    borderBottomColor: Colors.surface,
   },
-  infoLabel: { fontSize: 14, color: "#64748B", fontWeight: "600" },
-  infoValue: { fontSize: 14, color: "rgba(31, 48, 94, 0.88)", fontWeight: "800" },
+  infoLabel: { fontSize: 14, color: Colors.subtitle, fontWeight: "600" },
+  infoValue: { fontSize: 14, color: Colors.primary, fontWeight: "800" },
   errorText: {
     fontSize: 16,
-    color: "#94A3B8",
+    color: Colors.muted,
     marginTop: 16,
     fontWeight: "600",
   },
   retryButton: {
     marginTop: 24,
-    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    backgroundColor: Colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 14,
   },
-  retryText: { color: "#FFF", fontWeight: "700" },
+  retryText: { color: Colors.white, fontWeight: "700" },
 });
 
 export default LeaseDetails;

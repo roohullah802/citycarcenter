@@ -17,6 +17,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const CarCardsByBrand = () => {
   const [searchText, setSearchText] = useState<string>("");
@@ -39,8 +41,8 @@ const CarCardsByBrand = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.centerWrapper}>
-        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
+      <View style={[GlobalStyles.surface, GlobalStyles.center]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
         <Text style={styles.statusText}>Accessing {brand} inventory...</Text>
       </View>
     );
@@ -48,8 +50,8 @@ const CarCardsByBrand = () => {
 
   if (isError) {
     return (
-      <View style={styles.centerWrapper}>
-        <Ionicons name="cloud-offline-outline" size={50} color="#EF4444" />
+      <View style={[GlobalStyles.surface, GlobalStyles.center, { paddingHorizontal: 40 }]}>
+        <Ionicons name="cloud-offline-outline" size={50} color={Colors.danger} />
         <Text style={styles.errorTitle}>Connection Failed</Text>
         <TouchableOpacity style={styles.retryBtn} onPress={() => refetch()}>
           <Text style={styles.retryText}>Retry Now</Text>
@@ -60,17 +62,17 @@ const CarCardsByBrand = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={GlobalStyles.container}>
         <StatusBar barStyle="dark-content" />
 
         {/* REFINED PROFESSIONAL HEADER */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.navBtn} onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
+            <Ionicons name="chevron-back" size={28} color={Colors.primary} />
           </TouchableOpacity>
 
           <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle}>{brand}</Text>
+            <Text style={GlobalStyles.headerTitle}>{brand}</Text>
             <View style={styles.countBadge}>
               <Text style={styles.countText}>
                 {filteredCars.length} Available
@@ -83,18 +85,18 @@ const CarCardsByBrand = () => {
 
         {/* MODERN SEARCH BAR */}
         <View style={styles.searchSection}>
-          <View style={styles.searchBar}>
-            <Ionicons name="search-outline" size={20} color="#94A3B8" />
+          <View style={[GlobalStyles.inputBox, { backgroundColor: Colors.surface, height: 52, borderRadius: 14 }]}>
+            <Ionicons name="search-outline" size={20} color={Colors.muted} />
             <TextInput
-              placeholder={`Search ${brand} models...`}
+              placeholder={`Explore ${brand} collection...`}
               value={searchText}
               onChangeText={setSearchText}
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={Colors.muted}
               style={styles.searchInput}
             />
             {searchText !== "" && (
               <TouchableOpacity onPress={() => setSearchText("")}>
-                <Ionicons name="close-circle" size={18} color="#CBD5E1" />
+                <Ionicons name="close-circle" size={18} color={Colors.muted} />
               </TouchableOpacity>
             )}
           </View>

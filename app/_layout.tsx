@@ -1,23 +1,23 @@
-import "react-native-url-polyfill/auto";
 import ToastProvider from "@/folder/toastService";
+import { Colors } from "@/utils/Colors";
 import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/expo";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import { SplashScreen } from "expo-router";
+import { SplashScreen, Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { ActivityIndicator, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { tokenCache } from "../folder/tokenCache";
-import StackLayout from "./Stack";
-import { StatusBar } from "expo-status-bar";
+import "react-native-url-polyfill/auto";
 import { FavoritesProvider } from "../context/FavoutiteContext";
+import { tokenCache } from "../folder/tokenCache";
 
 SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
-  anchor: "(tabs)",
+  initialRouteName: "(tabs)",
 };
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
@@ -40,7 +40,7 @@ export default function RootLayout() {
   if (!fontsLoaded) {
     return (
       <SafeAreaView style={style.cnt}>
-        <ActivityIndicator size={"small"} color={"rgba(31, 48, 94, 0.88)"} />
+        <ActivityIndicator size={"large"} color={Colors.primary} />
       </SafeAreaView>
     );
   }
@@ -51,7 +51,7 @@ export default function RootLayout() {
       <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
         <ClerkLoading>
           <SafeAreaView style={style.cnt}>
-            <ActivityIndicator size="large" color={"red"} />
+            <ActivityIndicator size="large" color={Colors.primary} />
           </SafeAreaView>
         </ClerkLoading>
         <ClerkLoaded>
@@ -64,7 +64,29 @@ export default function RootLayout() {
                       process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!
                     }
                   >
-                    <StackLayout />
+                    <Stack
+                      screenOptions={{ 
+                        headerShown: false, 
+                        animation: "fade_from_bottom" 
+                      }}
+                    >
+                      <Stack.Screen name="(tabs)" />
+                      <Stack.Screen name="screens/Others/BrandCards" />
+                      <Stack.Screen name="screens/Others/SearchCarCards" />
+                      <Stack.Screen name="screens/Others/CarCardsByBrand" />
+                      <Stack.Screen name="screens/Setting/PrivatePolicy" />
+                      <Stack.Screen name="screens/Setting/Report" />
+                      <Stack.Screen name="screens/Lease/ExtendLease" />
+                      <Stack.Screen name="screens/Others/CarLeaseDetails" />
+                      <Stack.Screen name="screens/Others/DateAndTime" />
+                      <Stack.Screen name="screens/Lease/LeaseDetails" />
+                      <Stack.Screen name="screens/Payments/PaymentDetails" />
+                      <Stack.Screen name="screens/Payments/PaymentSuccess" />
+                      <Stack.Screen name="screens/Auth/SocialAuth" />
+                      <Stack.Screen name="screens/Others/CarImages" />
+                      <Stack.Screen name="screens/Setting/DocumentUploadScreen" />
+                      <Stack.Screen name="screens/Setting/DocumentSubmittedScreen" />
+                    </Stack>
                   </StripeProvider>
                 </FavoritesProvider>
               </ToastProvider>

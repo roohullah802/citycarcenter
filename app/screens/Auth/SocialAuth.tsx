@@ -1,16 +1,17 @@
+import { Colors } from "@/utils/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import React, { useCallback, useRef } from "react";
 import {
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  StatusBar,
 } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SignInWithApple from "./SignInWithApple";
 import SignInWithGoogle from "./SignInWithGoogle";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function SocialAuthScreen() {
   const modelRef = useRef<Modalize>(null);
@@ -26,7 +27,7 @@ export default function SocialAuthScreen() {
       <View style={styles.main}>
         <View style={styles.header}>
           <View style={styles.brandMark}>
-            <Ionicons name="car-sport" size={24} color="#FFF" />
+            <Ionicons name="car-sport" size={24} color={Colors.white} />
           </View>
           <Text style={styles.heroText}>
             Elevate Your{"\n"}
@@ -56,7 +57,7 @@ export default function SocialAuthScreen() {
             activeOpacity={0.6}
           >
             <Text style={styles.whyText}>Security & Privacy Information</Text>
-            <Ionicons name="chevron-forward" size={14} color="#94A3B8" />
+            <Ionicons name="chevron-forward" size={14} color={Colors.muted} />
           </TouchableOpacity>
 
           <Text style={styles.copyright}>© 2026 CITY CAR CENTER</Text>
@@ -72,7 +73,7 @@ export default function SocialAuthScreen() {
       >
         <View style={styles.modalContent}>
           <View style={styles.modalIcon}>
-            <Ionicons name="shield-checkmark" size={32} color="rgba(31, 48, 94, 0.88)" />
+            <Ionicons name="shield-checkmark" size={32} color={Colors.primary} />
           </View>
 
           <Text style={styles.modalHeading}>Enterprise-Grade Security</Text>
@@ -95,7 +96,7 @@ export default function SocialAuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.background,
   },
   decorativeCircle: {
     position: "absolute",
@@ -118,12 +119,12 @@ const styles = StyleSheet.create({
   brandMark: {
     width: 48,
     height: 48,
-    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    backgroundColor: Colors.primary,
     borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 24,
-    shadowColor: "rgba(31, 48, 94, 0.88)",
+    shadowColor: Colors.shadow,
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 5,
@@ -131,7 +132,7 @@ const styles = StyleSheet.create({
   heroText: {
     fontSize: 30,
     fontWeight: "300",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: Colors.primary,
     lineHeight: 38,
     letterSpacing: -0.5,
   },
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
   brandSub: {
     fontSize: 10,
     fontWeight: "800",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: Colors.primary,
     letterSpacing: 2,
     marginTop: 12,
   },
@@ -151,12 +152,12 @@ const styles = StyleSheet.create({
   authTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: Colors.primary,
     marginBottom: 8,
   },
   authDescription: {
     fontSize: 14,
-    color: "#64748B",
+    color: Colors.subtitle,
     lineHeight: 20,
     marginBottom: 32,
     fontWeight: "500",
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   whyText: {
-    color: "#94A3B8",
+    color: Colors.muted,
     fontWeight: "700",
     fontSize: 12,
     textTransform: "uppercase",
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
   modal: {
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.background,
   },
   modalContent: {
     padding: 32,
@@ -211,12 +212,12 @@ const styles = StyleSheet.create({
   modalHeading: {
     fontSize: 22,
     fontWeight: "800",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: Colors.primary,
     marginBottom: 12,
   },
   modalBody: {
     fontSize: 15,
-    color: "#64748B",
+    color: Colors.subtitle,
     textAlign: "center",
     lineHeight: 24,
     fontWeight: "500",
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
   swipeHintText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#94A3B8",
+    color: Colors.muted,
     textTransform: "uppercase",
     letterSpacing: 1,
   },

@@ -20,6 +20,8 @@ import { Ionicons } from "@expo/vector-icons";
 import BottomSheetFilterModal from "./BottomSheetFilterModel";
 import { useCars } from "@/hooks/useFetchCars";
 import { useFavorites } from "@/context/FavoutiteContext";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 interface Car {
   modelName: string;
@@ -60,9 +62,9 @@ const SearchCarCards = () => {
   // --- 1. LOADING STATE ---
   if (isLoading) {
     return (
-      <View style={styles.centerWrapper}>
+      <View style={[GlobalStyles.surface, GlobalStyles.center]}>
         <StatusBar barStyle="dark-content" />
-        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
+        <ActivityIndicator size="large" color={Colors.primary} />
         <Text style={styles.loadingText}>Curating your collection...</Text>
       </View>
     );
@@ -71,10 +73,10 @@ const SearchCarCards = () => {
   // --- 2. ERROR STATE ---
   if (isError) {
     return (
-      <View style={styles.centerWrapper}>
+      <View style={[GlobalStyles.surface, GlobalStyles.center, { paddingHorizontal: 40 }]}>
         <StatusBar barStyle="dark-content" />
         <View style={styles.errorIconCircle}>
-          <Ionicons name="cloud-offline-outline" size={40} color="#EF4444" />
+          <Ionicons name="cloud-offline-outline" size={40} color={Colors.danger} />
         </View>
         <Text style={styles.emptyTitle}>Connection Interrupted</Text>
         <Text style={styles.emptySubtitle}>
@@ -90,7 +92,7 @@ const SearchCarCards = () => {
           <Ionicons
             name="refresh-outline"
             size={18}
-            color="#FFF"
+            color={Colors.white}
             style={{ marginLeft: 8 }}
           />
         </TouchableOpacity>
@@ -100,7 +102,7 @@ const SearchCarCards = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={GlobalStyles.container}>
         <StatusBar barStyle="dark-content" />
 
         {/* HEADER */}
@@ -109,9 +111,9 @@ const SearchCarCards = () => {
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
+            <Ionicons name="chevron-back" size={28} color={Colors.primary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Available Fleet</Text>
+          <Text style={GlobalStyles.headerTitle}>Available Fleet</Text>
           <View style={{ width: 40 }} />
         </View>
 
@@ -120,7 +122,7 @@ const SearchCarCards = () => {
           <View style={styles.searchBarWrapper}>
             <Ionicons name="search-outline" size={20} color="#94A3B8" />
             <TextInput
-              placeholder="Search model, e.g. 'Civic'..."
+              placeholder="Search for your dream car..."
               value={searchText}
               onChangeText={setSearchText}
               placeholderTextColor="#94A3B8"

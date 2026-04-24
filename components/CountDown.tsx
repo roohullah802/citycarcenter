@@ -10,11 +10,15 @@ import {
 } from "react-native";
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 import { Ionicons } from "@expo/vector-icons";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const CountDown = ({ item }: any) => {
   const remainingSeconds = useMemo(() => {
-    const end = new Date(item?.endDate).getTime();
-    const now = new Date().getTime();
+    if (!item?.endDate) return 0;
+    const end = new Date(item.endDate).getTime();
+    if (isNaN(end)) return 0;
+    const now = Date.now();
     return Math.max(0, Math.floor((end - now) / 1000));
   }, [item?.endDate]);
 
@@ -42,7 +46,8 @@ const CountDown = ({ item }: any) => {
         })
       }
       style={({ pressed }) => [
-        styles.leaseCard,
+        GlobalStyles.card,
+        styles.leaseCardCustom,
         pressed && { opacity: 0.95, transform: [{ scale: 0.99 }] },
       ]}
     >
@@ -56,7 +61,7 @@ const CountDown = ({ item }: any) => {
             {item?.car?.modelName || "PREMIUM CAR"}
           </Text>
           <View style={styles.brandRow}>
-            <Ionicons name="car-sport-outline" size={14} color="#94A3B8" />
+            <Ionicons name="car-sport-outline" size={14} color={Colors.muted} />
             <Text style={styles.brandText} numberOfLines={1}>
               {item?.car?.brand || "Brand"}
             </Text>
@@ -73,20 +78,21 @@ const CountDown = ({ item }: any) => {
             })
           }
         >
-          <Ionicons name="time-outline" size={14} color="#FFF" />
+          <Ionicons name="time-outline" size={14} color={Colors.white} />
           <Text style={styles.extendText}>Extend</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.timerWrapper}>
         <CountdownCircleTimer
+          key={remainingSeconds}
           isPlaying
           duration={remainingSeconds}
-          colors={["#1F305E", "#F59E0B", "#EF4444"]}
+          colors={[Colors.primary as any, Colors.warning as any, Colors.danger as any]}
           colorsTime={[remainingSeconds, remainingSeconds / 2, 0]}
           size={90}
           strokeWidth={7}
-          trailColor="#F1F5F9"
+          trailColor={Colors.border as any}
         >
           {({ remainingTime }) => renderTimerContent(remainingTime)}
         </CountdownCircleTimer>
@@ -96,25 +102,9 @@ const CountDown = ({ item }: any) => {
 };
 
 const styles = StyleSheet.create({
-  leaseCard: {
+  leaseCardCustom: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    padding: 20,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#F1F5F9",
-    ...Platform.select({
-      ios: {
-        shadowColor: "rgba(31, 48, 94, 0.88)",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
   },
   infoContainer: {
     flex: 1,
@@ -142,7 +132,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#10B981",
+    backgroundColor: Colors.success,
     marginRight: 4,
   },
   statusLabel: {
@@ -154,7 +144,7 @@ const styles = StyleSheet.create({
   modelName: {
     fontSize: 20,
     fontWeight: "800",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: Colors.primary,
     marginBottom: 4,
   },
   brandRow: {
@@ -165,13 +155,13 @@ const styles = StyleSheet.create({
   brandText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#94A3B8",
+    color: Colors.muted,
   },
   extendButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    backgroundColor: Colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
@@ -180,7 +170,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   extendText: {
-    color: "#FFFFFF",
+    color: Colors.white,
     fontSize: 13,
     fontWeight: "700",
   },
@@ -190,11 +180,11 @@ const styles = StyleSheet.create({
   timerValue: {
     fontSize: 20,
     fontWeight: "800",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: Colors.primary,
   },
   timerSub: {
     fontSize: 11,
-    color: "#94A3B8",
+    color: Colors.muted,
     fontWeight: "700",
     textTransform: "uppercase",
     marginTop: 2,

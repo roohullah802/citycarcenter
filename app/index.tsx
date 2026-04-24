@@ -1,21 +1,36 @@
+import { Colors } from "@/utils/Colors";
 import { useAuth } from "@clerk/expo";
-import { Redirect } from "expo-router";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
+
 
 export default function Index() {
   const { isSignedIn, isLoaded } = useAuth();
+  const router = useRouter();
 
-  if (!isLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (!isLoaded) return;
 
-  if (!isSignedIn) {
-    return <Redirect href="/screens/Auth/SocialAuth" />;
-  }
+    if (isSignedIn) {
+      router.replace("/(tabs)/Home");
+    } else {
+      const timer = setTimeout(() => {
+        router.replace("/screens/Auth/SocialAuth");
+      }, 3000);
 
-  return <Redirect href="/(tabs)/Home" />;
+      return () => clearTimeout(timer);
+    }
+  }, [isLoaded, isSignedIn]);
+
+  return (
+    <View style={{
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "#FFFFFF"
+    }}>
+      <ActivityIndicator size="large" color={Colors.primary} />
+    </View>
+  );
 }

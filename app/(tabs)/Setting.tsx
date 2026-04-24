@@ -17,6 +17,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import LogoutModal from "../screens/Auth/Logout";
 import { useDocumentStatus } from "@/hooks/useDocuments";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const Settings = () => {
   const insets = useSafeAreaInsets();
@@ -34,16 +36,23 @@ const Settings = () => {
       : require("../../assests/guest3.png");
 
   const getBadgeInfo = () => {
-    if (isLoading) return { label: "...", color: "#94A3B8" };
-    if (isError || !data) return statusConfig.unverified;
+    if (isLoading) return { label: "...", color: Colors.muted, icon: "ellipsis-horizontal" as const };
+    if (isError || !data) return { ...statusConfig.unverified, icon: "alert-circle-outline" as const };
     const currentStatus = data?.docStatus || "unverified";
-    return statusConfig[currentStatus] ?? statusConfig.unverified;
+    const config = statusConfig[currentStatus] ?? statusConfig.unverified;
+    
+    let icon: keyof typeof Ionicons.glyphMap = "alert-circle-outline";
+    if (currentStatus === "approved") icon = "checkmark-circle";
+    if (currentStatus === "pending") icon = "time-outline";
+    if (currentStatus === "declined") icon = "close-circle-outline";
+    
+    return { ...config, icon };
   };
 
-  const { label: badgeLabel, color: badgeColor } = getBadgeInfo();
+  const { label: badgeLabel, color: badgeColor, icon: badgeIcon } = getBadgeInfo();
 
   return (
-    <View style={styles.mainContainer}>
+    <View style={GlobalStyles.surface}>
       <StatusBar barStyle="dark-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -52,27 +61,30 @@ const Settings = () => {
           { paddingTop: insets.top + 10 },
         ]}
       >
-        <Text style={styles.header}>Account Settings</Text>
+        <Text style={GlobalStyles.headerTitle}>Profile & Settings</Text>
 
-        {/* PROFILE CARD */}
+        {/* PREMIUM PROFILE CARD */}
         <View style={styles.profileCard}>
           <View style={styles.avatarWrapper}>
             <Image source={avatarSource} style={styles.avatar} />
-            {isSignedIn && (
-              <View style={[styles.badge, { backgroundColor: badgeColor }]}>
-                <Text style={styles.badgeText}>{badgeLabel}</Text>
-              </View>
-            )}
           </View>
 
           <View style={styles.profileDetails}>
-            <Text style={styles.name}>
-              {user?.fullName ? user.fullName : "Guest User"}
-            </Text>
+            <View style={styles.nameRow}>
+              <Text style={styles.name}>
+                {user?.fullName ? user.fullName : "Guest User"}
+              </Text>
+              {isSignedIn && (
+                <View style={[styles.statusBadge, { backgroundColor: `${badgeColor}15` }]}>
+                  <Ionicons name={badgeIcon} size={12} color={badgeColor} />
+                  <Text style={[styles.statusText, { color: badgeColor }]}>{badgeLabel}</Text>
+                </View>
+              )}
+            </View>
             <Text numberOfLines={1} style={styles.email}>
               {isSignedIn
                 ? user?.primaryEmailAddress?.emailAddress
-                : "Sign in for full access"}
+                : "Join City Car Center today"}
             </Text>
           </View>
 
@@ -81,8 +93,7 @@ const Settings = () => {
               style={styles.loginBtn}
               onPress={() => router.push("/screens/Auth/SocialAuth")}
             >
-              <Text style={styles.loginBtnText}>Login</Text>
-              <Ionicons name="log-in-outline" size={18} color="rgba(31, 48, 94, 0.88)" />
+              <Ionicons name="log-in-outline" size={20} color={Colors.primary} />
             </TouchableOpacity>
           )}
         </View>
@@ -102,7 +113,7 @@ const Settings = () => {
                 <Ionicons
                   name="shield-checkmark-outline"
                   size={22}
-                  color="rgba(31, 48, 94, 0.88)"
+                  color={Colors.primary}
                 />
               </View>
               <Text style={styles.cardText}>Identity Documents</Text>
@@ -155,7 +166,7 @@ const Settings = () => {
             style={styles.logoutWrapper}
             onPress={handleVisible}
           >
-            <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+            <Ionicons name="log-out-outline" size={20} color={Colors.danger} />
             <Text style={styles.logoutText}>Sign Out</Text>
           </TouchableOpacity>
         )}
@@ -179,60 +190,57 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-    padding: 20,
+    padding: 16,
     borderRadius: 24,
     borderWidth: 1,
     borderColor: "#F1F5F9",
     marginBottom: 32,
-    ...Platform.select({
-      ios: {
-        shadowColor: "rgba(31, 48, 94, 0.88)",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.05,
-        shadowRadius: 12,
-      },
-      android: { elevation: 3 },
-    }),
+    ...GlobalStyles.shadowLight,
   },
-  avatarWrapper: { position: "relative" },
+  avatarWrapper: { 
+    position: "relative",
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    borderRadius: 20,
+    padding: 4,
+  },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 18,
-    backgroundColor: "#E2E8F0",
-  },
-  badge: {
-    position: "absolute",
-    bottom: -4,
-    right: -4,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: "#F8FAFC",
-  },
-  badgeText: {
-    color: "#FFF",
-    fontSize: 5,
-    fontWeight: "900",
-    textTransform: "uppercase",
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: "#F8FAFC",
   },
   profileDetails: { flex: 1, marginLeft: 16 },
-  name: { fontSize: 18, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
-  email: { fontSize: 13, color: "#64748B", marginTop: 2, fontWeight: "500" },
-  loginBtn: {
+  nameRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#E0F2FE",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
+    gap: 8,
+    flexWrap: "wrap",
   },
-  loginBtnText: {
+  name: { fontSize: 18, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    gap: 3,
+    marginLeft: 4,
+  },
+  statusText: {
+    fontSize: 9,
     fontWeight: "800",
-    color: "rgba(31, 48, 94, 0.88)",
-    marginRight: 6,
-    fontSize: 13,
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  email: { fontSize: 13, color: "#64748B", marginTop: 4, fontWeight: "500" },
+  loginBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#F0F9FF",
+    justifyContent: "center",
+    alignItems: "center",
   },
   section: { marginBottom: 24 },
   sectionTitle: {

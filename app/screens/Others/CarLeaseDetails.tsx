@@ -19,6 +19,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const { height } = Dimensions.get("window");
 const HEADER_HEIGHT = height * 0.42;
@@ -134,10 +136,20 @@ const CarDetails = () => {
             <Ionicons
               name={isFav ? "heart" : "heart-outline"}
               size={24}
-              color={isFav ? "#EF4444" : "rgba(31, 48, 94, 0.88)"}
+              color={isFav ? Colors.primary : Colors.primary}
             />
           </TouchableOpacity>
         </View>
+
+        {/* Leased Badge */}
+        {details?.available === false && (
+          <View style={styles.leasedBadgeOverlay}>
+            <View style={styles.leasedBadge}>
+              <Ionicons name="lock-closed" size={16} color={Colors.white} />
+              <Text style={styles.leasedBadgeText}>CURRENTLY LEASED</Text>
+            </View>
+          </View>
+        )}
       </View>
 
       {/* DETAILS CONTENT */}
@@ -234,7 +246,8 @@ const CarDetails = () => {
           </Text>
         </View>
         <TouchableOpacity
-          style={styles.bookBtn}
+          style={[styles.bookBtn, details?.available === false && styles.disabledBookBtn]}
+          disabled={details?.available === false}
           onPress={() => {
             if (!isSignedIn) {
               router.push("/screens/Auth/SocialAuth");
@@ -246,13 +259,17 @@ const CarDetails = () => {
             }
           }}
         >
-          <Text style={styles.bookBtnText}>Rent Now</Text>
-          <Ionicons
-            name="arrow-forward"
-            size={18}
-            color="#FFF"
-            style={{ marginLeft: 8 }}
-          />
+          <Text style={styles.bookBtnText}>
+            {details?.available === false ? "Vehicle Rented" : "Rent Now"}
+          </Text>
+          {details?.available !== false && (
+            <Ionicons
+              name="arrow-forward"
+              size={18}
+              color="#FFF"
+              style={{ marginLeft: 8 }}
+            />
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -507,6 +524,36 @@ const styles = StyleSheet.create({
     }),
   },
   bookBtnText: { color: "#FFF", fontSize: 16, fontWeight: "700" },
+  leasedBadgeOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  leasedBadge: {
+    backgroundColor: Colors.danger,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 8,
+    ...GlobalStyles.shadowMedium,
+  },
+  leasedBadgeText: {
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 1,
+  },
+  disabledBookBtn: {
+    backgroundColor: Colors.muted,
+    opacity: 0.8,
+  },
 });
 
 export default CarDetails;

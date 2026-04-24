@@ -14,6 +14,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import BrandCard from "../../../components/BrandCard";
 import { useFetchBrands } from "@/hooks/useFetchBrands";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const TopBrandsScreen = () => {
   const [search, setSearch] = useState<string>("");
@@ -34,8 +36,8 @@ const TopBrandsScreen = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.centeredWrapper}>
-        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
+      <View style={[GlobalStyles.surface, GlobalStyles.center]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
         <Text style={styles.statusText}>Discovering Brands...</Text>
       </View>
     );
@@ -43,8 +45,8 @@ const TopBrandsScreen = () => {
 
   if (isError) {
     return (
-      <View style={styles.centeredWrapper}>
-        <Ionicons name="cloud-offline-outline" size={50} color="#FF6B6B" />
+      <View style={[GlobalStyles.surface, GlobalStyles.center, { paddingHorizontal: 40 }]}>
+        <Ionicons name="cloud-offline-outline" size={50} color={Colors.danger} />
         <Text style={styles.errorTitle}>Network Error</Text>
         <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
           <Text style={styles.retryText}>Try Again</Text>
@@ -54,7 +56,7 @@ const TopBrandsScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={GlobalStyles.container}>
       <StatusBar barStyle="dark-content" />
 
       {/* REFINED HEADER */}
@@ -63,23 +65,23 @@ const TopBrandsScreen = () => {
           onPress={() => router.back()}
           style={styles.navButton}
         >
-          <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
+          <Ionicons name="chevron-back" size={28} color={Colors.primary} />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Browse Brands</Text>
+        <Text style={GlobalStyles.headerTitle}>Browse Brands</Text>
         <View style={{ width: 40 }} />
       </View>
 
       {/* PROFESSIONAL SEARCH BOX */}
       <View style={styles.searchSection}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search-outline" size={20} color="#94A3B8" />
+        <View style={[GlobalStyles.inputBox, { backgroundColor: Colors.surface, height: 52, borderRadius: 14 }]}>
+          <Ionicons name="search-outline" size={20} color={Colors.muted} />
           <TextInput
-            placeholder="Search manufacturers..."
+            placeholder="Find your favorite brand..."
             value={search}
             onChangeText={setSearch}
             style={styles.input}
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={Colors.muted}
             clearButtonMode="while-editing"
           />
         </View>

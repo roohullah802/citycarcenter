@@ -14,6 +14,8 @@ import {
   View,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.7;
@@ -57,10 +59,18 @@ function CarItems({ item }: any) {
           >
             <Icon
               name={isFav ? "heart" : "heart-outline"}
-              color={isFav ? "#EF4444" : "#FFFFFF"}
+              color={isFav ? Colors.primary : Colors.white}
               size={20}
             />
           </TouchableOpacity>
+
+          {/* Rented Badge */}
+          {item?.available === false && (
+            <View style={styles.rentedBadge}>
+              <Icon name="lock-closed" size={12} color={Colors.white} />
+              <Text style={styles.rentedBadgeText}>RENTED</Text>
+            </View>
+          )}
         </View>
 
         {/* Info Section */}
@@ -88,9 +98,10 @@ function CarItems({ item }: any) {
 
           {/* Rent Button */}
           <TouchableOpacity
-            style={styles.rentButton}
+            style={[styles.rentButton, item?.available === false && styles.disabledButton]}
             activeOpacity={0.8}
             onPress={() => {
+              if (item?.available === false) return;
               if (!isSignedIn) {
                 router.push("/screens/Auth/SocialAuth");
                 return;
@@ -100,9 +111,12 @@ function CarItems({ item }: any) {
                 params: { carId: item._id },
               });
             }}
+            disabled={item?.available === false}
           >
-            <Text style={styles.rentButtonText}>Rent Now</Text>
-            <Icon name="arrow-forward" size={14} color="#FFF" />
+            <Text style={styles.rentButtonText}>
+              {item?.available === false ? "Currently Rented" : "Rent Now"}
+            </Text>
+            {item?.available !== false && <Icon name="arrow-forward" size={14} color="#FFF" />}
           </TouchableOpacity>
         </View>
       </View>
@@ -116,23 +130,13 @@ const styles = StyleSheet.create({
   carCard: {
     width: CARD_WIDTH,
     marginRight: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.white,
     borderRadius: 20,
     overflow: "hidden",
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#F1F5F9",
-    ...Platform.select({
-      ios: {
-        shadowColor: "rgba(31, 48, 94, 0.88)",
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.08,
-        shadowRadius: 16,
-      },
-      android: {
-        elevation: 5,
-      },
-    }),
+    borderColor: Colors.border,
+    ...GlobalStyles.shadowMedium,
   },
   imageContainer: {
     position: "relative",
@@ -147,7 +151,7 @@ const styles = StyleSheet.create({
     left: 12,
     flexDirection: "row",
     alignItems: "baseline",
-    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    backgroundColor: Colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,
@@ -155,12 +159,12 @@ const styles = StyleSheet.create({
   priceAmount: {
     fontSize: 16,
     fontFamily: "bold",
-    color: "#FFFFFF",
+    color: Colors.white,
   },
   priceUnit: {
     fontSize: 11,
     fontFamily: "medium",
-    color: "#94A3B8",
+    color: Colors.muted,
     marginLeft: 2,
   },
   favoriteBtn: {
@@ -180,7 +184,7 @@ const styles = StyleSheet.create({
   carName: {
     fontSize: 16,
     fontFamily: "bold",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: Colors.primary,
     marginBottom: 8,
   },
   specsRow: {
@@ -196,7 +200,7 @@ const styles = StyleSheet.create({
   specText: {
     fontSize: 12,
     fontFamily: "medium",
-    color: "#94A3B8",
+    color: Colors.muted,
   },
   specDot: {
     width: 3,
@@ -209,7 +213,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    backgroundColor: Colors.primary,
     paddingVertical: 12,
     borderRadius: 12,
     gap: 6,
@@ -219,5 +223,28 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "bold",
     letterSpacing: 0.3,
+  },
+  rentedBadge: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    backgroundColor: Colors.danger,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    gap: 4,
+    ...GlobalStyles.shadowLight,
+  },
+  rentedBadgeText: {
+    color: Colors.white,
+    fontSize: 10,
+    fontFamily: "bold",
+    letterSpacing: 0.5,
+  },
+  disabledButton: {
+    backgroundColor: Colors.muted,
+    opacity: 0.8,
   },
 });

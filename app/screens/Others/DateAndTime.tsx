@@ -1,3 +1,10 @@
+import { useAuth, useUser } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import { useStripe } from "@stripe/stripe-react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -9,16 +16,9 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
-import { useStripe } from "@stripe/stripe-react-native";
-import { router, useLocalSearchParams } from "expo-router";
-import { useAuth, useUser } from "@clerk/expo";
 
-import { showToast } from "../../../folder/toastService";
 import { useCreateIntent } from "@/hooks/usePayment";
+import { showToast } from "../../../folder/toastService";
 
 export default function DateAndTimeScreen() {
   const { carId } = useLocalSearchParams<{ carId: string }>();
@@ -75,7 +75,6 @@ export default function DateAndTimeScreen() {
         endDate: returnDate.toISOString(),
       });
 
-      console.log(resp);
 
       if (!resp?.clientSecret) throw new Error(resp?.message || resp?.error || "Payment gateway error");
 

@@ -11,6 +11,8 @@ import {
   View,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 function CarCards({ item }: any) {
   const { handleFav, isFavourite } = useFavorites();
@@ -33,6 +35,11 @@ function CarCards({ item }: any) {
           style={styles.image}
           resizeMode="cover"
         />
+        {item?.available === false && (
+          <View style={styles.rentedBadge}>
+            <Text style={styles.rentedBadgeText}>RENTED</Text>
+          </View>
+        )}
         <View style={styles.details}>
           <Text style={styles.name} numberOfLines={1}>
             {item.modelName}
@@ -48,7 +55,8 @@ function CarCards({ item }: any) {
 
           <View style={styles.actionsRow}>
             <TouchableOpacity
-              style={styles.rentBtn}
+              style={[styles.rentBtn, item?.available === false && styles.disabledBtn]}
+              disabled={item?.available === false}
               onPress={() => {
                 if (!isSignedIn) {
                   router.push("/screens/Auth/SocialAuth");
@@ -60,7 +68,9 @@ function CarCards({ item }: any) {
                 }
               }}
             >
-              <Text style={styles.rentBtnText}>Rent Now</Text>
+              <Text style={styles.rentBtnText}>
+                {item?.available === false ? "Rented" : "Rent Now"}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -69,7 +79,7 @@ function CarCards({ item }: any) {
             >
               <Icon
                 name={isFav ? "heart" : "heart-outline"}
-                color="rgba(31, 48, 94, 0.88)"
+                color={Colors.primary}
                 size={18}
               />
             </TouchableOpacity>
@@ -89,7 +99,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   rentBtn: {
-    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    backgroundColor: Colors.primary,
     width: 90,
     paddingVertical: 7,
     borderRadius: 20,
@@ -158,5 +168,25 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.9,
+  },
+  rentedBadge: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    backgroundColor: Colors.danger,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    zIndex: 10,
+  },
+  rentedBadgeText: {
+    color: "white",
+    fontSize: 9,
+    fontFamily: "bold",
+    letterSpacing: 0.5,
+  },
+  disabledBtn: {
+    backgroundColor: Colors.muted,
+    opacity: 0.7,
   },
 });

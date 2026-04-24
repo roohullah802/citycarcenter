@@ -15,6 +15,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const FavouriteCars: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
@@ -38,15 +40,15 @@ const FavouriteCars: React.FC = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.centerWrapper}>
-        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
+      <View style={[GlobalStyles.surface, GlobalStyles.center]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
         <Text style={styles.loadingText}>Loading your collection...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={GlobalStyles.container}>
       <StatusBar barStyle="dark-content" />
 
       {/* REFINED DYNAMIC HEADER */}
@@ -57,7 +59,7 @@ const FavouriteCars: React.FC = () => {
               onPress={() => router.back()}
               style={styles.navBtn}
             >
-              <Ionicons name="chevron-back" size={28} color="rgba(31, 48, 94, 0.88)" />
+              <Ionicons name="chevron-back" size={28} color={Colors.primary} />
             </TouchableOpacity>
 
             <Text style={styles.headerTitle}>My Favorites</Text>
@@ -66,7 +68,7 @@ const FavouriteCars: React.FC = () => {
               onPress={() => setIsSearching(true)}
               style={styles.navBtn}
             >
-              <Ionicons name="search-outline" size={24} color="rgba(31, 48, 94, 0.88)" />
+              <Ionicons name="search-outline" size={24} color={Colors.primary} />
             </TouchableOpacity>
           </View>
         ) : (
@@ -79,7 +81,7 @@ const FavouriteCars: React.FC = () => {
                 onChangeText={setSearchText}
                 autoFocus
                 style={styles.searchInput}
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={Colors.muted}
               />
               {searchText.length > 0 && (
                 <TouchableOpacity onPress={() => setSearchText("")}>
@@ -164,7 +166,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: Colors.primary,
     letterSpacing: -0.5,
   },
   navBtn: {
