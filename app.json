@@ -20,7 +20,10 @@
       "intentFilters": [
         {
           "action": "VIEW",
-          "category": ["DEFAULT", "BROWSABLE"],
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
           "data": [
             {
               "scheme": "citycarcenter",
@@ -63,7 +66,9 @@
         {
           "android": {
             "packagingOptions": {
-              "pickFirst": ["**/META-INF/versions/9/OSGI-INF/MANIFEST.MF"]
+              "pickFirst": [
+                "**/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+              ]
             }
           }
         }
@@ -77,7 +82,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "bf8ab1a2-9140-4fae-8e36-7e5fa2d19d37"
+        "projectId": "77996d1d-5c78-4285-9e18-cfb9159ea7c3"
       }
     }
   }
