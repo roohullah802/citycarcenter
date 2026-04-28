@@ -1,25 +1,25 @@
-import React, { useState, useMemo } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  ActivityIndicator,
-  StatusBar,
-  Alert,
-  Platform,
-} from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { RFValue } from "react-native-responsive-fontsize";
-import { router } from "expo-router";
-import { useUser } from "@clerk/expo";
-import { useUploadDocs } from "@/hooks/useDocuments";
 import { showToast } from "@/folder/toastService";
 import { uploadFile } from "@/folder/upload";
+import { useUploadDocs } from "@/hooks/useDocuments";
+import { useUser } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
+import React, { useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { RFValue } from "react-native-responsive-fontsize";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type DocKey = "cnicFront" | "cnicBack" | "drivingLicence" | "extraDocuments";
 
@@ -37,7 +37,7 @@ const DOCUMENTS: { key: DocKey; label: string; required: boolean }[] = [
 export default function DocumentUploadScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useUser();
-  const [docs, setDocs] = useState<Record<DocKey, string | null>>({
+  const [docs, setDocs] = useState<Record<DocKey, { uri: string; base64: string | null } | null>>({
     cnicFront: null,
     cnicBack: null,
     drivingLicence: null,
@@ -59,10 +59,17 @@ export default function DocumentUploadScreen() {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      base64: true,
     });
 
     if (!result.canceled) {
-      setDocs((prev) => ({ ...prev, [key]: result.assets[0].uri }));
+      setDocs((prev) => ({
+        ...prev,
+        [key]: {
+          uri: result.assets[0].uri,
+          base64: result.assets[0].base64 || null,
+        },
+      }));
     }
   };
 
@@ -76,9 +83,11 @@ export default function DocumentUploadScreen() {
     try {
       const uploadPromises = DOCUMENTS.filter((d) => docs[d.key]).map(
         async (doc) => {
-          const uri = docs[doc.key]!;
+          const docData = docs[doc.key]!;
           const fileName = `${doc.key}_${user?.id}_${Date.now()}.jpg`;
-          const result = await uploadFile(uri, fileName);
+          // Prefix base64 with data uri header if it's missing (ImageKit needs it or the raw base64)
+          const fileToUpload = docData.base64 ? `data:image/jpeg;base64,${docData.base64}` : docData.uri;
+          const result = await uploadFile(fileToUpload, fileName);
           return { key: doc.key, url: result?.url };
         },
       );
@@ -141,7 +150,7 @@ export default function DocumentUploadScreen() {
             {docs[doc.key] ? (
               <View style={styles.imageWrapper}>
                 <Image
-                  source={{ uri: docs[doc.key]! }}
+                  source={{ uri: docs[doc.key]!.uri }}
                   style={styles.preview}
                 />
                 <TouchableOpacity

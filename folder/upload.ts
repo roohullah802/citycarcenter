@@ -1,7 +1,7 @@
 import { axiosInstance } from "./axiosInstance";
 import { imagekit } from "./imagekit";
 
-export const uploadFile = async (uri: string, fileName: string) => {
+export const uploadFile = async (file: string, fileName: string) => {
   try {
     const response = await axiosInstance.get("/signature");
     const auth = response.data?.imagekit_signature;
@@ -12,7 +12,7 @@ export const uploadFile = async (uri: string, fileName: string) => {
       );
     }
     const result = await imagekit.upload({
-      file: uri,
+      file: file,
       fileName: fileName,
       signature: auth.signature,
       expire: auth.expire,
