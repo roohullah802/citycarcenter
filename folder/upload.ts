@@ -14,6 +14,7 @@ export const uploadFile = async (file: string, fileName: string) => {
     const result = await imagekit.upload({
       file: file,
       fileName: fileName,
+      folder: "DocumentReview",
       signature: auth.signature,
       expire: auth.expire,
       token: auth.token,

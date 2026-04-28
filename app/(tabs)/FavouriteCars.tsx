@@ -1,5 +1,5 @@
 import FavCars from "@/components/FavCars";
-import { useFavorites } from "@/context/FavoutiteContext";
+import { useFetchFavourites } from "@/hooks/useFavourites";
 import { useCars } from "@/hooks/useFetchCars";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -22,11 +22,15 @@ const FavouriteCars: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchText, setSearchText] = useState("");
 
-  const { favouriteIds } = useFavorites();
-  const { data, isLoading } = useCars();
+  const { data: favouritesData, isLoading: isFavLoading, isError: isFavError } = useFetchFavourites();
+  const { data: carsData, isLoading: isCarsLoading } = useCars();
+
+  const favouriteIds = favouritesData?.carIds || [];
+  console.log(favouriteIds);
+
 
   const favouriteCarsData = useMemo(() => {
-    const allCars = data?.data || [];
+    const allCars = carsData?.data || [];
     const favs = allCars.filter((car: any) => favouriteIds.includes(car?._id));
 
     if (!searchText.trim()) return favs;
@@ -36,13 +40,25 @@ const FavouriteCars: React.FC = () => {
         car.modelName?.toLowerCase().includes(searchText.toLowerCase()) ||
         car.brand?.toLowerCase().includes(searchText.toLowerCase()),
     );
-  }, [data, favouriteIds, searchText]);
+  }, [carsData, favouriteIds, searchText]);
 
-  if (isLoading) {
+  if (isFavLoading || isCarsLoading) {
     return (
       <View style={[GlobalStyles.surface, GlobalStyles.center]}>
         <ActivityIndicator size="large" color={Colors.primary} />
         <Text style={styles.loadingText}>Loading your collection...</Text>
+      </View>
+    );
+  }
+
+  if (isFavError) {
+    return (
+      <View style={[GlobalStyles.surface, GlobalStyles.center]}>
+        <Ionicons name="alert-circle-outline" size={42} color={Colors.danger} />
+        <Text style={styles.loadingText}>Error loading favorites</Text>
+        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 20 }}>
+          <Text style={{ color: Colors.primary }}>Go Back</Text>
+        </TouchableOpacity>
       </View>
     );
   }

@@ -1,5 +1,5 @@
 import CarCards from "@/components/CarCards";
-import { useFavorites } from "@/context/FavoutiteContext";
+import { useFetchFavourites } from "@/hooks/useFavourites";
 import { useCars } from "@/hooks/useFetchCars";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -23,7 +23,8 @@ import { GlobalStyles } from "@/utils/GlobalStyles";
 const CarCardsByBrand = () => {
   const [searchText, setSearchText] = useState<string>("");
   const { brand } = useLocalSearchParams<{ brand: string }>();
-  const { favouriteIds } = useFavorites();
+  const { data: favouritesData } = useFetchFavourites();
+  const favouriteIds = favouritesData?.carIds || [];
 
   const { data, isLoading, isError, refetch } = useCars();
   const cars = data?.data;

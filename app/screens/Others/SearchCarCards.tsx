@@ -19,7 +19,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheetFilterModal from "./BottomSheetFilterModel";
 import { useCars } from "@/hooks/useFetchCars";
-import { useFavorites } from "@/context/FavoutiteContext";
+import { useFetchFavourites } from "@/hooks/useFavourites";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
 
@@ -28,7 +28,7 @@ interface Car {
   price: number;
   pricePerDay: number;
   images: { url: string; fileId: string }[];
-  brandImage: string;
+  brandImage: { url: string; fileId: string } | string;
   totalReviews: number;
   brand: string;
   _id: string;
@@ -38,7 +38,8 @@ const SearchCarCards = () => {
   const [searchText, setSearchText] = useState("");
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([1, 1000]);
-  const { favouriteIds } = useFavorites();
+  const { data: favouritesData } = useFetchFavourites();
+  const favouriteIds = favouritesData?.carIds || [];
 
   const ref = useRef<Modalize>(null);
   const { data, isLoading, isError, refetch } = useCars();

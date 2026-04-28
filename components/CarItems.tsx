@@ -1,4 +1,4 @@
-import { useFavorites } from "@/context/FavoutiteContext";
+import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
 import { capitalText } from "@/folder/capitalText";
 import { useAuth } from "@clerk/expo";
 import { router } from "expo-router";
@@ -22,9 +22,10 @@ const CARD_WIDTH = width * 0.7;
 
 function CarItems({ item }: any) {
   const { isSignedIn } = useAuth();
-  const { handleFav, isFavourite } = useFavorites();
+  const { data: favouritesData } = useFetchFavourites();
+  const toggleFavourite = useToggleFavourite();
 
-  const isFav = isFavourite(item?._id);
+  const isFav = favouritesData?.carIds?.includes(item?._id);
 
   return (
     <Pressable
@@ -54,7 +55,7 @@ function CarItems({ item }: any) {
           {/* Favorite Button */}
           <TouchableOpacity
             style={styles.favoriteBtn}
-            onPress={() => handleFav(item?._id)}
+            onPress={() => toggleFavourite.mutate(item?._id)}
             activeOpacity={0.7}
           >
             <Icon

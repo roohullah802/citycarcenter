@@ -11,7 +11,6 @@ import { ActivityIndicator, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "react-native-url-polyfill/auto";
-import { FavoritesProvider } from "../context/FavoutiteContext";
 import { tokenCache } from "../folder/tokenCache";
 
 SplashScreen.preventAutoHideAsync();
@@ -58,12 +57,11 @@ export default function RootLayout() {
           <GestureHandlerRootView style={{ flex: 1 }}>
             <QueryClientProvider client={queryClient}>
               <ToastProvider>
-                <FavoritesProvider>
-                  <StripeProvider
-                    publishableKey={
-                      process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-                    }
-                  >
+                <StripeProvider
+                  publishableKey={
+                    process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+                  }
+                >
                     <Stack
                       screenOptions={{ 
                         headerShown: false, 
@@ -87,8 +85,7 @@ export default function RootLayout() {
                       <Stack.Screen name="screens/Setting/DocumentUploadScreen" />
                       <Stack.Screen name="screens/Setting/DocumentSubmittedScreen" />
                     </Stack>
-                  </StripeProvider>
-                </FavoritesProvider>
+                </StripeProvider>
               </ToastProvider>
             </QueryClientProvider>
           </GestureHandlerRootView>

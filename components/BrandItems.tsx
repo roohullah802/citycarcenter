@@ -25,7 +25,7 @@ function BrandItems({ item }: any) {
     >
       <View style={styles.brandIconContainer}>
         <Image
-          source={{ uri: item.brandImage }}
+          source={{ uri: item.brandImage?.url || item.brandImage }}
           style={styles.brandIcon}
           resizeMode="contain"
         />

@@ -1,4 +1,4 @@
-import { useFavorites } from "@/context/FavoutiteContext";
+import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
 import { useAuth } from "@clerk/expo";
 import { router } from "expo-router";
 import React from "react";
@@ -15,10 +15,11 @@ import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
 
 function CarCards({ item }: any) {
-  const { handleFav, isFavourite } = useFavorites();
+  const { data: favouritesData } = useFetchFavourites();
+  const toggleFavourite = useToggleFavourite();
   const { isSignedIn } = useAuth();
 
-  const isFav = isFavourite(item?._id);
+  const isFav = favouritesData?.carIds?.includes(item?._id);
   return (
     <Pressable
       style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
@@ -75,7 +76,7 @@ function CarCards({ item }: any) {
 
             <TouchableOpacity
               style={styles.heartBtn}
-              onPress={() => handleFav(item?._id)}
+              onPress={() => toggleFavourite.mutate(item?._id)}
             >
               <Icon
                 name={isFav ? "heart" : "heart-outline"}

@@ -38,7 +38,7 @@ const BrandCard: React.FC<Props> = React.memo(({ item, size = CARD_SIZE }) => {
         ]}
       >
         <Image
-          source={{ uri: item?.brandImage as unknown as string }}
+          source={{ uri: (item?.brandImage as any)?.url || (item?.brandImage as any) }}
           style={styles.image}
           resizeMode="contain"
         />

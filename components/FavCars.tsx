@@ -1,4 +1,4 @@
-import { useFavorites } from "@/context/FavoutiteContext";
+import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -15,8 +15,9 @@ import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
 
 function FavCars({ item }: any) {
-  const { isFavourite, handleFav } = useFavorites();
-  const isFav = isFavourite(item?._id);
+  const { data: favouritesData } = useFetchFavourites();
+  const toggleFavourite = useToggleFavourite();
+  const isFav = favouritesData?.carIds?.includes(item?._id);
 
   return (
     <View style={styles.container}>
@@ -60,7 +61,7 @@ function FavCars({ item }: any) {
               </Text>
               <TouchableOpacity
                 style={styles.heartBtn}
-                onPress={() => handleFav(item._id)}
+                onPress={() => toggleFavourite.mutate(item._id)}
                 activeOpacity={0.7}
               >
                 <Icon

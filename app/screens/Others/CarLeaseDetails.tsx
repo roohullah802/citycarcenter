@@ -1,5 +1,5 @@
 import { ImageItem } from "@/components/ImageItems";
-import { useFavorites } from "@/context/FavoutiteContext";
+import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
 import { capitalText } from "@/folder/capitalText";
 import { useCarById } from "@/hooks/useFetchCars";
 import { useAuth } from "@clerk/expo";
@@ -29,7 +29,8 @@ const CarDetails = () => {
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const { isSignedIn } = useAuth();
-  const { isFavourite, handleFav } = useFavorites();
+  const { data: favouritesData } = useFetchFavourites();
+  const toggleFavourite = useToggleFavourite();
 
   const { data, isLoading, isError, refetch } = useCarById(id as string);
   const details = data?.data?.[0];
@@ -77,7 +78,7 @@ const CarDetails = () => {
     );
   }
 
-  const isFav = isFavourite(details?._id);
+  const isFav = favouritesData?.carIds?.includes(details?._id);
 
   return (
     <View style={styles.container}>
@@ -131,7 +132,7 @@ const CarDetails = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.roundBtn}
-            onPress={() => handleFav(details?._id)}
+            onPress={() => toggleFavourite.mutate(details?._id)}
           >
             <Ionicons
               name={isFav ? "heart" : "heart-outline"}
