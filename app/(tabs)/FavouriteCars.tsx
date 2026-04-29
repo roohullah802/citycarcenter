@@ -26,7 +26,6 @@ const FavouriteCars: React.FC = () => {
   const { data: carsData, isLoading: isCarsLoading } = useCars();
 
   const favouriteIds = favouritesData?.carIds || [];
-  console.log(favouriteIds);
 
 
   const favouriteCarsData = useMemo(() => {

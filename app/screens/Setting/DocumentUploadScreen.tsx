@@ -88,7 +88,7 @@ export default function DocumentUploadScreen() {
           // Prefix base64 with data uri header if it's missing (ImageKit needs it or the raw base64)
           const fileToUpload = docData.base64 ? `data:image/jpeg;base64,${docData.base64}` : docData.uri;
           const result = await uploadFile(fileToUpload, fileName);
-          return { key: doc.key, url: result?.url };
+          return { key: doc.key, url: result?.url, fileId: result?.fileId };
         },
       );
 
@@ -96,11 +96,21 @@ export default function DocumentUploadScreen() {
 
       const payload = {
         clerkId: user?.id,
-        cnicFront: results.find((r) => r.key === "cnicFront")?.url,
-        cnicBack: results.find((r) => r.key === "cnicBack")?.url,
-        drivingLicence: results.find((r) => r.key === "drivingLicence")?.url,
-        extraDocuments:
-          results.find((r) => r.key === "extraDocuments")?.url || "",
+        cnicFront: (() => {
+          const res = results.find((r) => r.key === "cnicFront");
+          return res ? { url: res.url, fileId: res.fileId } : undefined;
+        })(),
+        cnicBack: (() => {
+          const res = results.find((r) => r.key === "cnicBack");
+          return res ? { url: res.url, fileId: res.fileId } : undefined;
+        })(),
+        drivingLicence: (() => {
+          const res = results.find((r) => r.key === "drivingLicence");
+          return res ? { url: res.url, fileId: res.fileId } : undefined;
+        })(),
+        extraDocuments: results
+          .filter((r) => r.key === "extraDocuments")
+          .map((r) => ({ url: r.url, fileId: r.fileId })),
       };
 
       await uploadDocToDB(payload);
