@@ -1,26 +1,26 @@
 import { ImageItem } from "@/components/ImageItems";
-import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
 import { capitalText } from "@/folder/capitalText";
+import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
 import { useCarById } from "@/hooks/useFetchCars";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 import { useAuth } from "@clerk/expo";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
   FlatList,
+  Platform,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { Colors } from "@/utils/Colors";
-import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const { height } = Dimensions.get("window");
 const HEADER_HEIGHT = height * 0.42;
@@ -97,6 +97,10 @@ const CarDetails = () => {
           showsHorizontalScrollIndicator={false}
           keyExtractor={(_, index) => index.toString()}
           onViewableItemsChanged={onViewRef.current}
+          initialNumToRender={1}
+          maxToRenderPerBatch={1}
+          windowSize={2}
+          removeClippedSubviews={true}
           viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
           renderItem={({ item, index }) => (
             <ImageItem

@@ -6,11 +6,11 @@ import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
 import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   FlatList,
-  Image,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -101,6 +101,8 @@ function HomeScreen() {
                     : require("../../assests/guest3.png")
                 }
                 style={styles.profileImage}
+                transition={300}
+                cachePolicy={"memory-disk"}
               />
             </TouchableOpacity>
           </View>
@@ -189,6 +191,10 @@ function HomeScreen() {
                 data={brands?.brands}
                 renderItem={({ item }) => <BrandItems item={item} />}
                 keyExtractor={(item, index) => index.toString()}
+                initialNumToRender={4}
+                maxToRenderPerBatch={4}
+                windowSize={5}
+                removeClippedSubviews={true}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.horizontalList}
@@ -222,6 +228,10 @@ function HomeScreen() {
                 data={cars?.data}
                 renderItem={({ item }) => <CarItems item={item} />}
                 keyExtractor={(item) => item._id}
+                initialNumToRender={5}
+                maxToRenderPerBatch={5}
+                windowSize={6}
+                removeClippedSubviews={true}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.horizontalList}
@@ -242,6 +252,8 @@ function HomeScreen() {
                   : require("../../assests/guest3.png")
               }
               style={styles.modalProfileImage}
+              transition={300}
+              cachePolicy={"memory-disk"}
             />
             {isSignedIn && (
               <View style={styles.verifiedBadge}>

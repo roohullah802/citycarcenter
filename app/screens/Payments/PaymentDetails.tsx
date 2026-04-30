@@ -1,18 +1,18 @@
 import PaymentHistory from "@/components/PaymentHistory";
 import { usePaymentHistory } from "@/hooks/usePayment";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import {
+  ActivityIndicator,
   FlatList,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
-  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 
 const PaymentDetails = () => {
   const { data, isLoading, isError, refetch } = usePaymentHistory();
@@ -65,6 +65,10 @@ const PaymentDetails = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        initialNumToRender={3}
+        maxToRenderPerBatch={4}
+        windowSize={3}
+        removeClippedSubviews={true}
         ListEmptyComponent={
           <View style={styles.emptyWrapper}>
             <View style={styles.emptyIconCircle}>

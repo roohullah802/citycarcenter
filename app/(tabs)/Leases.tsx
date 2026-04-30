@@ -1,6 +1,9 @@
 import CountDown from "@/components/CountDown";
 import { useActiveLeases } from "@/hooks/useFetchLease";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 import { useAuth } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -13,9 +16,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "@/utils/Colors";
-import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const AllLeases = () => {
   const { isSignedIn } = useAuth();
@@ -100,6 +100,10 @@ const AllLeases = () => {
             data={leases || []}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => <CountDown item={item} />}
+            initialNumToRender={5}
+            maxToRenderPerBatch={5}
+            windowSize={6}
+            removeClippedSubviews={true}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
           />

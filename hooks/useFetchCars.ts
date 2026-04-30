@@ -15,7 +15,6 @@ export const useCarById = (id: string) => {
     queryKey: ["carsById", id],
     queryFn: () => carsApi.carById(id),
     enabled: !!id,
-    refetchInterval: 5000,
   });
 
   return result;

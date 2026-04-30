@@ -1,18 +1,18 @@
 import { useCarById } from "@/hooks/useFetchCars";
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState, useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Dimensions,
   FlatList,
+  StatusBar,
+  StyleSheet,
+  Text,
   TouchableOpacity,
   View,
-  Dimensions,
-  Text,
-  ActivityIndicator,
-  StyleSheet,
-  StatusBar,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width, height } = Dimensions.get("window");
@@ -87,6 +87,10 @@ function CarImages() {
         viewabilityConfig={viewabilityConfig}
         keyExtractor={(_, index) => index.toString()}
         renderItem={({ item }) => <IndividualImage url={item?.url} />}
+        initialNumToRender={1}
+        maxToRenderPerBatch={1}
+        windowSize={2}
+        removeClippedSubviews={true}
         contentContainerStyle={styles.listContent}
       />
     </View>
@@ -107,6 +111,7 @@ const IndividualImage = ({ url }: { url: string }) => {
         source={{ uri: url }}
         contentFit="contain"
         transition={300}
+        cachePolicy={"memory-disk"}
         style={styles.fullImage}
         onLoadEnd={() => setIsImgLoading(false)}
       />

@@ -1,24 +1,24 @@
 import { SettingsRow } from "@/components/SettingsRow";
+import { useDocumentStatus } from "@/hooks/useDocuments";
 import { statusConfig } from "@/lib/status";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
 import { useAuth, useUser } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-  Image,
+  Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  StatusBar,
-  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import LogoutModal from "../screens/Auth/Logout";
-import { useDocumentStatus } from "@/hooks/useDocuments";
-import { Colors } from "@/utils/Colors";
-import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const Settings = () => {
   const insets = useSafeAreaInsets();
@@ -40,12 +40,12 @@ const Settings = () => {
     if (isError || !data) return { ...statusConfig.unverified, icon: "alert-circle-outline" as const };
     const currentStatus = data?.docStatus || "unverified";
     const config = statusConfig[currentStatus] ?? statusConfig.unverified;
-    
+
     let icon: keyof typeof Ionicons.glyphMap = "alert-circle-outline";
     if (currentStatus === "approved") icon = "checkmark-circle";
     if (currentStatus === "pending") icon = "time-outline";
     if (currentStatus === "declined") icon = "close-circle-outline";
-    
+
     return { ...config, icon };
   };
 
@@ -66,7 +66,7 @@ const Settings = () => {
         {/* PREMIUM PROFILE CARD */}
         <View style={styles.profileCard}>
           <View style={styles.avatarWrapper}>
-            <Image source={avatarSource} style={styles.avatar} />
+            <Image source={avatarSource} style={styles.avatar} transition={300} cachePolicy={"memory-disk"} />
           </View>
 
           <View style={styles.profileDetails}>
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     ...GlobalStyles.shadowLight,
   },
-  avatarWrapper: { 
+  avatarWrapper: {
     position: "relative",
     borderWidth: 1,
     borderColor: "#F1F5F9",

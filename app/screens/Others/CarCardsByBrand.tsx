@@ -1,9 +1,13 @@
 import CarCards from "@/components/CarCards";
 import { useFetchFavourites } from "@/hooks/useFavourites";
 import { useCars } from "@/hooks/useFetchCars";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
+import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Keyboard,
   StatusBar,
@@ -13,12 +17,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "@/utils/Colors";
-import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const CarCardsByBrand = () => {
   const [searchText, setSearchText] = useState<string>("");
@@ -122,6 +122,10 @@ const CarCardsByBrand = () => {
             renderItem={({ item }) => <CarCards item={item} />}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
+            initialNumToRender={5}
+            maxToRenderPerBatch={5}
+            windowSize={6}
+            removeClippedSubviews={true}
             extraData={favouriteIds}
           />
         )}

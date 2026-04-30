@@ -1,11 +1,11 @@
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import React from "react";
 import {
-  Image,
-  StyleSheet,
-  View,
   Dimensions,
+  StyleSheet,
   TouchableOpacity,
+  View,
 } from "react-native";
 
 interface Props {
@@ -40,7 +40,9 @@ const BrandCard: React.FC<Props> = React.memo(({ item, size = CARD_SIZE }) => {
         <Image
           source={{ uri: (item?.brandImage as any)?.url || (item?.brandImage as any) }}
           style={styles.image}
-          resizeMode="contain"
+          contentFit="contain"
+          transition={300}
+          cachePolicy={"memory-disk"}
         />
       </View>
     </TouchableOpacity>

@@ -1,22 +1,22 @@
 import FavCars from "@/components/FavCars";
 import { useFetchFavourites } from "@/hooks/useFavourites";
 import { useCars } from "@/hooks/useFetchCars";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  FlatList,
-  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "@/utils/Colors";
-import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const FavouriteCars: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
@@ -123,6 +123,10 @@ const FavouriteCars: React.FC = () => {
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
+        windowSize={6}
+        removeClippedSubviews={true}
         ListEmptyComponent={
           <View style={styles.emptyWrapper}>
             <View style={styles.emptyIconBox}>

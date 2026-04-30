@@ -1,9 +1,10 @@
 import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
+import { Colors } from "@/utils/Colors";
 import { useAuth } from "@clerk/expo";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import React from "react";
 import {
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -11,8 +12,6 @@ import {
   View,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
-import { Colors } from "@/utils/Colors";
-import { GlobalStyles } from "@/utils/GlobalStyles";
 
 function CarCards({ item }: any) {
   const { data: favouritesData } = useFetchFavourites();
@@ -34,7 +33,9 @@ function CarCards({ item }: any) {
         <Image
           source={{ uri: item?.images?.[0]?.url }}
           style={styles.image}
-          resizeMode="cover"
+          contentFit="cover"
+          transition={300}
+          cachePolicy={"memory-disk"}
         />
         {item?.available === false && (
           <View style={styles.rentedBadge}>

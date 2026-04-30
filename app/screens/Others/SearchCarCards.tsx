@@ -1,9 +1,16 @@
 import CarCards from "@/components/CarCards";
+import { useFetchFavourites } from "@/hooks/useFavourites";
+import { useCars } from "@/hooks/useFetchCars";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Keyboard,
+  Platform,
   StatusBar,
   StyleSheet,
   Text,
@@ -11,17 +18,10 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  ActivityIndicator,
-  Platform,
 } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import BottomSheetFilterModal from "./BottomSheetFilterModel";
-import { useCars } from "@/hooks/useFetchCars";
-import { useFetchFavourites } from "@/hooks/useFavourites";
-import { Colors } from "@/utils/Colors";
-import { GlobalStyles } from "@/utils/GlobalStyles";
 
 interface Car {
   modelName: string;
@@ -176,6 +176,10 @@ const SearchCarCards = () => {
             renderItem={({ item }) => <CarCards item={item} />}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
+            initialNumToRender={5}
+            maxToRenderPerBatch={5}
+            windowSize={4}
+            removeClippedSubviews={true}
             extraData={favouriteIds}
             refreshing={isLoading}
             onRefresh={refetch} // Pull-to-refresh integration

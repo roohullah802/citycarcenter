@@ -1,14 +1,14 @@
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
   StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const DocumentsSubmittedScreen: React.FC = () => {
@@ -31,7 +31,9 @@ const DocumentsSubmittedScreen: React.FC = () => {
               <Image
                 source={require("../../../assests/uploadSuccess.jpeg")}
                 style={styles.image}
-                resizeMode="cover"
+                contentFit="cover"
+                transition={300}
+                cachePolicy={"memory-disk"}
               />
             </View>
           </View>

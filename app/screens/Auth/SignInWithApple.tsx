@@ -1,16 +1,15 @@
 import { useSSO } from "@clerk/expo";
+import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-
 export default function SignInWithApple() {
   const [loading, setLoading] = useState<boolean>(false);
   const { startSSOFlow } = useSSO();
@@ -61,7 +60,9 @@ export default function SignInWithApple() {
         <Image
           source={require("../../../assests/apple.png")}
           style={styles.icon}
-          resizeMode="contain"
+          transition={300}
+          contentFit="contain"
+          cachePolicy={"memory-disk"}
         />
       </View>
       <View style={styles.labelWrap}>

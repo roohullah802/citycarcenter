@@ -1,20 +1,20 @@
 import { useFaqs } from "@/hooks/useContent";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  LayoutAnimation,
+  Platform,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
-  LayoutAnimation,
-  Platform,
   UIManager,
-  StatusBar,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 
 if (
   Platform.OS === "android" &&
@@ -96,6 +96,10 @@ const FAQScreen: React.FC = () => {
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
+        initialNumToRender={5}
+        maxToRenderPerBatch={4}
+        windowSize={4}
+        removeClippedSubviews={true}
         ListEmptyComponent={
           isLoading ? (
             <ActivityIndicator style={{ marginTop: 40 }} color="rgba(31, 48, 94, 0.88)" />

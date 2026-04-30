@@ -1,18 +1,17 @@
 import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import React from "react";
 import {
-  Image,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
-import { Colors } from "@/utils/Colors";
-import { GlobalStyles } from "@/utils/GlobalStyles";
 
 function FavCars({ item }: any) {
   const { data: favouritesData } = useFetchFavourites();
@@ -38,7 +37,9 @@ function FavCars({ item }: any) {
             <Image
               source={{ uri: item?.images?.[0]?.url }}
               style={styles.image}
-              resizeMode="cover"
+              contentFit="cover"
+              transition={300}
+              cachePolicy={"memory-disk"}
             />
             <View style={styles.priceBadge}>
               <Text style={styles.priceAmount}>${item?.pricePerDay}</Text>

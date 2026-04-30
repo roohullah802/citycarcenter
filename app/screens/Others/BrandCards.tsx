@@ -1,3 +1,7 @@
+import { useFetchBrands } from "@/hooks/useFetchBrands";
+import { Colors } from "@/utils/Colors";
+import { GlobalStyles } from "@/utils/GlobalStyles";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
@@ -11,11 +15,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import BrandCard from "../../../components/BrandCard";
-import { useFetchBrands } from "@/hooks/useFetchBrands";
-import { Colors } from "@/utils/Colors";
-import { GlobalStyles } from "@/utils/GlobalStyles";
 
 const TopBrandsScreen = () => {
   const [search, setSearch] = useState<string>("");
@@ -100,6 +100,10 @@ const TopBrandsScreen = () => {
           keyExtractor={(item, index) => item._id || index.toString()}
           contentContainerStyle={styles.listContent}
           renderItem={renderBrand}
+          initialNumToRender={8}
+          maxToRenderPerBatch={8}
+          windowSize={10}
+          removeClippedSubviews={true}
           showsVerticalScrollIndicator={false}
           columnWrapperStyle={styles.columnGap}
         />

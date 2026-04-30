@@ -1,7 +1,7 @@
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import React from "react";
 import {
-  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -27,7 +27,9 @@ function BrandItems({ item }: any) {
         <Image
           source={{ uri: item.brandImage?.url || item.brandImage }}
           style={styles.brandIcon}
-          resizeMode="contain"
+          contentFit="contain"
+          transition={300}
+          cachePolicy={"memory-disk"}
         />
       </View>
       <Text style={styles.brandName} numberOfLines={1}>
