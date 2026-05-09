@@ -20,9 +20,11 @@ import { useCreateIntent } from "@/hooks/usePayment";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
 import { useUser } from "@clerk/expo";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ExtendLeaseScreen = () => {
   const { id } = useLocalSearchParams();
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const createIntent = useCreateIntent();
@@ -74,6 +76,11 @@ const ExtendLeaseScreen = () => {
 
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) throw presentError;
+
+      // Invalidate frontend cache immediately
+      queryClient.invalidateQueries({ queryKey: ["leases"] });
+      queryClient.invalidateQueries({ queryKey: ["activeLeases"] });
+      queryClient.invalidateQueries({ queryKey: ["leaseById"] });
 
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {

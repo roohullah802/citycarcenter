@@ -1,13 +1,19 @@
 import accountVerificationApi from "@/api/account.verification.service";
 import { showToast } from "@/folder/toastService";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 
 export const useUploadDocs = () => {
+  const queryClient = useQueryClient();
+
   const result = useMutation({
     mutationKey: ["uploadDocs"],
     mutationFn: (data: any) => accountVerificationApi.documents(data),
-    onSuccess: () => showToast("Documents uploaded successfully! "),
+    onSuccess: () => {
+      showToast("Documents uploaded successfully! ");
+      // Invalidate the status query to immediately fetch the new pending status
+      queryClient.invalidateQueries({ queryKey: ["status"] });
+    },
     onError: (error) =>
       showToast(error.message || "Failed to upload documents!"),
   });
