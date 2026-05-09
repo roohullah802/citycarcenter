@@ -76,6 +76,8 @@ export default function DateAndTimeScreen() {
       });
 
 
+      if (resp?.rateLimited) return;
+
       if (!resp?.clientSecret) throw new Error(resp?.message || resp?.error || "Payment gateway error");
 
       const { error: initError } = await initPaymentSheet({
