@@ -1,3 +1,4 @@
+import { capitalText } from "@/folder/capitalText";
 import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
 import { Colors } from "@/utils/Colors";
 import { useAuth } from "@clerk/expo";
@@ -44,7 +45,7 @@ function CarCards({ item }: any) {
         )}
         <View style={styles.details}>
           <Text style={styles.name} numberOfLines={1}>
-            {item.modelName}
+            {capitalText(item.modelName)}
           </Text>
           <Text style={styles.price} numberOfLines={1}>
             Price: ${item.pricePerDay}/day

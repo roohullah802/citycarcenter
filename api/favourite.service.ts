@@ -5,8 +5,8 @@ const favouriteApi = {
     const response = await axiosInstance.get(`/favourites/${userId}`);
     return response.data;
   },
-  toggleFavourite: async (data: { userId: string; carId: string }) => {
-    const response = await axiosInstance.post("/favourites", data);
+  toggleFavourite: async (data: { carId: string }, userId: string) => {
+    const response = await axiosInstance.post(`/favourites/${userId}`, data);
     return response.data;
   },
 };

@@ -12,6 +12,7 @@ import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
+import { capitalText } from "@/folder/capitalText";
 
 const CountDown = ({ item }: any) => {
   const remainingSeconds = useMemo(() => {
@@ -58,12 +59,12 @@ const CountDown = ({ item }: any) => {
             <Text style={styles.statusLabel}>ACTIVE RENTAL</Text>
           </View>
           <Text style={styles.modelName} numberOfLines={1}>
-            {item?.car?.modelName || "PREMIUM CAR"}
+            {capitalText(item?.car?.modelName) || "PREMIUM CAR"}
           </Text>
           <View style={styles.brandRow}>
             <Ionicons name="car-sport-outline" size={14} color={Colors.muted} />
             <Text style={styles.brandText} numberOfLines={1}>
-              {item?.car?.brand || "Brand"}
+              {capitalText(item?.car?.brand) || "Brand"}
             </Text>
           </View>
         </View>

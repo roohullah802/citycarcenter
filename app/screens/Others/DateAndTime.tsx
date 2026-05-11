@@ -96,8 +96,6 @@ export default function DateAndTimeScreen() {
 
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {
-      console.log("err ", error);
-
       const serverData = error?.response?.data;
       const serverMessage = serverData?.message || serverData?.error || serverData;
       let finalMessage = serverMessage || error?.message || "Transaction failed";

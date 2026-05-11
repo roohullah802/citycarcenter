@@ -21,7 +21,6 @@ export const unstable_settings = {
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 const publishableStripeKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-console.log("kk ", publishableStripeKey);
 
 const queryClient = new QueryClient();
 

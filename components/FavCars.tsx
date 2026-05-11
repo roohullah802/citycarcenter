@@ -1,3 +1,4 @@
+import { capitalText } from "@/folder/capitalText";
 import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
@@ -58,7 +59,7 @@ function FavCars({ item }: any) {
           <View style={styles.details}>
             <View style={styles.headerRow}>
               <Text style={styles.name} numberOfLines={1}>
-                {item?.modelName}
+                {capitalText(item?.modelName)}
               </Text>
               <TouchableOpacity
                 style={styles.heartBtn}

@@ -20,7 +20,7 @@ export const useToggleFavourite = () => {
 
   return useMutation({
     mutationFn: (carId: string) =>
-      favouriteApi.toggleFavourite({ userId: userId!, carId }),
+      favouriteApi.toggleFavourite({ carId }, userId!),
     onMutate: async (carId) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey: ["favourites", userId] });
