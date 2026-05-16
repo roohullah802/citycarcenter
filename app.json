@@ -7,6 +7,9 @@
     "icon": "./assets/icons/ios-light.png",
     "scheme": "citycarcenter",
     "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.roohullah.citycarcenter",
