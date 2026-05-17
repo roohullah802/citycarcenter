@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCreateIntent } from "@/hooks/usePayment";
 import { showToast } from "../../../folder/toastService";
+import { useDocumentStatus } from "@/hooks/useDocuments";
 
 export default function DateAndTimeScreen() {
   const { carId } = useLocalSearchParams<{ carId: string }>();
@@ -31,6 +32,8 @@ export default function DateAndTimeScreen() {
   // State
   const [pickUpDate, setPickUpDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const { data: docData } = useDocumentStatus();
+  const currentStatus = docData?.docStatus || "unverified";
 
   // Constants
   const LEASE_DAYS = 7;
@@ -60,6 +63,11 @@ export default function DateAndTimeScreen() {
 
   const handlePayment = async () => {
     if (!isSignedIn) return showToast("Please login to continue");
+    if (currentStatus !== "approved") {
+      showToast("Please upload your documents and wait for approval to rent a car.");
+      router.push("/screens/Setting/DocumentUploadScreen");
+      return;
+    }
 
     try {
       const cleanCarId = carId.replace(/"/g, "");

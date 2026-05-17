@@ -4,6 +4,8 @@ import { Colors } from "@/utils/Colors";
 import { useAuth } from "@clerk/expo";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { useDocumentStatus } from "@/hooks/useDocuments";
+import { showToast } from "@/folder/toastService";
 import React from "react";
 import {
   Pressable,
@@ -18,6 +20,8 @@ function CarCards({ item }: any) {
   const { data: favouritesData } = useFetchFavourites();
   const toggleFavourite = useToggleFavourite();
   const { isSignedIn } = useAuth();
+  const { data: docData } = useDocumentStatus();
+  const currentStatus = docData?.docStatus || "unverified";
 
   const isFav = favouritesData?.carIds?.includes(item?._id);
   return (
@@ -63,6 +67,9 @@ function CarCards({ item }: any) {
               onPress={() => {
                 if (!isSignedIn) {
                   router.push("/screens/Auth/SocialAuth");
+                } else if (currentStatus !== "approved") {
+                  showToast("Please upload your documents and wait for approval to rent a car.");
+                  router.push("/screens/Setting/DocumentUploadScreen");
                 } else {
                   router.push({
                     pathname: "/screens/Others/DateAndTime",

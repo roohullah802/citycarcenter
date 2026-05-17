@@ -8,6 +8,8 @@ import { useAuth } from "@clerk/expo";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useRef, useState } from "react";
+import { useDocumentStatus } from "@/hooks/useDocuments";
+import { showToast } from "@/folder/toastService";
 import {
   ActivityIndicator,
   Dimensions,
@@ -38,6 +40,8 @@ const CarDetails = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showMoreBtn, setShowMoreBtn] = useState(false);
+  const { data: docData } = useDocumentStatus();
+  const currentStatus = docData?.docStatus || "unverified";
 
   const onViewRef = useRef(({ viewableItems }: any) => {
     if (viewableItems?.length > 0) setActiveIndex(viewableItems[0].index);
@@ -256,6 +260,9 @@ const CarDetails = () => {
           onPress={() => {
             if (!isSignedIn) {
               router.push("/screens/Auth/SocialAuth");
+            } else if (currentStatus !== "approved") {
+              showToast("Please upload your documents and wait for approval to rent a car.");
+              router.push("/screens/Setting/DocumentUploadScreen");
             } else {
               router.push({
                 pathname: "/screens/Others/DateAndTime",

@@ -4,6 +4,8 @@ import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
 import { useAuth } from "@clerk/expo";
 import { Image } from "expo-image";
+import { useDocumentStatus } from "@/hooks/useDocuments";
+import { showToast } from "@/folder/toastService";
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -23,6 +25,8 @@ function CarItems({ item }: any) {
   const { isSignedIn } = useAuth();
   const { data: favouritesData } = useFetchFavourites();
   const toggleFavourite = useToggleFavourite();
+  const { data: docData } = useDocumentStatus();
+  const currentStatus = docData?.docStatus || "unverified";
 
   const isFav = favouritesData?.carIds?.includes(item?._id);
 
@@ -106,6 +110,11 @@ function CarItems({ item }: any) {
               if (item?.available === false) return;
               if (!isSignedIn) {
                 router.push("/screens/Auth/SocialAuth");
+                return;
+              }
+              if (currentStatus !== "approved") {
+                showToast("Please upload your documents and wait for approval to rent a car.");
+                router.push("/screens/Setting/DocumentUploadScreen");
                 return;
               }
               router.push({

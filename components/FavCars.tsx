@@ -4,6 +4,8 @@ import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { useDocumentStatus } from "@/hooks/useDocuments";
+import { showToast } from "@/folder/toastService";
 import React from "react";
 import {
   Pressable,
@@ -17,6 +19,8 @@ import Icon from "react-native-vector-icons/Ionicons";
 function FavCars({ item }: any) {
   const { data: favouritesData } = useFetchFavourites();
   const toggleFavourite = useToggleFavourite();
+  const { data: docData } = useDocumentStatus();
+  const currentStatus = docData?.docStatus || "unverified";
   const isFav = favouritesData?.carIds?.includes(item?._id);
 
   return (
@@ -91,6 +95,11 @@ function FavCars({ item }: any) {
               activeOpacity={0.8}
               onPress={() => {
                 if (item?.available === false) return;
+                if (currentStatus !== "approved") {
+                  showToast("Please upload your documents and wait for approval to rent a car.");
+                  router.push("/screens/Setting/DocumentUploadScreen");
+                  return;
+                }
                 router.push({
                   pathname: "/screens/Others/DateAndTime",
                   params: { carId: item?._id },
