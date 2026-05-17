@@ -1,25 +1,16 @@
-import { Redirect, Tabs } from "expo-router";
-import React, { useEffect } from "react";
-import { ActivityIndicator, View, Platform, StyleSheet } from "react-native";
-import { useAuth } from "@clerk/expo";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { setAuthToken } from "@/folder/axiosInstance";
 import { Colors } from "@/utils/Colors";
+import { useAuth } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import React from "react";
+import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  const { getToken, isLoaded, isSignedIn } = useAuth({
+  const { isLoaded } = useAuth({
     treatPendingAsSignedOut: false,
   });
-
-  useEffect(() => {
-    async function syncToken() {
-      const token = await getToken();
-      setAuthToken(token);
-    }
-    if (isSignedIn) syncToken();
-  }, [getToken, isSignedIn, isLoaded]);
 
   if (!isLoaded) {
     return (
@@ -65,10 +56,10 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              size={24} 
-              name={focused ? "home" : "home-outline"} 
-              color={color} 
+            <Ionicons
+              size={24}
+              name={focused ? "home" : "home-outline"}
+              color={color}
             />
           ),
         }}
@@ -78,10 +69,10 @@ export default function TabLayout() {
         options={{
           title: "Leases",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              size={24} 
-              name={focused ? "car-sport" : "car-sport-outline"} 
-              color={color} 
+            <Ionicons
+              size={24}
+              name={focused ? "car-sport" : "car-sport-outline"}
+              color={color}
             />
           ),
         }}
@@ -91,10 +82,10 @@ export default function TabLayout() {
         options={{
           title: "Favorites",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              size={24} 
-              name={focused ? "heart" : "heart-outline"} 
-              color={color} 
+            <Ionicons
+              size={24}
+              name={focused ? "heart" : "heart-outline"}
+              color={color}
             />
           ),
         }}
@@ -104,10 +95,10 @@ export default function TabLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              size={24} 
-              name={focused ? "settings" : "settings-outline"} 
-              color={color} 
+            <Ionicons
+              size={24}
+              name={focused ? "settings" : "settings-outline"}
+              color={color}
             />
           ),
         }}
@@ -118,8 +109,8 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   loadingContainer: {
-    flex: 1, 
-    justifyContent: "center", 
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#FFFFFF"
   }
