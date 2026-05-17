@@ -67,8 +67,10 @@ function CarCards({ item }: any) {
               onPress={() => {
                 if (!isSignedIn) {
                   router.push("/screens/Auth/SocialAuth");
+                } else if (currentStatus === "pending") {
+                  showToast("Your documents are under review. Please wait for approval.");
                 } else if (currentStatus !== "approved") {
-                  showToast("Please upload your documents and wait for approval to rent a car.");
+                  showToast("Please upload your documents to rent a car.");
                   router.push("/screens/Setting/DocumentUploadScreen");
                 } else {
                   router.push({

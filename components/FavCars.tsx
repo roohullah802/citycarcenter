@@ -95,8 +95,12 @@ function FavCars({ item }: any) {
               activeOpacity={0.8}
               onPress={() => {
                 if (item?.available === false) return;
+                if (currentStatus === "pending") {
+                  showToast("Your documents are under review. Please wait for approval.");
+                  return;
+                }
                 if (currentStatus !== "approved") {
-                  showToast("Please upload your documents and wait for approval to rent a car.");
+                  showToast("Please upload your documents to rent a car.");
                   router.push("/screens/Setting/DocumentUploadScreen");
                   return;
                 }

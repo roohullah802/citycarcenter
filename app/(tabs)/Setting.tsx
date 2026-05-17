@@ -7,6 +7,7 @@ import { useAuth, useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { showToast } from "@/folder/toastService";
 import React, { useCallback, useState } from "react";
 import {
   Platform,
@@ -27,6 +28,7 @@ const Settings = () => {
   const { isSignedIn } = useAuth();
 
   const { data, isLoading, isError } = useDocumentStatus();
+  const currentStatus = data?.docStatus || "unverified";
 
   const handleVisible = useCallback(() => setIsVisible((prev) => !prev), []);
 
@@ -38,7 +40,6 @@ const Settings = () => {
   const getBadgeInfo = () => {
     if (isLoading) return { label: "...", color: Colors.muted, icon: "ellipsis-horizontal" as const };
     if (isError || !data) return { ...statusConfig.unverified, icon: "alert-circle-outline" as const };
-    const currentStatus = data?.docStatus || "unverified";
     const config = statusConfig[currentStatus] ?? statusConfig.unverified;
 
     let icon: keyof typeof Ionicons.glyphMap = "alert-circle-outline";
@@ -105,9 +106,15 @@ const Settings = () => {
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.manualCard}
-              onPress={() =>
-                router.push("/screens/Setting/DocumentUploadScreen")
-              }
+              onPress={() => {
+                if (currentStatus === "pending") {
+                  showToast("Your documents are under review. Please wait for approval.");
+                } else if (currentStatus === "approved") {
+                  showToast("Your documents are already approved.");
+                } else {
+                  router.push("/screens/Setting/DocumentUploadScreen");
+                }
+              }}
             >
               <View style={styles.iconContainer}>
                 <Ionicons
