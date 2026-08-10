@@ -8,6 +8,7 @@ import { useDocumentStatus } from "@/hooks/useDocuments";
 import { showToast } from "@/folder/toastService";
 import React from "react";
 import {
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -24,6 +25,7 @@ function CarCards({ item }: any) {
   const currentStatus = docData?.docStatus || "unverified";
 
   const isFav = favouritesData?.carIds?.includes(item?._id);
+
   return (
     <Pressable
       style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
@@ -35,35 +37,60 @@ function CarCards({ item }: any) {
       }
     >
       <View style={styles.card}>
-        <Image
-          source={{ uri: item?.images?.[0]?.url }}
-          style={styles.image}
-          contentFit="cover"
-          transition={300}
-          cachePolicy={"memory-disk"}
-        />
-        {item?.available === false && (
-          <View style={styles.rentedBadge}>
-            <Text style={styles.rentedBadgeText}>RENTED</Text>
-          </View>
-        )}
+        {/* Car Image Section */}
+        <View style={styles.imageWrapper}>
+          <Image
+            source={{ uri: item?.images?.[0]?.url }}
+            style={styles.image}
+            contentFit="cover"
+            transition={300}
+            cachePolicy={"memory-disk"}
+          />
+
+          {item?.available === false && (
+            <View style={styles.rentedBadge}>
+              <Text style={styles.rentedBadgeText}>RENTED</Text>
+            </View>
+          )}
+
+          {item?.discountEnabled && item?.discountPercentage > 0 && (
+            <View style={styles.discountBadge}>
+              <Text style={styles.discountBadgeText}>{item.discountPercentage}% OFF</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Car Details Section */}
         <View style={styles.details}>
-          <Text style={styles.name} numberOfLines={1}>
-            {capitalText(item.modelName)}
-          </Text>
-          <Text style={styles.price} numberOfLines={1}>
-            Price: ${item.pricePerDay}/day
-          </Text>
+          <View style={styles.topInfo}>
+            {item?.brand ? (
+              <Text style={styles.brandText} numberOfLines={1}>
+                {capitalText(item.brand)}
+              </Text>
+            ) : null}
+            <Text style={styles.name} numberOfLines={1}>
+              {capitalText(item.modelName)}
+            </Text>
 
-          <View style={styles.rating}>
-            <Icon name="star" size={16} color="#fbbf24" />
-            <Text style={styles.ratingText}>({item.totalReviews} Reviews)</Text>
+            <View style={styles.priceRow}>
+              <Text style={styles.priceAmount}>${item.pricePerDay}</Text>
+              <Text style={styles.priceUnit}>/day</Text>
+            </View>
+
+            <View style={styles.ratingRow}>
+              <Icon name="star" size={13} color="#F59E0B" />
+              <Text style={styles.ratingText}>
+                {item.totalReviews ? `(${item.totalReviews} reviews)` : "New"}
+              </Text>
+            </View>
           </View>
 
+          {/* Actions Row */}
           <View style={styles.actionsRow}>
             <TouchableOpacity
               style={[styles.rentBtn, item?.available === false && styles.disabledBtn]}
               disabled={item?.available === false}
+              activeOpacity={0.8}
               onPress={() => {
                 if (!isSignedIn) {
                   router.push("/screens/Auth/SocialAuth");
@@ -83,15 +110,19 @@ function CarCards({ item }: any) {
               <Text style={styles.rentBtnText}>
                 {item?.available === false ? "Rented" : "Rent Now"}
               </Text>
+              {item?.available !== false && (
+                <Icon name="arrow-forward" size={12} color="#FFF" style={{ marginLeft: 3 }} />
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.heartBtn}
               onPress={() => toggleFavourite.mutate(item?._id)}
+              activeOpacity={0.7}
             >
               <Icon
                 name={isFav ? "heart" : "heart-outline"}
-                color={Colors.primary}
+                color={isFav ? Colors.primary : "#94A3B8"}
                 size={18}
               />
             </TouchableOpacity>
@@ -105,100 +136,151 @@ function CarCards({ item }: any) {
 export default CarCards;
 
 const styles = StyleSheet.create({
-  heartBtn: {
-    padding: 8,
-    backgroundColor: "#eef5ff",
-    borderRadius: 50,
+  pressable: {
+    width: "100%",
+    marginBottom: 14,
   },
-  rentBtn: {
-    backgroundColor: Colors.primary,
-    width: 90,
-    paddingVertical: 7,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  rentBtnText: {
-    fontSize: 10,
-    fontFamily: "demiBold",
-    color: "white",
-  },
-  rating: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  ratingText: {
-    fontSize: 7,
-    color: "#3f3f3fff",
-    fontFamily: "demiBold",
-    marginLeft: 4,
-  },
-  actionsRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 10,
-  },
-  image: {
-    width: "55%",
-    height: "100%",
-  },
-  details: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: "#fff",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#3f3f3fff",
-    fontFamily: "bold",
-  },
-  price: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#3f3f3fff",
-    fontFamily: "bold",
+  pressed: {
+    opacity: 0.95,
   },
   card: {
     flexDirection: "row",
-    backgroundColor: "#f9f9f9",
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: "#98817B",
-    shadowOpacity: 0.02,
-    shadowRadius: 10,
-    elevation: 2,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
     overflow: "hidden",
-    height: 130,
-    width: "99%",
+    height: 145,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.12)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 10,
+      },
+      android: { elevation: 3 },
+    }),
   },
-  pressable: {
+  imageWrapper: {
+    width: "42%",
+    height: "100%",
+    position: "relative",
+    backgroundColor: "#F8FAFC",
+  },
+  image: {
     width: "100%",
-  },
-  pressed: {
-    opacity: 0.9,
+    height: "100%",
   },
   rentedBadge: {
     position: "absolute",
-    top: 10,
-    left: 10,
+    top: 8,
+    left: 8,
     backgroundColor: Colors.danger,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 6,
     zIndex: 10,
   },
   rentedBadgeText: {
-    color: "white",
+    color: "#FFFFFF",
     fontSize: 9,
     fontFamily: "bold",
     letterSpacing: 0.5,
   },
+  discountBadge: {
+    position: "absolute",
+    bottom: 8,
+    left: 8,
+    backgroundColor: "#D97706",
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+    zIndex: 10,
+  },
+  discountBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 9,
+    fontFamily: "bold",
+  },
+  details: {
+    flex: 1,
+    padding: 12,
+    justifyContent: "space-between",
+    backgroundColor: "#FFFFFF",
+  },
+  topInfo: {
+    gap: 2,
+  },
+  brandText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#94A3B8",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: Colors.primary,
+    lineHeight: 20,
+  },
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    marginTop: 4,
+  },
+  priceAmount: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#059669",
+  },
+  priceUnit: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#64748B",
+    marginLeft: 2,
+  },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 3,
+    gap: 4,
+  },
+  ratingText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#64748B",
+  },
+  actionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 4,
+  },
+  rentBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  rentBtnText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
   disabledBtn: {
     backgroundColor: Colors.muted,
     opacity: 0.7,
+  },
+  heartBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: "#F1F5F9",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

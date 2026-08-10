@@ -1,7 +1,9 @@
 import BrandItems from "@/components/BrandItems";
 import CarItems from "@/components/CarItems";
+import CountDown from "@/components/CountDown";
 import { useFetchBrands } from "@/hooks/useFetchBrands";
 import { useCars } from "@/hooks/useFetchCars";
+import { useActiveLeases } from "@/hooks/useFetchLease";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
 import { useUser } from "@clerk/expo";
@@ -10,6 +12,7 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
+    Dimensions,
     FlatList,
     ScrollView,
     StatusBar,
@@ -33,6 +36,9 @@ function HomeScreen() {
   const modalRef = useRef<Modalize>(null);
   const location = useGetCurrentLocation();
   const [greeting, setGreeting] = useState("Good Morning");
+
+  const { data: activeLeasesData } = useActiveLeases();
+  const activeLeases = activeLeasesData?.leases || [];
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -138,6 +144,42 @@ function HomeScreen() {
           </View>
         </TouchableOpacity>
 
+        {/* ACTIVE LEASES BANNER / CAROUSEL ON HOME SCREEN */}
+        {isSignedIn && activeLeases.length > 0 && (
+          <View style={styles.activeLeasesWrapper}>
+            {activeLeases.length > 1 && (
+              <View style={styles.activeLeasesHeader}>
+                <View style={styles.activeTitleRow}>
+                  <View style={styles.activeDot} />
+                  <Text style={styles.activeSectionTitle}>
+                    Active Rentals ({activeLeases.length})
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => router.push("/(tabs)/Leases")}>
+                  <Text style={styles.seeAllLeasesText}>View All ({activeLeases.length}) →</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {activeLeases.length === 1 ? (
+              <CountDown item={activeLeases[0]} variant="compact" />
+            ) : (
+              <FlatList
+                data={activeLeases}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => (
+                  <View style={{ width: Dimensions.get("window").width }}>
+                    <CountDown item={item} variant="compact" />
+                  </View>
+                )}
+              />
+            )}
+          </View>
+        )}
+
         {/* ERROR STATE VIEW */}
         {(brandsError || carsError) && (
           <View style={styles.errorContainer}>
@@ -148,30 +190,6 @@ function HomeScreen() {
             </Text>
             <TouchableOpacity style={styles.retryBtn} onPress={onRetry}>
               <Text style={styles.retryBtnText}>Try Again</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* ERROR STATE */}
-        {(brandsError || carsError) && (
-          <View style={styles.errorContainer}>
-            <View style={[GlobalStyles.center, { marginBottom: 12 }]}>
-              <Ionicons
-                name="cloud-offline-outline"
-                size={44}
-                color={Colors.danger}
-              />
-            </View>
-            <Text style={styles.errorTitle}>Something went wrong</Text>
-            <Text style={styles.errorSub}>
-              We&apos;re having trouble connecting to our servers. Please check
-              your internet and try again.
-            </Text>
-            <TouchableOpacity
-              style={[styles.retryBtn, { backgroundColor: Colors.primary }]}
-              onPress={onRetry}
-            >
-              <Text style={styles.retryBtnText}>Retry Connection</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -340,27 +358,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
-  notificationBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "#FFFFFF",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#EEF2F6",
-  },
-  notificationDot: {
-    position: "absolute",
-    top: 10,
-    right: 12,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#EF4444",
-    borderWidth: 1.5,
-    borderColor: "#FFFFFF",
-  },
   profileImage: {
     width: 46,
     height: 46,
@@ -404,6 +401,42 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 12,
   },
+
+  // Active Leases Section
+  activeLeasesWrapper: {
+    marginTop: 20,
+  },
+  activeLeasesHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+  activeTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  activeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#10B981",
+  },
+  activeSectionTitle: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: Colors.primary,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  seeAllLeasesText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: Colors.primary,
+  },
+
   section: { marginTop: 32 },
   sectionHeader: {
     paddingHorizontal: 20,

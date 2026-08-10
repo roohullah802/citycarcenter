@@ -160,12 +160,12 @@ const styles = StyleSheet.create({
     color: "rgba(31, 48, 94, 0.88)",
   },
   listContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
   columnGap: {
-    justifyContent: "flex-start",
-    gap: 8,
+    gap: 12,
+    marginBottom: 20,
   },
   centeredWrapper: {
     flex: 1,

@@ -1,7 +1,7 @@
 import { showToast } from "@/folder/toastService";
 import { useStripe } from "@stripe/stripe-react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -17,10 +17,12 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useCreateIntent } from "@/hooks/usePayment";
+import { useLeaseById } from "@/hooks/useFetchLease";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
 import { useUser } from "@clerk/expo";
 import { useQueryClient } from "@tanstack/react-query";
+import { capitalText } from "@/folder/capitalText";
 
 const ExtendLeaseScreen = () => {
   const { id } = useLocalSearchParams();
@@ -30,18 +32,93 @@ const ExtendLeaseScreen = () => {
   const createIntent = useCreateIntent();
   const { user } = useUser();
 
-  const [manualDays, setManualDays] = useState<string>("1");
+  // Fetch lease details for car rates and current end date
+  const { data: leaseData, isLoading: isLeaseLoading } = useLeaseById(id as string);
+  const lease = leaseData?.details?.[0] || leaseData?.lease;
+  const car = lease?.carDetails?.[0] || lease?.car;
+
+  const [manualDays, setManualDays] = useState<string>("3");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const daysCount = useMemo(() => {
+    const parsed = parseInt(manualDays, 10);
+    return isNaN(parsed) || parsed < 1 ? 1 : parsed;
+  }, [manualDays]);
+
+  // Calculate new end date
+  const currentEndDate = useMemo(() => {
+    if (!lease?.endDate) return new Date();
+    return new Date(lease.endDate);
+  }, [lease?.endDate]);
+
+  const newEndDate = useMemo(() => {
+    const result = new Date(currentEndDate);
+    result.setDate(result.getDate() + daysCount);
+    return result;
+  }, [currentEndDate, daysCount]);
+
+  // Live Extension Pricing Calculation
+  const priceBreakdown = useMemo(() => {
+    if (!car) return { base: 0, tax: 0, total: 0, rateType: "daily" };
+
+    const dailyRate = car.pricePerDay || 0;
+    const weeklyRate = car.weeklyRate || dailyRate * 7;
+    const monthlyRate = car.monthlyRate || dailyRate * 25;
+    const taxPercent = car.tax || 0;
+
+    let base = 0;
+    let rateType = "daily";
+
+    if (daysCount >= 28 && monthlyRate > 0) {
+      rateType = "monthly";
+      const months = Math.floor(daysCount / 30);
+      const remAfterMonths = daysCount % 30;
+      const weeks = Math.floor(remAfterMonths / 7);
+      const remDays = remAfterMonths % 7;
+      base = (months * monthlyRate) + (weeks * weeklyRate) + (remDays * dailyRate);
+    } else if (daysCount >= 7 && weeklyRate > 0) {
+      rateType = "weekly";
+      const weeks = Math.floor(daysCount / 7);
+      const remDays = daysCount % 7;
+      base = (weeks * weeklyRate) + (remDays * dailyRate);
+    } else {
+      rateType = "daily";
+      base = daysCount * dailyRate;
+    }
+
+    base = Math.round(base * 100) / 100;
+    const tax = Math.round(base * (taxPercent / 100) * 100) / 100;
+    const total = Math.round((base + tax) * 100) / 100;
+
+    return { base, tax, total, rateType };
+  }, [car, daysCount]);
 
   const handleManualInput = useCallback((text: string) => {
     const numericValue = text.replace(/[^0-9]/g, "");
     setManualDays(numericValue);
   }, []);
 
-  const handleContinue = useCallback(async () => {
-    const days = Number(manualDays);
+  const adjustDays = (delta: number) => {
+    const current = parseInt(manualDays, 10) || 0;
+    const updated = Math.max(1, current + delta);
+    setManualDays(String(updated));
+  };
 
-    if (!days || days === 0) {
+  const setPresetDays = (days: number) => {
+    setManualDays(String(days));
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const handleContinue = useCallback(async () => {
+    if (!daysCount || daysCount < 1) {
       return showToast("Please enter a valid number of days");
     }
 
@@ -55,7 +132,7 @@ const ExtendLeaseScreen = () => {
         action: "extendLease",
         userId: mongodbId,
         leaseId: id,
-        days: days,
+        days: daysCount,
       });
 
       if (result?.rateLimited) return;
@@ -105,19 +182,29 @@ const ExtendLeaseScreen = () => {
       setIsLoading(false);
     }
   }, [
-    manualDays,
+    daysCount,
     initPaymentSheet,
     presentPaymentSheet,
     createIntent,
     id,
     user,
+    queryClient,
   ]);
+
+  if (isLeaseLoading) {
+    return (
+      <View style={[GlobalStyles.container, styles.centerWrapper]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>Fetching lease details...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={GlobalStyles.container}>
       <StatusBar barStyle="dark-content" />
 
-      {/* Professional Header */}
+      {/* HEADER */}
       <View style={[GlobalStyles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -134,60 +221,147 @@ const ExtendLeaseScreen = () => {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: (insets.bottom || 0) + 140 }]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.introSection}>
-            <Text style={styles.welcomeText}>Custom Extension</Text>
-            <Text style={styles.subText}>
-              Enter the specific number of days you would like to keep the
-              vehicle.
-            </Text>
+          {/* VEHICLE BANNER */}
+          {car && (
+            <View style={styles.vehicleCard}>
+              <View style={styles.vehicleIconBox}>
+                <Ionicons name="car-sport-outline" size={24} color={Colors.primary} />
+              </View>
+              <View style={styles.vehicleInfo}>
+                <Text style={styles.vehicleBrand}>{capitalText(car.brand || "")}</Text>
+                <Text style={styles.vehicleName}>{capitalText(car.modelName || "")}</Text>
+              </View>
+            </View>
+          )}
+
+          {/* DURATION INPUT CARD */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>SELECT EXTENSION DURATION</Text>
+
+            <View style={styles.counterRow}>
+              <TouchableOpacity
+                style={styles.counterBtn}
+                onPress={() => adjustDays(-1)}
+              >
+                <Ionicons name="remove-outline" size={22} color={Colors.primary} />
+              </TouchableOpacity>
+
+              <View style={styles.inputBox}>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={manualDays}
+                  onChangeText={handleManualInput}
+                  placeholder="1"
+                  placeholderTextColor={Colors.muted}
+                />
+                <Text style={styles.daySuffix}>Days</Text>
+              </View>
+
+              <TouchableOpacity
+                style={styles.counterBtn}
+                onPress={() => adjustDays(1)}
+              >
+                <Ionicons name="add-outline" size={22} color={Colors.primary} />
+              </TouchableOpacity>
+            </View>
+
+            {/* PRESET DAYS PILLS */}
+            <View style={styles.presetRow}>
+              {[1, 3, 7, 14, 30].map((d) => (
+                <TouchableOpacity
+                  key={d}
+                  style={[
+                    styles.presetPill,
+                    daysCount === d && styles.presetPillActive,
+                  ]}
+                  onPress={() => setPresetDays(d)}
+                >
+                  <Text
+                    style={[
+                      styles.presetText,
+                      daysCount === d && styles.presetTextActive,
+                    ]}
+                  >
+                    +{d} {d === 1 ? "Day" : "Days"}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
-          <Text style={styles.sectionTitle}>Duration</Text>
-          <View style={[GlobalStyles.inputBox, GlobalStyles.shadowLight, { height: 80, borderRadius: 24, marginBottom: 32 }]}>
-            <View style={styles.inputIcon}>
-              <Ionicons name="calendar-outline" size={24} color={Colors.info} />
-            </View>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              value={manualDays}
-              onChangeText={handleManualInput}
-              placeholder="0"
-              placeholderTextColor={Colors.muted}
-              autoFocus={true}
-            />
-            <View style={styles.suffixBadge}>
-              <Text style={styles.daySuffix}>Days</Text>
+          {/* EXTENSION SUMMARY & PRICE BREAKDOWN */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>EXTENSION BREAKDOWN</Text>
+
+            <View style={styles.breakdownList}>
+              <View style={styles.breakdownRow}>
+                <Text style={styles.rowLabel}>Current End Date</Text>
+                <Text style={styles.rowValue}>{formatDate(currentEndDate)}</Text>
+              </View>
+
+              <View style={styles.breakdownRow}>
+                <Text style={[styles.rowLabel, { color: "#059669" }]}>New End Date</Text>
+                <Text style={[styles.rowValue, { color: "#059669", fontWeight: "800" }]}>
+                  {formatDate(newEndDate)}
+                </Text>
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.breakdownRow}>
+                <Text style={styles.rowLabel}>Rate Tier ({priceBreakdown.rateType})</Text>
+                <Text style={styles.rowValue}>${priceBreakdown.base}</Text>
+              </View>
+
+              {priceBreakdown.tax > 0 && (
+                <View style={styles.breakdownRow}>
+                  <Text style={styles.rowLabel}>Tax ({car?.tax || 0}%)</Text>
+                  <Text style={styles.rowValue}>+${priceBreakdown.tax}</Text>
+                </View>
+              )}
+
+              <View style={styles.divider} />
+
+              <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Total Extension Fee</Text>
+                <Text style={styles.totalValue}>${priceBreakdown.total}</Text>
+              </View>
             </View>
           </View>
 
+          {/* INSURANCE HIGHLIGHT */}
           <View style={styles.infoHighlight}>
             <Ionicons
-              name="shield-checkmark-outline"
-              size={22}
-              color={Colors.primary}
+              name="shield-checkmark"
+              size={20}
+              color="#059669"
             />
             <Text style={styles.infoHighlightText}>
-              Daily rates apply based on your original agreement. Insurance
-              coverage remains active.
-            </Text>
-          </View>
-
-          <View style={styles.tipBox}>
-            <Text style={styles.tipTitle}>Note:</Text>
-            <Text style={styles.tipText}>
-              Extension starts immediately after your current lease ends. Ensure
-              you have sufficient funds for the selected period.
+              Your insurance coverage and 24/7 roadside assistance will remain fully active.
             </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Fixed Footer */}
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
+      {/* FLOATING FOOTER BUTTON */}
+      <View
+        style={[
+          styles.footer,
+          { paddingBottom: (insets.bottom || 0) + 16, paddingTop: 16 },
+        ]}
+      >
+        <View style={styles.priceContainer}>
+          <Text style={styles.footerLabel}>Total Amount</Text>
+          <Text style={styles.footerPrice}>
+            ${priceBreakdown.total}
+            <Text style={styles.perDay}> ({daysCount} {daysCount === 1 ? "day" : "days"})</Text>
+          </Text>
+        </View>
+
         <TouchableOpacity
           disabled={isLoading}
           style={[styles.primaryButton, isLoading && styles.buttonDisabled]}
@@ -197,7 +371,17 @@ const ExtendLeaseScreen = () => {
           {isLoading ? (
             <ActivityIndicator size={"small"} color={Colors.white} />
           ) : (
-            <Text style={styles.buttonText}>Confirm & Pay</Text>
+            <>
+              <Text style={styles.buttonText}>
+                Pay ${priceBreakdown.total}
+              </Text>
+              <Ionicons
+                name="card-outline"
+                size={18}
+                color="#FFF"
+                style={{ marginLeft: 6 }}
+              />
+            </>
           )}
         </TouchableOpacity>
       </View>
@@ -208,6 +392,17 @@ const ExtendLeaseScreen = () => {
 export default ExtendLeaseScreen;
 
 const styles = StyleSheet.create({
+  centerWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#94A3B8",
+  },
   backButton: {
     width: 40,
     height: 40,
@@ -215,115 +410,255 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   scrollContent: {
-    padding: 24,
+    padding: 20,
   },
-  introSection: {
-    marginBottom: 40,
-  },
-  welcomeText: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: Colors.primary,
-    letterSpacing: -0.5,
-  },
-  subText: {
-    fontSize: 15,
-    color: Colors.subtitle,
-    marginTop: 8,
-    lineHeight: 22,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: Colors.muted,
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-    marginBottom: 16,
-  },
-  inputWrapper: {
+  vehicleCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.surface,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    borderRadius: 24,
-    paddingHorizontal: 20,
-    height: 80,
-    marginBottom: 32,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.1)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+      },
+      android: { elevation: 2 },
+    }),
   },
-  inputIcon: {
-    marginRight: 16,
+  vehicleIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: "#E0F2FE",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+  },
+  vehicleInfo: { flex: 1 },
+  vehicleBrand: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#94A3B8",
+    textTransform: "uppercase",
+  },
+  vehicleName: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: Colors.primary,
+  },
+
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 22,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.1)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+      },
+      android: { elevation: 2 },
+    }),
+  },
+  cardTitle: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#94A3B8",
+    letterSpacing: 1,
+    marginBottom: 16,
+  },
+  counterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  counterBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  inputBox: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    paddingHorizontal: 16,
+    height: 52,
   },
   input: {
     flex: 1,
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "800",
     color: Colors.primary,
-  },
-  suffixBadge: {
-    backgroundColor: "#E0F2FE",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    textAlign: "center",
   },
   daySuffix: {
     fontSize: 14,
     fontWeight: "700",
+    color: "#64748B",
+  },
+  presetRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 16,
+  },
+  presetPill: {
+    backgroundColor: "#F8FAFC",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  presetPillActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  presetText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#64748B",
+  },
+  presetTextActive: {
+    color: "#FFFFFF",
+  },
+
+  breakdownList: {
+    gap: 10,
+  },
+  breakdownRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  rowLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#64748B",
+  },
+  rowValue: {
+    fontSize: 14,
+    fontWeight: "700",
     color: Colors.primary,
   },
+  divider: {
+    height: 1,
+    backgroundColor: "#F1F5F9",
+    marginVertical: 4,
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 2,
+  },
+  totalLabel: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: Colors.primary,
+  },
+  totalValue: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#059669",
+  },
+
   infoHighlight: {
     flexDirection: "row",
-    backgroundColor: "#F0F9FF",
-    padding: 20,
-    borderRadius: 20,
+    backgroundColor: "#F0FDF4",
+    padding: 16,
+    borderRadius: 16,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#E0F2FE",
-    marginBottom: 24,
+    borderColor: "#DCFCE7",
   },
   infoHighlightText: {
     flex: 1,
-    fontSize: 14,
-    color: Colors.primary,
-    marginLeft: 12,
-    lineHeight: 20,
+    fontSize: 13,
+    color: "#166534",
+    marginLeft: 10,
     fontWeight: "500",
   },
-  tipBox: {
-    padding: 16,
-  },
-  tipTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: Colors.subtitle,
-    marginBottom: 4,
-  },
-  tipText: {
-    fontSize: 13,
-    color: Colors.muted,
-    lineHeight: 18,
-  },
+
   footer: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    backgroundColor: Colors.white,
+    borderTopColor: "#F1F5F9",
+    zIndex: 50,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(31, 48, 94, 0.15)",
+        shadowOffset: { width: 0, height: -6 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+      },
+      android: { elevation: 12 },
+    }),
+  },
+  priceContainer: {
+    justifyContent: "center",
+  },
+  footerLabel: {
+    fontSize: 11,
+    color: "#94A3B8",
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
+  footerPrice: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: Colors.primary,
+    marginTop: 2,
+  },
+  perDay: {
+    fontSize: 12,
+    color: "#94A3B8",
+    fontWeight: "500",
   },
   primaryButton: {
     backgroundColor: Colors.primary,
-    height: 60,
-    borderRadius: 20,
+    height: 52,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     ...Platform.select({
       ios: {
         shadowColor: Colors.shadow,
-        shadowOffset: { width: 0, height: 6 },
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.15,
-        shadowRadius: 10,
+        shadowRadius: 8,
       },
-      android: { elevation: 6 },
+      android: { elevation: 4 },
     }),
   },
   buttonDisabled: {
@@ -332,7 +667,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: Colors.white,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
   },
 });

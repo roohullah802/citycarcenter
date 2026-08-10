@@ -35,7 +35,7 @@ const CarDetails = () => {
   const toggleFavourite = useToggleFavourite();
 
   const { data, isLoading, isError, refetch } = useCarById(id as string);
-  const details = data?.data?.[0];
+  const details = data?.data?.[0] || data?.car || data?.data;
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -52,7 +52,7 @@ const CarDetails = () => {
     return (
       <View style={styles.centerWrapper}>
         <StatusBar barStyle="dark-content" />
-        <ActivityIndicator size="large" color="rgba(31, 48, 94, 0.88)" />
+        <ActivityIndicator size="large" color={Colors.primary} />
         <Text style={styles.loadingText}>Loading Vehicle Details...</Text>
       </View>
     );
@@ -63,11 +63,10 @@ const CarDetails = () => {
     return (
       <View style={styles.centerWrapper}>
         <StatusBar barStyle="dark-content" />
-        <Ionicons name="cloud-offline-outline" size={60} color="#EF4444" />
+        <Ionicons name="cloud-offline-outline" size={60} color={Colors.danger} />
         <Text style={styles.errorTitle}>Oops! Something went wrong</Text>
         <Text style={styles.errorSubtitle}>
-          We couldn&apos;t retrieve the car information. Please check your
-          connection.
+          We couldn&apos;t retrieve the car information. Please check your connection.
         </Text>
         <TouchableOpacity style={styles.retryBtn} onPress={() => refetch()}>
           <Text style={styles.retryText}>Try Again</Text>
@@ -83,6 +82,7 @@ const CarDetails = () => {
   }
 
   const isFav = favouritesData?.carIds?.includes(details?._id);
+  const hasDiscount = details?.discountEnabled && details?.discountPercentage > 0;
 
   return (
     <View style={styles.container}>
@@ -124,7 +124,7 @@ const CarDetails = () => {
                 styles.pill,
                 {
                   width: index === activeIndex ? 20 : 8,
-                  backgroundColor: index === activeIndex ? "rgba(31, 48, 94, 0.88)" : "#FFF",
+                  backgroundColor: index === activeIndex ? Colors.primary : "#FFF",
                 },
               ]}
             />
@@ -135,12 +135,14 @@ const CarDetails = () => {
           <TouchableOpacity
             style={styles.roundBtn}
             onPress={() => router.back()}
+            activeOpacity={0.8}
           >
-            <Ionicons name="chevron-back" size={24} color="rgba(31, 48, 94, 0.88)" />
+            <Ionicons name="chevron-back" size={24} color={Colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.roundBtn}
             onPress={() => toggleFavourite.mutate(details?._id)}
+            activeOpacity={0.8}
           >
             <Ionicons
               name={isFav ? "heart" : "heart-outline"}
@@ -165,17 +167,19 @@ const CarDetails = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.detailsPanel}
-        contentContainerStyle={{ paddingBottom: 140 }}
+        contentContainerStyle={{ paddingBottom: (insets.bottom || 0) + 140 }}
       >
         <View style={styles.titleSection}>
           <View style={styles.titleInfo}>
-            <Text style={styles.brandName}>{capitalText(details?.brand)}</Text>
+            {details?.brand ? (
+              <Text style={styles.brandName}>{capitalText(details.brand)}</Text>
+            ) : null}
             <Text style={styles.modelName}>
               {capitalText(details?.modelName)}
             </Text>
           </View>
           <View style={styles.ratingBadge}>
-            <Ionicons name="star" size={14} color="#F5A623" />
+            <Ionicons name="star" size={14} color="#F59E0B" />
             <Text style={styles.ratingText}>{details?.totalReviews || 0}</Text>
           </View>
         </View>
@@ -200,6 +204,7 @@ const CarDetails = () => {
           />
         </View>
 
+        {/* Overview */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Overview</Text>
           <Text
@@ -218,45 +223,58 @@ const CarDetails = () => {
           )}
         </View>
 
+        {/* Key Features */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Key Features</Text>
           <View style={styles.featureGrid}>
             <FeatureItem
               icon="account-group-outline"
               label="Capacity"
-              value={`${details?.passengers} Seats`}
+              value={`${details?.passengers || 5} Seats`}
             />
             <FeatureItem
               icon="lightning-bolt-outline"
               label="Top Speed"
-              value={`${details?.topSpeed} km/h`}
+              value={`${details?.topSpeed || 200} km/h`}
             />
             <FeatureItem
               icon="gas-station-outline"
               label="Fuel Type"
-              value={details?.fuelType}
+              value={details?.fuelType || "Petrol"}
             />
           </View>
         </View>
       </ScrollView>
 
-      {/* FIXED RENT FOOTER */}
+      {/* FIXED RENT FOOTER WITH PROPER SAFE AREA INSETS */}
       <View
         style={[
           styles.footer,
-          { paddingBottom: insets.bottom > 0 ? insets.bottom : 20 },
+          {
+            paddingBottom: (insets.bottom || 0) + 16,
+            paddingTop: 16,
+          },
         ]}
       >
-        <View>
-          <Text style={styles.footerLabel}>Daily Rate</Text>
+        <View style={styles.priceContainer}>
+          <View style={styles.rateLabelRow}>
+            <Text style={styles.footerLabel}>Daily Rate</Text>
+            {hasDiscount && (
+              <View style={styles.discountTag}>
+                <Text style={styles.discountTagText}>{details.discountPercentage}% OFF</Text>
+              </View>
+            )}
+          </View>
           <Text style={styles.footerPrice}>
             ${details?.pricePerDay}
             <Text style={styles.perDay}> / day</Text>
           </Text>
         </View>
+
         <TouchableOpacity
           style={[styles.bookBtn, details?.available === false && styles.disabledBookBtn]}
           disabled={details?.available === false}
+          activeOpacity={0.8}
           onPress={() => {
             if (!isSignedIn) {
               router.push("/screens/Auth/SocialAuth");
@@ -281,7 +299,7 @@ const CarDetails = () => {
               name="arrow-forward"
               size={18}
               color="#FFF"
-              style={{ marginLeft: 8 }}
+              style={{ marginLeft: 6 }}
             />
           )}
         </TouchableOpacity>
@@ -292,7 +310,7 @@ const CarDetails = () => {
 
 const StatBox = ({ icon, label, value }: any) => (
   <View style={styles.statBox}>
-    <Ionicons name={icon} size={18} color="rgba(31, 48, 94, 0.88)" />
+    <Ionicons name={icon} size={18} color={Colors.primary} />
     <Text style={styles.statLabel}>{label}</Text>
     <Text style={styles.statValue}>{value}</Text>
   </View>
@@ -300,7 +318,7 @@ const StatBox = ({ icon, label, value }: any) => (
 
 const FeatureItem = ({ icon, label, value }: any) => (
   <View style={styles.featureCard}>
-    <MaterialCommunityIcons name={icon} size={24} color="rgba(31, 48, 94, 0.88)" />
+    <MaterialCommunityIcons name={icon} size={24} color={Colors.primary} />
     <View style={{ marginLeft: 12 }}>
       <Text style={styles.featLabel}>{label}</Text>
       <Text style={styles.featValue}>{value}</Text>
@@ -326,7 +344,7 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: Colors.primary,
     marginTop: 16,
   },
   errorSubtitle: {
@@ -338,7 +356,7 @@ const styles = StyleSheet.create({
   },
   retryBtn: {
     marginTop: 24,
-    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    backgroundColor: Colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 14,
@@ -359,6 +377,15 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.9)",
     justifyContent: "center",
     alignItems: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(0,0,0,0.15)",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: { elevation: 3 },
+    }),
   },
   paginationWrapper: {
     position: "absolute",
@@ -380,7 +407,7 @@ const styles = StyleSheet.create({
     padding: 24,
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowColor: Colors.shadow,
         shadowOffset: { width: 0, height: -6 },
         shadowOpacity: 0.08,
         shadowRadius: 16,
@@ -396,17 +423,17 @@ const styles = StyleSheet.create({
   },
   titleInfo: { flex: 1, paddingRight: 10 },
   brandName: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "800",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: "#94A3B8",
     letterSpacing: 1,
     textTransform: "uppercase",
   },
   modelName: {
     fontSize: 26,
     fontWeight: "800",
-    color: "rgba(31, 48, 94, 0.88)",
-    marginTop: 4,
+    color: Colors.primary,
+    marginTop: 2,
   },
   ratingBadge: {
     flexDirection: "row",
@@ -415,8 +442,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
-  ratingText: { marginLeft: 4, fontWeight: "700", color: "rgba(31, 48, 94, 0.88)" },
+  ratingText: { marginLeft: 4, fontWeight: "700", color: Colors.primary },
 
   statsBar: {
     flexDirection: "row",
@@ -429,7 +458,7 @@ const styles = StyleSheet.create({
     borderColor: "#F1F5F9",
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowColor: Colors.shadow,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.04,
         shadowRadius: 10,
@@ -448,19 +477,20 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 13,
     fontWeight: "700",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: Colors.primary,
     marginTop: 2,
+    textTransform: "capitalize",
   },
 
   section: { marginBottom: 32 },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "rgba(31, 48, 94, 0.88)",
+    color: Colors.primary,
     marginBottom: 12,
   },
   description: { fontSize: 15, color: "#64748B", lineHeight: 24 },
-  readMore: { color: "rgba(31, 48, 94, 0.88)", fontWeight: "700", marginTop: 8 },
+  readMore: { color: Colors.primary, fontWeight: "700", marginTop: 8 },
 
   featureGrid: { gap: 12 },
   featureCard: {
@@ -473,7 +503,7 @@ const styles = StyleSheet.create({
     borderColor: "#F1F5F9",
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowColor: Colors.shadow,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.04,
         shadowRadius: 8,
@@ -487,51 +517,71 @@ const styles = StyleSheet.create({
     color: "#94A3B8",
     textTransform: "uppercase",
   },
-  featValue: { fontSize: 15, fontWeight: "700", color: "rgba(31, 48, 94, 0.88)" },
+  featValue: { fontSize: 15, fontWeight: "700", color: Colors.primary, textTransform: "capitalize" },
 
   footer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFFFFF",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 24,
+    paddingHorizontal: 24,
     borderTopWidth: 1,
     borderTopColor: "#F1F5F9",
     zIndex: 50,
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(31, 48, 94, 0.88)",
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
+        shadowColor: "rgba(31, 48, 94, 0.15)",
+        shadowOffset: { width: 0, height: -6 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
       },
-      android: { elevation: 10 },
+      android: { elevation: 12 },
     }),
   },
+  priceContainer: {
+    justifyContent: "center",
+  },
+  rateLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
   footerLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#94A3B8",
     fontWeight: "700",
     textTransform: "uppercase",
   },
-  footerPrice: { fontSize: 22, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
-  perDay: { fontSize: 14, color: "#94A3B8", fontWeight: "400" },
+  discountTag: {
+    backgroundColor: "#FEF3C7",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  discountTagText: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "#D97706",
+  },
+  footerPrice: { fontSize: 24, fontWeight: "800", color: Colors.primary, marginTop: 2 },
+  perDay: { fontSize: 13, color: "#94A3B8", fontWeight: "500" },
   bookBtn: {
-    backgroundColor: "rgba(31, 48, 94, 0.88)",
+    backgroundColor: Colors.primary,
+    height: 54,
     paddingHorizontal: 28,
-    paddingVertical: 16,
-    borderRadius: 18,
+    borderRadius: 16,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(31, 48, 94, 0.88)",
+        shadowColor: Colors.shadow,
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.15,
         shadowRadius: 8,
       },
       android: { elevation: 4 },
