@@ -57,6 +57,13 @@ function CarItems({ item }: any) {
             <Text style={styles.priceUnit}>/day</Text>
           </View>
 
+          {/* Discount Badge */}
+          {item?.discountEnabled && item?.discountPercentage > 0 && (
+            <View style={styles.discountBadge}>
+              <Text style={styles.discountBadgeText}>{item.discountPercentage}% OFF</Text>
+            </View>
+          )}
+
           {/* Favorite Button */}
           <TouchableOpacity
             style={styles.favoriteBtn}
@@ -192,6 +199,20 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.25)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  discountBadge: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    backgroundColor: "#D97706",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  discountBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontFamily: "bold",
   },
   infoSection: {
     padding: 14,
