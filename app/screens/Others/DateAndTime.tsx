@@ -194,7 +194,13 @@ export default function DateAndTimeScreen() {
 
       const { error: presentError } = await presentPaymentSheet();
 
-      if (presentError) throw presentError;
+      if (presentError) {
+        if (presentError.code === "Canceled") {
+          showToast("Payment canceled. No charges were made.");
+          return;
+        }
+        throw presentError;
+      }
 
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {

@@ -75,7 +75,13 @@ const ExtendLeaseScreen = () => {
       if (initError) throw initError;
 
       const { error: presentError } = await presentPaymentSheet();
-      if (presentError) throw presentError;
+      if (presentError) {
+        if (presentError.code === "Canceled") {
+          showToast("Payment canceled. No charges were made.");
+          return;
+        }
+        throw presentError;
+      }
 
       // Invalidate frontend cache immediately
       queryClient.invalidateQueries({ queryKey: ["leases"] });
