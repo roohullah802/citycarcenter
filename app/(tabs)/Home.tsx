@@ -10,13 +10,13 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  FlatList,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    FlatList,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -55,7 +55,6 @@ function HomeScreen() {
     refetch: refetchCars,
   } = useCars();
 
-
   const onRetry = () => {
     refetchBrands();
     refetchCars();
@@ -80,7 +79,11 @@ function HomeScreen() {
             </Text>
             {isSignedIn && (
               <View style={styles.locationContainer}>
-                <Ionicons name="location-sharp" size={14} color="rgba(31, 48, 94, 0.88)" />
+                <Ionicons
+                  name="location-sharp"
+                  size={14}
+                  color="rgba(31, 48, 94, 0.88)"
+                />
                 <Text style={styles.locationValue} numberOfLines={1}>
                   {location || "Detecting address..."}
                 </Text>
@@ -89,7 +92,6 @@ function HomeScreen() {
           </View>
 
           <View style={styles.headerActions}>
-
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => modalRef.current?.open()}
@@ -121,7 +123,11 @@ function HomeScreen() {
         <TouchableOpacity
           onPress={() => router.push("/screens/Others/SearchCarCards")}
           activeOpacity={0.8}
-          style={[GlobalStyles.inputBox, GlobalStyles.shadowLight, { marginHorizontal: 20, paddingLeft: 16, paddingRight: 8 }]}
+          style={[
+            GlobalStyles.inputBox,
+            GlobalStyles.shadowLight,
+            { marginHorizontal: 20, paddingLeft: 16, paddingRight: 8 },
+          ]}
         >
           <Ionicons name="search-outline" size={20} color={Colors.muted} />
           <Text style={styles.searchPlaceholder}>
@@ -150,11 +156,16 @@ function HomeScreen() {
         {(brandsError || carsError) && (
           <View style={styles.errorContainer}>
             <View style={[GlobalStyles.center, { marginBottom: 12 }]}>
-              <Ionicons name="cloud-offline-outline" size={44} color={Colors.danger} />
+              <Ionicons
+                name="cloud-offline-outline"
+                size={44}
+                color={Colors.danger}
+              />
             </View>
             <Text style={styles.errorTitle}>Something went wrong</Text>
             <Text style={styles.errorSub}>
-              We're having trouble connecting to our servers. Please check your internet and try again.
+              We&apos;re having trouble connecting to our servers. Please check
+              your internet and try again.
             </Text>
             <TouchableOpacity
               style={[styles.retryBtn, { backgroundColor: Colors.primary }]}
@@ -181,8 +192,17 @@ function HomeScreen() {
               <View style={{ flexDirection: "row", paddingLeft: 20 }}>
                 {[1, 2, 3, 4].map((i) => (
                   <View key={i} style={{ marginRight: 14 }}>
-                    <SkeletonLoader style={{ width: 68, height: 68, borderRadius: 18 }} />
-                    <SkeletonLoader style={{ width: 50, height: 10, marginTop: 8, alignSelf: "center" }} />
+                    <SkeletonLoader
+                      style={{ width: 68, height: 68, borderRadius: 18 }}
+                    />
+                    <SkeletonLoader
+                      style={{
+                        width: 50,
+                        height: 10,
+                        marginTop: 8,
+                        alignSelf: "center",
+                      }}
+                    />
                   </View>
                 ))}
               </View>
@@ -219,7 +239,9 @@ function HomeScreen() {
               <View style={{ flexDirection: "row", paddingLeft: 20 }}>
                 {[1, 2].map((i) => (
                   <View key={i} style={{ marginRight: 16 }}>
-                    <SkeletonLoader style={{ width: 260, height: 280, borderRadius: 20 }} />
+                    <SkeletonLoader
+                      style={{ width: 260, height: 280, borderRadius: 20 }}
+                    />
                   </View>
                 ))}
               </View>
@@ -242,7 +264,12 @@ function HomeScreen() {
       </ScrollView>
 
       {/* PROFILE MODAL */}
-      <Modalize ref={modalRef} adjustToContentHeight handlePosition="inside" modalStyle={styles.modalStyle}>
+      <Modalize
+        ref={modalRef}
+        adjustToContentHeight
+        handlePosition="inside"
+        modalStyle={styles.modalStyle}
+      >
         <View style={styles.modalInner}>
           <View style={styles.modalProfileWrapper}>
             <Image
@@ -341,7 +368,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "rgba(31, 48, 94, 0.88)",
   },
-  heroSection: { paddingHorizontal: 20, marginBottom: 24, position: "relative" },
+  heroSection: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+    position: "relative",
+  },
   heroBgCircle: {
     position: "absolute",
     width: 150,
@@ -353,7 +384,13 @@ const styles = StyleSheet.create({
     right: -20,
     zIndex: -1,
   },
-  title: { fontSize: 28, fontWeight: "300", color: "rgba(31, 48, 94, 0.88)", lineHeight: 36, letterSpacing: -0.5 },
+  title: {
+    fontSize: 28,
+    fontWeight: "300",
+    color: "rgba(31, 48, 94, 0.88)",
+    lineHeight: 36,
+    letterSpacing: -0.5,
+  },
   highlightText: { fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
   searchPlaceholder: {
     flex: 1,
@@ -362,7 +399,11 @@ const styles = StyleSheet.create({
     color: Colors.muted,
     fontWeight: "500",
   },
-  filterIcon: { backgroundColor: Colors.primary, padding: 10, borderRadius: 12 },
+  filterIcon: {
+    backgroundColor: Colors.primary,
+    padding: 10,
+    borderRadius: 12,
+  },
   section: { marginTop: 32 },
   sectionHeader: {
     paddingHorizontal: 20,
@@ -371,8 +412,18 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     marginBottom: 16,
   },
-  sectionTitle: { fontSize: 20, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)", letterSpacing: -0.5 },
-  seeAll: { fontSize: 13, color: "rgba(31, 48, 94, 0.88)", fontWeight: "700", marginBottom: 2 },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "rgba(31, 48, 94, 0.88)",
+    letterSpacing: -0.5,
+  },
+  seeAll: {
+    fontSize: 13,
+    color: "rgba(31, 48, 94, 0.88)",
+    fontWeight: "700",
+    marginBottom: 2,
+  },
   horizontalList: { paddingLeft: 20, paddingBottom: 10 },
   errorContainer: {
     margin: 20,
@@ -421,8 +472,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderRadius: 12,
   },
-  modalName: { fontSize: 22, fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
-  modalEmail: { fontSize: 15, color: "#64748B", marginTop: 4, fontWeight: "500" },
+  modalName: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "rgba(31, 48, 94, 0.88)",
+  },
+  modalEmail: {
+    fontSize: 15,
+    color: "#64748B",
+    marginTop: 4,
+    fontWeight: "500",
+  },
   modalDivider: {
     height: 1,
     width: "100%",

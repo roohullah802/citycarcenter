@@ -1,25 +1,25 @@
 import { useAuth, useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, {
-  DateTimePickerEvent,
+    DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import { useStripe } from "@stripe/stripe-react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useDocumentStatus } from "@/hooks/useDocuments";
 import { useCreateIntent } from "@/hooks/usePayment";
 import { showToast } from "../../../folder/toastService";
-import { useDocumentStatus } from "@/hooks/useDocuments";
 
 export default function DateAndTimeScreen() {
   const { carId } = useLocalSearchParams<{ carId: string }>();
@@ -86,11 +86,14 @@ export default function DateAndTimeScreen() {
         startDate: pickUpDate.toISOString(),
         endDate: returnDate.toISOString(),
       });
-
+      console.log("resp ", resp);
 
       if (resp?.rateLimited) return;
-
-      if (!resp?.clientSecret) throw new Error(resp?.message || resp?.error || "Payment gateway error");
+      console.log("ppp ", resp?.clientSecret);
+      if (!resp?.clientSecret)
+        throw new Error(
+          resp?.message || resp?.error || "Payment gateway error",
+        );
 
       const { error: initError } = await initPaymentSheet({
         merchantDisplayName: "City Car Center",
@@ -104,13 +107,16 @@ export default function DateAndTimeScreen() {
       if (initError) throw initError;
 
       const { error: presentError } = await presentPaymentSheet();
+
       if (presentError) throw presentError;
 
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {
       const serverData = error?.response?.data;
-      const serverMessage = serverData?.message || serverData?.error || serverData;
-      let finalMessage = serverMessage || error?.message || "Transaction failed";
+      const serverMessage =
+        serverData?.message || serverData?.error || serverData;
+      let finalMessage =
+        serverMessage || error?.message || "Transaction failed";
 
       if (Array.isArray(finalMessage)) {
         finalMessage = finalMessage.join(", ");

@@ -11,6 +11,8 @@ const accountVerificationApi = {
   },
   issues: async (data: any) => {
     const response = await axiosInstance.post("/issues", data);
+    console.log("respp ", response);
+
     return response.data;
   },
   signature: async () => {
