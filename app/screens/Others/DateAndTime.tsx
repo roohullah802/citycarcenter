@@ -33,7 +33,13 @@ export default function DateAndTimeScreen() {
 
   // Fetch car details for price estimation
   const { data: carData } = useCarById(cleanCarId);
-  const car = carData?.car || carData;
+  const car = useMemo(() => {
+    if (!carData) return null;
+    if (Array.isArray(carData.data) && carData.data.length > 0) return carData.data[0];
+    if (carData.car) return carData.car;
+    if (carData.data && typeof carData.data === 'object') return carData.data;
+    return carData;
+  }, [carData]);
 
   // Dates state
   const today = useMemo(() => {

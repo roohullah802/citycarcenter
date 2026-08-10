@@ -23,18 +23,17 @@ import { GlobalStyles } from "@/utils/GlobalStyles";
 const ReportIssueScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const [description, setDescription] = useState("");
-  const [email, setEmail] = useState("");
-  const [isFocused, setIsFocused] = useState<string | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
 
   const postIssue = usePostIssues();
 
   const isValid = useMemo(
-    () => description.trim().length > 5 && email.includes("@"),
-    [description, email],
+    () => description.trim().length >= 5,
+    [description],
   );
 
   const handleSend = useCallback(async () => {
-    const result = issueSchema.safeParse({ email, description });
+    const result = issueSchema.safeParse({ description });
 
     if (!result.success) {
       const errorMessage = result.error.issues[0]?.message;
@@ -42,8 +41,8 @@ const ReportIssueScreen: React.FC = () => {
       return;
     }
 
-    postIssue.mutate({ email, description });
-  }, [description, email, postIssue]);
+    postIssue.mutate({ description: description.trim() });
+  }, [description, postIssue]);
 
   return (
     <View style={GlobalStyles.container}>
@@ -53,7 +52,7 @@ const ReportIssueScreen: React.FC = () => {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* PROFESSIONAL HEADER */}
+        {/* HEADER */}
         <View style={[GlobalStyles.header, { paddingTop: insets.top + 10 }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.navBtn}>
             <Ionicons name="chevron-back" size={28} color={Colors.primary} />
@@ -70,39 +69,8 @@ const ReportIssueScreen: React.FC = () => {
           <View style={styles.heroSection}>
             <Text style={styles.heroTitle}>How can we help?</Text>
             <Text style={styles.heroSubtitle}>
-              Our team is here to assist. Please describe the problem
-              you&apos;re experiencing in detail.
+              Our team is here to assist. Describe the issue you&apos;re experiencing and we&apos;ll look into it right away.
             </Text>
-          </View>
-
-          {/* Email Input */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>EMAIL ADDRESS</Text>
-            <View
-              style={[
-                GlobalStyles.inputBox,
-                GlobalStyles.shadowLight,
-                isFocused === "email" && styles.inputBoxFocused,
-              ]}
-            >
-              <Ionicons
-                name="mail-outline"
-                size={20}
-                color={isFocused === "email" ? Colors.primary : Colors.muted}
-                style={styles.icon}
-              />
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter your contact email"
-                placeholderTextColor={Colors.muted}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onFocus={() => setIsFocused("email")}
-                onBlur={() => setIsFocused(null)}
-                onChangeText={setEmail}
-              />
-            </View>
           </View>
 
           {/* Description Input */}
@@ -112,16 +80,16 @@ const ReportIssueScreen: React.FC = () => {
               style={[
                 styles.textAreaBox,
                 GlobalStyles.shadowLight,
-                isFocused === "desc" && styles.inputBoxFocused,
+                isFocused && styles.inputBoxFocused,
               ]}
             >
               <TextInput
                 style={styles.textArea}
-                placeholder="Please provide as much information as possible..."
+                placeholder="Please describe the issue in detail..."
                 placeholderTextColor={Colors.muted}
                 value={description}
-                onFocus={() => setIsFocused("desc")}
-                onBlur={() => setIsFocused(null)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
                 onChangeText={setDescription}
                 multiline
                 numberOfLines={6}
@@ -130,7 +98,7 @@ const ReportIssueScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* SEND BUTTON */}
+          {/* SUBMIT BUTTON */}
           <TouchableOpacity
             style={[styles.submitBtn, !isValid && styles.submitBtnDisabled]}
             onPress={handleSend}
@@ -189,13 +157,6 @@ const styles = StyleSheet.create({
   inputBoxFocused: {
     borderColor: Colors.primary,
     backgroundColor: Colors.white,
-  },
-  icon: { marginRight: 12 },
-  textInput: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: "600",
-    color: Colors.primary,
   },
   textAreaBox: {
     backgroundColor: Colors.white,
