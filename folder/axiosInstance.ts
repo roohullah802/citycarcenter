@@ -2,8 +2,11 @@ import { showToast } from "@/folder/toastService";
 import { getClerkInstance } from "@clerk/expo"; // Import Clerk directly
 import axios from "axios";
 
+const rawBaseUrl = process.env.EXPO_PUBLIC_BASE_URL || "https://api.citycarcenters.com/api/v1/users";
+const baseURL = rawBaseUrl.replace(/\/+$/, "");
+
 export const axiosInstance = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_BASE_URL!,
+  baseURL,
 });
 
 // REQUEST INTERCEPTOR: Dynamically fetches a fresh token for every request
