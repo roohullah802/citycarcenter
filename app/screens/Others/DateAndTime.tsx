@@ -179,8 +179,6 @@ export default function DateAndTimeScreen() {
         applyDiscount: car?.discountEnabled || false,
       });
 
-      if (resp?.rateLimited) return;
-
       if (!resp?.clientSecret) {
         throw new Error(
           resp?.message || resp?.error || "Payment gateway error",

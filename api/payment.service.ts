@@ -8,7 +8,6 @@ const paymentApi = {
 
   createIntent: async (data: any) => {
     const response = await axiosInstance.post("/payments/create-intent", data) as any;
-    if (response?.rateLimited) return { rateLimited: true };
     return response.data;
   },
 };

@@ -135,8 +135,6 @@ const ExtendLeaseScreen = () => {
         days: daysCount,
       });
 
-      if (result?.rateLimited) return;
-
       const clientSecret = result?.clientSecret;
       if (!clientSecret) throw new Error(result?.message || result?.error || "Could not initialize payment");
 

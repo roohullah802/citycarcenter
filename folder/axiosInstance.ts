@@ -27,14 +27,40 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// RESPONSE INTERCEPTOR: Handles errors globally
+// RESPONSE INTERCEPTOR: Handles API errors globally with user-friendly messages
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.status === 429) {
-      showToast(error.response.data?.message ?? "Too many requests. Please wait a moment.");
-      return Promise.resolve({ data: null, status: 429, rateLimited: true });
+    let message = "An unexpected error occurred. Please try again.";
+
+    if (error?.response) {
+      const status = error.response.status;
+      const backendMsg = error.response.data?.message;
+
+      // Do not show toast messages to the user for 429 rate limit responses
+      if (status === 429) {
+        return Promise.reject(error);
+      }
+
+      if (backendMsg && typeof backendMsg === "string") {
+        message = backendMsg;
+      } else if (status === 400) {
+        message = "Invalid input provided. Please verify your details.";
+      } else if (status === 401) {
+        message = "Session expired or unauthorized. Please log in again.";
+      } else if (status === 403) {
+        message = "Access denied. You do not have permission for this action.";
+      } else if (status === 404) {
+        message = "The requested information could not be found.";
+      } else if (status >= 500) {
+        message = "Server error encountered. Please try again later.";
+      }
+    } else if (error?.request) {
+      message = "Network error. Please check your internet connection.";
     }
+
+    showToast(message);
     return Promise.reject(error);
   }
 );
+
