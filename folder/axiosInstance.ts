@@ -54,7 +54,9 @@ axiosInstance.interceptors.response.use(
         // Automatically sign out the user to clear the broken session
         const clerk = getClerkInstance();
         if (clerk.session) {
-          clerk.signOut().catch(console.error);
+          // Force clear local session first, then attempt network signout
+          clerk.setActive({ session: null }).catch(() => {});
+          clerk.signOut().catch(() => {});
         }
       } else if (backendMsg && typeof backendMsg === "string") {
         message = backendMsg;
