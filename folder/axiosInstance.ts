@@ -21,7 +21,9 @@ axiosInstance.interceptors.request.use(
         config.headers["Authorization"] = `Bearer ${token}`;
       }
     } catch (error) {
-      console.error("Failed to get Clerk token for API request:", error);
+      // Token fetch failed (likely due to an invalid/expired session).
+      // We silently catch this here. The request will proceed without a token,
+      // the backend will return 401, and our response interceptor will cleanly sign the user out.
     }
     return config;
   },
