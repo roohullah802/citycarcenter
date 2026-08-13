@@ -170,12 +170,18 @@ export default function DateAndTimeScreen() {
 
       if (!mongodbId) throw new Error("User session expired. Please re-login.");
 
+      // Adjust dates to midday to avoid timezone shifting them to a previous day in UTC
+      const startSend = new Date(pickUpDate);
+      startSend.setHours(12, 0, 0, 0);
+      const endSend = new Date(returnDate);
+      endSend.setHours(12, 0, 0, 0);
+
       const resp = await createIntent({
         action: "createLease",
         userId: mongodbId,
         carId: cleanCarId,
-        startDate: pickUpDate.toISOString(),
-        endDate: returnDate.toISOString(),
+        startDate: startSend.toISOString(),
+        endDate: endSend.toISOString(),
         applyDiscount: car?.discountEnabled || false,
       });
 
@@ -209,10 +215,15 @@ export default function DateAndTimeScreen() {
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {
       const serverData = error?.response?.data;
-      const serverMessage =
-        serverData?.message || serverData?.error || serverData;
-      let finalMessage =
-        serverMessage || error?.message || "Transaction failed";
+      let finalMessage = "Transaction failed";
+
+      if (serverData?.errors && typeof serverData.errors === "object") {
+        // Extract Zod validation field errors
+        const errorMessages = Object.values(serverData.errors).flat();
+        finalMessage = errorMessages.join(", ");
+      } else {
+        finalMessage = serverData?.message || serverData?.error || error?.message || "Transaction failed";
+      }
 
       if (Array.isArray(finalMessage)) {
         finalMessage = finalMessage.join(", ");
@@ -338,22 +349,11 @@ export default function DateAndTimeScreen() {
 
           {car && (
             <View style={styles.breakdownRows}>
-              <View style={styles.breakdownRow}>
-                <Text style={styles.rowLabel}>Rate Tier ({priceEstimation.rateType})</Text>
-                <Text style={styles.rowValue}>${priceEstimation.base}</Text>
-              </View>
 
               {priceEstimation.discount > 0 && (
                 <View style={styles.breakdownRow}>
                   <Text style={[styles.rowLabel, { color: "#D97706" }]}>Discount ({car.discountPercentage}%)</Text>
                   <Text style={[styles.rowValue, { color: "#D97706" }]}>-${priceEstimation.discount}</Text>
-                </View>
-              )}
-
-              {priceEstimation.tax > 0 && (
-                <View style={styles.breakdownRow}>
-                  <Text style={styles.rowLabel}>Tax ({car.tax}%)</Text>
-                  <Text style={styles.rowValue}>+${priceEstimation.tax}</Text>
                 </View>
               )}
 

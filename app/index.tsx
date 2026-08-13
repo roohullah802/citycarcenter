@@ -21,7 +21,7 @@ export default function Index() {
 
       return () => clearTimeout(timer);
     }
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded]);
 
   return (
     <View style={{

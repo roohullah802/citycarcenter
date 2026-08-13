@@ -189,8 +189,8 @@ const CarDetails = () => {
           <StatBox icon="calendar-outline" label="Year" value={details?.year} />
           <StatBox
             icon="speedometer-outline"
-            label="KM Limit"
-            value={details?.allowedMilleage}
+            label="Odometer"
+            value={details?.initialMileage}
           />
           <StatBox
             icon="cog-outline"

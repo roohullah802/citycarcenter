@@ -1,25 +1,25 @@
-import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const tokenCache = {
   async getToken(key: string) {
     try {
-      const value = await SecureStore.getItemAsync(key);
+      const value = await AsyncStorage.getItem(key);
       return value;
     } catch (err: any) {
-      await SecureStore.deleteItemAsync(key);
+      await AsyncStorage.removeItem(key);
       return null;
     }
   },
   async saveToken(key: string, value: string) {
     try {
-      await SecureStore.setItemAsync(key, value);
+      await AsyncStorage.setItem(key, value);
     } catch (err: any) {
       return;
     }
   },
   async clearToken(key: string) {
     try {
-      await SecureStore.deleteItemAsync(key);
+      await AsyncStorage.removeItem(key);
     } catch (err: any) {
       return;
     }

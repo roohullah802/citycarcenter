@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Animated, Easing, StyleSheet, Text, View, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/utils/Colors";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ToastType = "success" | "error" | "info";
 
@@ -16,6 +17,7 @@ export const showToast = (message: string, type: ToastType = "info") => {
 };
 
 const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const insets = useSafeAreaInsets();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-100)).current;
   const [message, setMessage] = useState("");
@@ -96,6 +98,7 @@ const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           style={[
             styles.toastContainer,
             {
+              top: Math.max(insets.top + 15, Platform.OS === "ios" ? 65 : 55),
               opacity: fadeAnim,
               transform: [{ translateY: slideAnim }],
             },
@@ -120,7 +123,6 @@ export default ToastProvider;
 const styles = StyleSheet.create({
   toastContainer: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 50 : 30,
     left: 20,
     right: 20,
     alignItems: "center",

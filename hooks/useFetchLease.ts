@@ -16,7 +16,6 @@ export const useLeaseById = (id: string) => {
     queryKey: ["leaseById"],
     queryFn: () => leaseApi.leaseById(id),
     enabled: !!id,
-    refetchInterval: 10000,
   });
 
   return result;

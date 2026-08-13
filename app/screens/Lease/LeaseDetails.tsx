@@ -164,7 +164,7 @@ const LeaseDetails = () => {
                 </View>
                 <Text style={styles.cardTitle}>Lease Summary</Text>
               </View>
-              <InfoRow label="Contract Type" value="Limited Mileage" />
+              <InfoRow label="Contract Type" value="Standard Rental" />
               <InfoRow label="Total Duration" value={`${days} Days`} />
               <InfoRow
                 label="Start Date"
@@ -192,10 +192,6 @@ const LeaseDetails = () => {
               <InfoRow
                 label="Daily Rate"
                 value={`$${carDetails?.pricePerDay}`}
-              />
-              <InfoRow
-                label="Mile Limit"
-                value={`${carDetails?.allowedMilleage} mi`}
               />
               <InfoRow
                 label="Starting Odo"

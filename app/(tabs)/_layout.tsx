@@ -1,14 +1,14 @@
 import { Colors } from "@/utils/Colors";
 import { useAuth } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import React from "react";
 import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  const { isLoaded } = useAuth({
+  const { isLoaded, isSignedIn } = useAuth({
     treatPendingAsSignedOut: false,
   });
 
@@ -18,6 +18,10 @@ export default function TabLayout() {
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
+  }
+
+  if (!isSignedIn) {
+    return <Redirect href="/screens/Auth/SocialAuth" />;
   }
 
   const activeColor = Colors.primary;

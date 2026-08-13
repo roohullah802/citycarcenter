@@ -39,18 +39,25 @@ axiosInstance.interceptors.response.use(
     if (error?.response) {
       const status = error.response.status;
       const backendMsg = error.response.data?.message;
+      const clerkAuthStatus = error.response.headers?.["x-clerk-auth-status"];
 
       // Do not show toast messages to the user for 429 rate limit responses
       if (status === 429) {
         return Promise.reject(error);
       }
 
-      if (backendMsg && typeof backendMsg === "string") {
+      // If the backend returns 404 but it's actually a Clerk auth error, treat it as 401
+      if (clerkAuthStatus === "signed-out" || status === 401) {
+        message = "Session expired or unauthorized. Please log in again.";
+        // Automatically sign out the user to clear the broken session
+        const clerk = getClerkInstance();
+        if (clerk.session) {
+          clerk.signOut().catch(console.error);
+        }
+      } else if (backendMsg && typeof backendMsg === "string") {
         message = backendMsg;
       } else if (status === 400) {
         message = "Invalid input provided. Please verify your details.";
-      } else if (status === 401) {
-        message = "Session expired or unauthorized. Please log in again.";
       } else if (status === 403) {
         message = "Access denied. You do not have permission for this action.";
       } else if (status === 404) {
