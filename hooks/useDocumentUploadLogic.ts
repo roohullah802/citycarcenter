@@ -45,40 +45,45 @@ export const useDocumentUploadLogic = () => {
   );
 
   const handlePickImage = async (key: DocKey) => {
-    const isExtra = key === "extraDocuments";
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    try {
+      const isExtra = key === "extraDocuments";
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (!permission.granted) {
-      Alert.alert("Permission required", "Gallery access is needed to upload documents.");
-      return;
-    }
+      if (!permission.granted) {
+        Alert.alert("Permission required", "Gallery access is needed to upload documents.");
+        return;
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: !isExtra,
-      allowsMultipleSelection: isExtra,
-      aspect: [4, 3],
-      quality: 0.8,
-      base64: true, // Keeping true to match existing behavior, but URI is preferred
-    });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: !isExtra,
+        allowsMultipleSelection: isExtra,
+        aspect: [4, 3],
+        quality: 0.8,
+        base64: true, // Keeping true to match existing behavior, but URI is preferred
+      });
 
-    if (result.canceled) return;
+      if (result.canceled) return;
 
-    if (isExtra) {
-      const newDocs = result.assets.map((asset) => ({
-        uri: asset.uri,
-        base64: asset.base64 || null,
-      }));
-      setDocs((prev) => ({
-        ...prev,
-        extraDocuments: [...prev.extraDocuments, ...newDocs],
-      }));
-    } else {
-      const asset = result.assets[0];
-      setDocs((prev) => ({
-        ...prev,
-        [key]: { uri: asset.uri, base64: asset.base64 || null },
-      }));
+      if (isExtra) {
+        const newDocs = result.assets.map((asset) => ({
+          uri: asset.uri,
+          base64: asset.base64 || null,
+        }));
+        setDocs((prev) => ({
+          ...prev,
+          extraDocuments: [...prev.extraDocuments, ...newDocs],
+        }));
+      } else {
+        const asset = result.assets[0];
+        setDocs((prev) => ({
+          ...prev,
+          [key]: { uri: asset.uri, base64: asset.base64 || null },
+        }));
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      showToast("An error occurred while picking the image.");
     }
   };
 
@@ -94,19 +99,24 @@ export const useDocumentUploadLogic = () => {
   };
 
   const uploadSingleFile = async (asset: ImageAsset, key: string, identifier: string): Promise<UploadResult> => {
-    const fileName = `${key}_${user?.id}_${identifier}_${Date.now()}.jpg`;
-    const fileToUpload = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
-    const result = await uploadFile(fileToUpload, fileName);
+    try {
+      const fileName = `${key}_${user?.id}_${identifier}_${Date.now()}.jpg`;
+      const fileToUpload = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
+      const result = await uploadFile(fileToUpload, fileName);
 
-    if (!result?.url || !result?.fileId) {
+      if (!result?.url || !result?.fileId) {
+        throw new Error(`Invalid response from server for ${key}`);
+      }
+
+      return {
+        key: key as DocKey,
+        url: result.url,
+        fileId: result.fileId,
+      };
+    } catch (error) {
+      console.error(`Failed to upload ${key}:`, error);
       throw new Error(`Failed to upload ${key}`);
     }
-
-    return {
-      key: key as DocKey,
-      url: result.url,
-      fileId: result.fileId,
-    };
   };
 
   const handleSubmit = async () => {
@@ -133,12 +143,27 @@ export const useDocumentUploadLogic = () => {
         uploadPromises.push(uploadSingleFile(asset, "extraDocuments", `extra_${index}`));
       });
 
-      // 3. Execute All Uploads
-      const results = await Promise.all(uploadPromises);
+      if (uploadPromises.length === 0) {
+        showToast("No documents to upload.");
+        setIsLoading(false);
+        return;
+      }
+
+      // 3. Execute All Uploads robustly
+      const results = await Promise.allSettled(uploadPromises);
+
+      const failedUploads = results.filter((r) => r.status === "rejected");
+      if (failedUploads.length > 0) {
+        throw new Error(`Failed to upload ${failedUploads.length} document(s). Please try again.`);
+      }
+
+      const successfulUploads = results
+        .filter((r): r is PromiseFulfilledResult<UploadResult> => r.status === "fulfilled")
+        .map((r) => r.value);
 
       // 4. Construct Final Payload
       const getDocResult = (key: DocKey) => {
-        const res = results.find((r) => r.key === key);
+        const res = successfulUploads.find((r) => r.key === key);
         return res ? { url: res.url, fileId: res.fileId } : undefined;
       };
 
@@ -147,13 +172,21 @@ export const useDocumentUploadLogic = () => {
         cnicFront: getDocResult("cnicFront"),
         cnicBack: getDocResult("cnicBack"),
         drivingLicence: getDocResult("drivingLicence"),
-        extraDocuments: results
+        extraDocuments: successfulUploads
           .filter((r) => r.key === "extraDocuments")
           .map((r) => ({ url: r.url, fileId: r.fileId })),
       };
 
       // 5. Save to DB
       await uploadDocToDB(payload);
+
+      // 6. Clear state after successful submission
+      setDocs({
+        cnicFront: null,
+        cnicBack: null,
+        drivingLicence: null,
+        extraDocuments: [],
+      });
 
       showToast("Documents submitted successfully!");
       router.push("/screens/Setting/DocumentSubmittedScreen");

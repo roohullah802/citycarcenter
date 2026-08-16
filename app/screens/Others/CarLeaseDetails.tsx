@@ -12,7 +12,6 @@ import { useDocumentStatus } from "@/hooks/useDocuments";
 import { showToast } from "@/folder/toastService";
 import {
   ActivityIndicator,
-  Dimensions,
   FlatList,
   Platform,
   ScrollView,
@@ -20,12 +19,11 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const { height } = Dimensions.get("window");
-const HEADER_HEIGHT = height * 0.42;
+import { RFValue } from "react-native-responsive-fontsize";
 
 const CarDetails = () => {
   const { id } = useLocalSearchParams();
@@ -33,6 +31,8 @@ const CarDetails = () => {
   const { isSignedIn } = useAuth();
   const { data: favouritesData } = useFetchFavourites();
   const toggleFavourite = useToggleFavourite();
+  const { height } = useWindowDimensions();
+  const HEADER_HEIGHT = height * 0.42;
 
   const { data, isLoading, isError, refetch } = useCarById(id as string);
   const details = data?.data?.[0] || data?.car || data?.data;
@@ -93,7 +93,7 @@ const CarDetails = () => {
       />
 
       {/* IMAGE HEADER */}
-      <View style={{ height: HEADER_HEIGHT }}>
+      <View style={[{ height: HEADER_HEIGHT }, GlobalStyles.tabletInner]}>
         <FlatList
           data={details?.images || []}
           horizontal
@@ -166,7 +166,7 @@ const CarDetails = () => {
       {/* DETAILS CONTENT */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={styles.detailsPanel}
+        style={[styles.detailsPanel, GlobalStyles.tabletInner]}
         contentContainerStyle={{ paddingBottom: (insets.bottom || 0) + 140 }}
       >
         <View style={styles.titleSection}>
@@ -250,6 +250,7 @@ const CarDetails = () => {
       <View
         style={[
           styles.footer,
+          GlobalStyles.tabletInner,
           {
             paddingBottom: (insets.bottom || 0) + 16,
             paddingTop: 16,
@@ -327,7 +328,7 @@ const FeatureItem = ({ icon, label, value }: any) => (
 );
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF" },
+  container: { flex: 1, backgroundColor: Colors.surface, alignItems: "center" },
   centerWrapper: {
     flex: 1,
     justifyContent: "center",
@@ -337,18 +338,18 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 14,
+    fontSize: RFValue(13),
     fontWeight: "600",
     color: "#94A3B8",
   },
   errorTitle: {
-    fontSize: 18,
+    fontSize: RFValue(16),
     fontWeight: "800",
     color: Colors.primary,
     marginTop: 16,
   },
   errorSubtitle: {
-    fontSize: 14,
+    fontSize: RFValue(13),
     color: "#94A3B8",
     textAlign: "center",
     marginTop: 8,
@@ -400,6 +401,7 @@ const styles = StyleSheet.create({
 
   detailsPanel: {
     flex: 1,
+    width: "100%",
     backgroundColor: "#FFF",
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
@@ -423,14 +425,14 @@ const styles = StyleSheet.create({
   },
   titleInfo: { flex: 1, paddingRight: 10 },
   brandName: {
-    fontSize: 12,
+    fontSize: RFValue(11),
     fontWeight: "800",
     color: "#94A3B8",
     letterSpacing: 1,
     textTransform: "uppercase",
   },
   modelName: {
-    fontSize: 26,
+    fontSize: RFValue(24),
     fontWeight: "800",
     color: Colors.primary,
     marginTop: 2,
@@ -468,14 +470,14 @@ const styles = StyleSheet.create({
   },
   statBox: { alignItems: "center" },
   statLabel: {
-    fontSize: 10,
+    fontSize: RFValue(9),
     color: "#94A3B8",
     fontWeight: "700",
     marginTop: 6,
     textTransform: "uppercase",
   },
   statValue: {
-    fontSize: 13,
+    fontSize: RFValue(12),
     fontWeight: "700",
     color: Colors.primary,
     marginTop: 2,
@@ -484,12 +486,12 @@ const styles = StyleSheet.create({
 
   section: { marginBottom: 32 },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: RFValue(16),
     fontWeight: "800",
     color: Colors.primary,
     marginBottom: 12,
   },
-  description: { fontSize: 15, color: "#64748B", lineHeight: 24 },
+  description: { fontSize: RFValue(14), color: "#64748B", lineHeight: 24 },
   readMore: { color: Colors.primary, fontWeight: "700", marginTop: 8 },
 
   featureGrid: { gap: 12 },
@@ -512,12 +514,12 @@ const styles = StyleSheet.create({
     }),
   },
   featLabel: {
-    fontSize: 11,
+    fontSize: RFValue(10),
     fontWeight: "700",
     color: "#94A3B8",
     textTransform: "uppercase",
   },
-  featValue: { fontSize: 15, fontWeight: "700", color: Colors.primary, textTransform: "capitalize" },
+  featValue: { fontSize: RFValue(14), fontWeight: "700", color: Colors.primary, textTransform: "capitalize" },
 
   footer: {
     position: "absolute",
@@ -551,7 +553,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   footerLabel: {
-    fontSize: 11,
+    fontSize: RFValue(10),
     color: "#94A3B8",
     fontWeight: "700",
     textTransform: "uppercase",
@@ -563,12 +565,12 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   discountTagText: {
-    fontSize: 9,
+    fontSize: RFValue(8),
     fontWeight: "800",
     color: "#D97706",
   },
-  footerPrice: { fontSize: 24, fontWeight: "800", color: Colors.primary, marginTop: 2 },
-  perDay: { fontSize: 13, color: "#94A3B8", fontWeight: "500" },
+  footerPrice: { fontSize: RFValue(22), fontWeight: "800", color: Colors.primary, marginTop: 2 },
+  perDay: { fontSize: RFValue(12), color: "#94A3B8", fontWeight: "500" },
   bookBtn: {
     backgroundColor: Colors.primary,
     height: 54,
@@ -587,7 +589,7 @@ const styles = StyleSheet.create({
       android: { elevation: 4 },
     }),
   },
-  bookBtnText: { color: "#FFF", fontSize: 16, fontWeight: "700" },
+  bookBtnText: { color: "#FFF", fontSize: RFValue(15), fontWeight: "700" },
   leasedBadgeOverlay: {
     position: "absolute",
     top: 0,
@@ -610,7 +612,7 @@ const styles = StyleSheet.create({
   },
   leasedBadgeText: {
     color: Colors.white,
-    fontSize: 14,
+    fontSize: RFValue(13),
     fontWeight: "800",
     letterSpacing: 1,
   },

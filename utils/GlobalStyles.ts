@@ -13,6 +13,15 @@ export const GlobalStyles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
   },
+  tabletConstrained: {
+    flexGrow: 1,
+    alignItems: "center",
+  },
+  tabletInner: {
+    width: "100%",
+    maxWidth: 768,
+    alignSelf: "center",
+  },
   card: {
     backgroundColor: Colors.white,
     borderRadius: 24,

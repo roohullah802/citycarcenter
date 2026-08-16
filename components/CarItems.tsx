@@ -9,19 +9,21 @@ import { showToast } from "@/folder/toastService";
 import { router } from "expo-router";
 import React from "react";
 import {
-  Dimensions,
   Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
-
-const { width } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.7;
+import { RFValue } from "react-native-responsive-fontsize";
 
 function CarItems({ item }: any) {
+  const { width } = useWindowDimensions();
+  // Ensure the card isn't monstrously large on a tablet
+  const CARD_WIDTH = Math.min(width * 0.7, 320); 
+
   const { isSignedIn } = useAuth();
   const { data: favouritesData } = useFetchFavourites();
   const toggleFavourite = useToggleFavourite();
@@ -40,7 +42,7 @@ function CarItems({ item }: any) {
       }
       style={({ pressed }) => [pressed && { opacity: 0.95 }]}
     >
-      <View style={styles.carCard}>
+      <View style={[styles.carCard, { width: CARD_WIDTH }]}>
         {/* Image Section */}
         <View style={styles.imageContainer}>
           <Image
@@ -150,7 +152,6 @@ export default CarItems;
 
 const styles = StyleSheet.create({
   carCard: {
-    width: CARD_WIDTH,
     marginRight: 16,
     backgroundColor: Colors.white,
     borderRadius: 20,
@@ -179,12 +180,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   priceAmount: {
-    fontSize: 16,
+    fontSize: RFValue(14),
     fontFamily: "bold",
     color: Colors.white,
   },
   priceUnit: {
-    fontSize: 11,
+    fontSize: RFValue(10),
     fontFamily: "medium",
     color: Colors.muted,
     marginLeft: 2,
@@ -211,14 +212,14 @@ const styles = StyleSheet.create({
   },
   discountBadgeText: {
     color: "#FFFFFF",
-    fontSize: 10,
+    fontSize: RFValue(9),
     fontFamily: "bold",
   },
   infoSection: {
     padding: 14,
   },
   carName: {
-    fontSize: 16,
+    fontSize: RFValue(14),
     fontFamily: "bold",
     color: Colors.primary,
     marginBottom: 8,
@@ -234,7 +235,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   specText: {
-    fontSize: 12,
+    fontSize: RFValue(11),
     fontFamily: "medium",
     color: Colors.muted,
   },
@@ -256,7 +257,7 @@ const styles = StyleSheet.create({
   },
   rentButtonText: {
     color: "#FFFFFF",
-    fontSize: 13,
+    fontSize: RFValue(11),
     fontFamily: "bold",
     letterSpacing: 0.3,
   },
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
   },
   rentedBadgeText: {
     color: Colors.white,
-    fontSize: 10,
+    fontSize: RFValue(9),
     fontFamily: "bold",
     letterSpacing: 0.5,
   },

@@ -2,13 +2,14 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import React from "react";
 import {
-  Dimensions,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { Colors } from "@/utils/Colors";
+import { RFValue } from "react-native-responsive-fontsize";
 
 interface Props {
   item: {
@@ -17,11 +18,14 @@ interface Props {
   };
 }
 
-const { width } = Dimensions.get("window");
-// Screen padding = 20 * 2 = 40. Gap between 4 columns = 12 * 3 = 36.
-const ITEM_WIDTH = Math.floor((width - 40 - 36) / 4);
-
 const BrandCard: React.FC<Props> = React.memo(({ item }) => {
+  const { width } = useWindowDimensions();
+  
+  // Calculate columns based on width
+  const columns = width < 500 ? 4 : width < 800 ? 6 : 8;
+  // Screen padding = 20 * 2 = 40. Gap = 12 between items.
+  const ITEM_WIDTH = Math.floor((width - 40 - (12 * (columns - 1))) / columns);
+
   const imageUrl = (item?.brandImage as any)?.url || (item?.brandImage as any);
 
   return (
@@ -74,12 +78,12 @@ const styles = StyleSheet.create({
     height: "80%",
   },
   fallbackText: {
-    fontSize: 18,
+    fontSize: RFValue(16),
     fontWeight: "800",
     color: Colors.primary,
   },
   brandName: {
-    fontSize: 11,
+    fontSize: RFValue(9),
     fontWeight: "700",
     color: Colors.primary,
     marginTop: 6,

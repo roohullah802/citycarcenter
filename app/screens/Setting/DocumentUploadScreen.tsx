@@ -29,60 +29,62 @@ export default function DocumentUploadScreen() {
         <View style={{ width: 40 }} /> {/* Placeholder for centering title */}
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.heading}>Submit Documents</Text>
-        <Text style={styles.subtext}>
-          Please upload clear photos of your original documents to verify your account.
-        </Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.innerContent}>
+          <Text style={styles.heading}>Submit Documents</Text>
+          <Text style={styles.subtext}>
+            Please upload clear photos of your original documents to verify your account.
+          </Text>
 
-        <DocumentCard
-          docKey="cnicFront"
-          label="CNIC Front"
-          required={true}
-          docs={docs}
-          onPickImage={handlePickImage}
-          onRemoveImage={handleRemoveImage}
-        />
+          <DocumentCard
+            docKey="cnicFront"
+            label="CNIC Front"
+            required={true}
+            docs={docs}
+            onPickImage={handlePickImage}
+            onRemoveImage={handleRemoveImage}
+          />
 
-        <DocumentCard
-          docKey="cnicBack"
-          label="CNIC Back"
-          required={true}
-          docs={docs}
-          onPickImage={handlePickImage}
-          onRemoveImage={handleRemoveImage}
-        />
+          <DocumentCard
+            docKey="cnicBack"
+            label="CNIC Back"
+            required={true}
+            docs={docs}
+            onPickImage={handlePickImage}
+            onRemoveImage={handleRemoveImage}
+          />
 
-        <DocumentCard
-          docKey="drivingLicence"
-          label="Driving Licence"
-          required={true}
-          docs={docs}
-          onPickImage={handlePickImage}
-          onRemoveImage={handleRemoveImage}
-        />
+          <DocumentCard
+            docKey="drivingLicence"
+            label="Driving Licence"
+            required={true}
+            docs={docs}
+            onPickImage={handlePickImage}
+            onRemoveImage={handleRemoveImage}
+          />
 
-        <DocumentCard
-          docKey="extraDocuments"
-          label="Extra Documents (Optional)"
-          required={false}
-          docs={docs}
-          onPickImage={handlePickImage}
-          onRemoveImage={handleRemoveImage}
-        />
+          <DocumentCard
+            docKey="extraDocuments"
+            label="Extra Documents (Optional)"
+            required={false}
+            docs={docs}
+            onPickImage={handlePickImage}
+            onRemoveImage={handleRemoveImage}
+          />
 
-        <TouchableOpacity
-          style={[styles.submitBtn, !canContinue && styles.submitBtnDisabled]}
-          disabled={!canContinue || isLoading}
-          onPress={handleSubmit}
-          activeOpacity={0.8}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.submitBtnText}>Submit Documents</Text>
-          )}
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.submitBtn, !canContinue && styles.submitBtnDisabled]}
+            disabled={!canContinue || isLoading}
+            onPress={handleSubmit}
+            activeOpacity={0.8}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.submitBtnText}>Submit Documents</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -116,7 +118,13 @@ const styles = StyleSheet.create({
     fontFamily: "bold",
     color: "#1F2937",
   },
-  content: {
+  scrollContent: {
+    flexGrow: 1,
+    alignItems: "center",
+  },
+  innerContent: {
+    width: "100%",
+    maxWidth: 600,
     padding: 20,
     paddingBottom: 40,
   },

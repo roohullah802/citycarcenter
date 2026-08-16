@@ -12,18 +12,19 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    Dimensions,
     FlatList,
     ScrollView,
     StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useGetCurrentLocation } from "../../folder/getAddress";
+import { RFValue } from "react-native-responsive-fontsize";
 
 // Skeleton Loader Component
 const SkeletonLoader = ({ style }: { style?: any }) => (
@@ -36,6 +37,7 @@ function HomeScreen() {
   const modalRef = useRef<Modalize>(null);
   const location = useGetCurrentLocation();
   const [greeting, setGreeting] = useState("Good Morning");
+  const { width } = useWindowDimensions();
 
   const { data: activeLeasesData } = useActiveLeases();
   const activeLeases = activeLeasesData?.leases || [];
@@ -73,212 +75,214 @@ function HomeScreen() {
         showsVerticalScrollIndicator={false}
         style={GlobalStyles.surface}
         contentContainerStyle={[
-          GlobalStyles.scrollContainer,
+          GlobalStyles.tabletConstrained,
           { paddingTop: insets.top + 10, paddingBottom: 40 },
         ]}
       >
-        {/* HEADER SECTION */}
-        <View style={styles.header}>
-          <View style={styles.headerInfo}>
-            <Text style={styles.greetingText}>
-              {greeting}, {isSignedIn ? user?.firstName || "Guest" : "Guest"}
-            </Text>
-            {isSignedIn && (
-              <View style={styles.locationContainer}>
-                <Ionicons
-                  name="location-sharp"
-                  size={14}
-                  color="rgba(31, 48, 94, 0.88)"
-                />
-                <Text style={styles.locationValue} numberOfLines={1}>
-                  {location || "Detecting address..."}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.headerActions}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => modalRef.current?.open()}
-            >
-              <Image
-                source={
-                  isSignedIn && user?.imageUrl
-                    ? { uri: user.imageUrl }
-                    : require("../../assests/guest3.png")
-                }
-                style={styles.profileImage}
-                transition={300}
-                cachePolicy={"memory-disk"}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* HERO TITLE */}
-        <View style={styles.heroSection}>
-          <View style={styles.heroBgCircle} />
-          <Text style={styles.title}>
-            Find your ideal ride in{"\n"}
-            <Text style={styles.highlightText}>just a few clicks.</Text>
-          </Text>
-        </View>
-
-        {/* SEARCH BAR */}
-        <TouchableOpacity
-          onPress={() => router.push("/screens/Others/SearchCarCards")}
-          activeOpacity={0.8}
-          style={[
-            GlobalStyles.inputBox,
-            GlobalStyles.shadowLight,
-            { marginHorizontal: 20, paddingLeft: 16, paddingRight: 8 },
-          ]}
-        >
-          <Ionicons name="search-outline" size={20} color={Colors.muted} />
-          <Text style={styles.searchPlaceholder}>
-            Search for your favorite car...
-          </Text>
-          <View style={styles.filterIcon}>
-            <Ionicons name="options-outline" size={18} color={Colors.white} />
-          </View>
-        </TouchableOpacity>
-
-        {/* ACTIVE LEASES BANNER / CAROUSEL ON HOME SCREEN */}
-        {isSignedIn && activeLeases.length > 0 && (
-          <View style={styles.activeLeasesWrapper}>
-            {activeLeases.length > 1 && (
-              <View style={styles.activeLeasesHeader}>
-                <View style={styles.activeTitleRow}>
-                  <View style={styles.activeDot} />
-                  <Text style={styles.activeSectionTitle}>
-                    Active Rentals ({activeLeases.length})
+        <View style={GlobalStyles.tabletInner}>
+          {/* HEADER SECTION */}
+          <View style={styles.header}>
+            <View style={styles.headerInfo}>
+              <Text style={styles.greetingText}>
+                {greeting}, {isSignedIn ? user?.firstName || "Guest" : "Guest"}
+              </Text>
+              {isSignedIn && (
+                <View style={styles.locationContainer}>
+                  <Ionicons
+                    name="location-sharp"
+                    size={14}
+                    color="rgba(31, 48, 94, 0.88)"
+                  />
+                  <Text style={styles.locationValue} numberOfLines={1}>
+                    {location || "Detecting address..."}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => router.push("/(tabs)/Leases")}>
-                  <Text style={styles.seeAllLeasesText}>View All ({activeLeases.length}) →</Text>
+              )}
+            </View>
+
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => modalRef.current?.open()}
+              >
+                <Image
+                  source={
+                    isSignedIn && user?.imageUrl
+                      ? { uri: user.imageUrl }
+                      : require("../../assests/guest3.png")
+                  }
+                  style={styles.profileImage}
+                  transition={300}
+                  cachePolicy={"memory-disk"}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* HERO TITLE */}
+          <View style={styles.heroSection}>
+            <View style={styles.heroBgCircle} />
+            <Text style={styles.title}>
+              Find your ideal ride in{"\n"}
+              <Text style={styles.highlightText}>just a few clicks.</Text>
+            </Text>
+          </View>
+
+          {/* SEARCH BAR */}
+          <TouchableOpacity
+            onPress={() => router.push("/screens/Others/SearchCarCards")}
+            activeOpacity={0.8}
+            style={[
+              GlobalStyles.inputBox,
+              GlobalStyles.shadowLight,
+              { marginHorizontal: 20, paddingLeft: 16, paddingRight: 8 },
+            ]}
+          >
+            <Ionicons name="search-outline" size={20} color={Colors.muted} />
+            <Text style={styles.searchPlaceholder}>
+              Search for your favorite car...
+            </Text>
+            <View style={styles.filterIcon}>
+              <Ionicons name="options-outline" size={18} color={Colors.white} />
+            </View>
+          </TouchableOpacity>
+
+          {/* ACTIVE LEASES BANNER / CAROUSEL ON HOME SCREEN */}
+          {isSignedIn && activeLeases.length > 0 && (
+            <View style={styles.activeLeasesWrapper}>
+              {activeLeases.length > 1 && (
+                <View style={styles.activeLeasesHeader}>
+                  <View style={styles.activeTitleRow}>
+                    <View style={styles.activeDot} />
+                    <Text style={styles.activeSectionTitle}>
+                      Active Rentals ({activeLeases.length})
+                    </Text>
+                  </View>
+                  <TouchableOpacity onPress={() => router.push("/(tabs)/Leases")}>
+                    <Text style={styles.seeAllLeasesText}>View All ({activeLeases.length}) →</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {activeLeases.length === 1 ? (
+                <CountDown item={activeLeases[0]} variant="compact" />
+              ) : (
+                <FlatList
+                  data={activeLeases}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  keyExtractor={(item) => item._id}
+                  renderItem={({ item }) => (
+                    <View style={{ width: Math.min(width, 768) }}>
+                      <CountDown item={item} variant="compact" />
+                    </View>
+                  )}
+                />
+              )}
+            </View>
+          )}
+
+          {/* ERROR STATE VIEW */}
+          {(brandsError || carsError) && (
+            <View style={styles.errorContainer}>
+              <Ionicons name="cloud-offline-outline" size={40} color="#EF4444" />
+              <Text style={styles.errorTitle}>Something went wrong</Text>
+              <Text style={styles.errorSub}>
+                We couldn&apos;t load the latest fleet. Check your connection.
+              </Text>
+              <TouchableOpacity style={styles.retryBtn} onPress={onRetry}>
+                <Text style={styles.retryBtnText}>Try Again</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* BRANDS SECTION */}
+          {!brandsError && (
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Top Brands</Text>
+                <TouchableOpacity
+                  onPress={() => router.push("/screens/Others/BrandCards")}
+                >
+                  <Text style={styles.seeAll}>See All</Text>
                 </TouchableOpacity>
               </View>
-            )}
 
-            {activeLeases.length === 1 ? (
-              <CountDown item={activeLeases[0]} variant="compact" />
-            ) : (
-              <FlatList
-                data={activeLeases}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(item) => item._id}
-                renderItem={({ item }) => (
-                  <View style={{ width: Dimensions.get("window").width }}>
-                    <CountDown item={item} variant="compact" />
-                  </View>
-                )}
-              />
-            )}
-          </View>
-        )}
-
-        {/* ERROR STATE VIEW */}
-        {(brandsError || carsError) && (
-          <View style={styles.errorContainer}>
-            <Ionicons name="cloud-offline-outline" size={40} color="#EF4444" />
-            <Text style={styles.errorTitle}>Something went wrong</Text>
-            <Text style={styles.errorSub}>
-              We couldn&apos;t load the latest fleet. Check your connection.
-            </Text>
-            <TouchableOpacity style={styles.retryBtn} onPress={onRetry}>
-              <Text style={styles.retryBtnText}>Try Again</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* BRANDS SECTION */}
-        {!brandsError && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Top Brands</Text>
-              <TouchableOpacity
-                onPress={() => router.push("/screens/Others/BrandCards")}
-              >
-                <Text style={styles.seeAll}>See All</Text>
-              </TouchableOpacity>
+              {brandsLoading ? (
+                <View style={{ flexDirection: "row", paddingLeft: 20 }}>
+                  {[1, 2, 3, 4].map((i) => (
+                    <View key={i} style={{ marginRight: 14 }}>
+                      <SkeletonLoader
+                        style={{ width: 68, height: 68, borderRadius: 18 }}
+                      />
+                      <SkeletonLoader
+                        style={{
+                          width: 50,
+                          height: 10,
+                          marginTop: 8,
+                          alignSelf: "center",
+                        }}
+                      />
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <FlatList
+                  data={brands?.brands}
+                  renderItem={({ item }) => <BrandItems item={item} />}
+                  keyExtractor={(item, index) => index.toString()}
+                  initialNumToRender={4}
+                  maxToRenderPerBatch={4}
+                  windowSize={5}
+                  removeClippedSubviews={true}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.horizontalList}
+                />
+              )}
             </View>
+          )}
 
-            {brandsLoading ? (
-              <View style={{ flexDirection: "row", paddingLeft: 20 }}>
-                {[1, 2, 3, 4].map((i) => (
-                  <View key={i} style={{ marginRight: 14 }}>
-                    <SkeletonLoader
-                      style={{ width: 68, height: 68, borderRadius: 18 }}
-                    />
-                    <SkeletonLoader
-                      style={{
-                        width: 50,
-                        height: 10,
-                        marginTop: 8,
-                        alignSelf: "center",
-                      }}
-                    />
-                  </View>
-                ))}
+          {/* CARS SECTION */}
+          {!carsError && (
+            <View style={[styles.section, { marginTop: 10 }]}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Available Near You</Text>
+                <TouchableOpacity
+                  onPress={() => router.push("/screens/Others/SearchCarCards")}
+                >
+                  <Text style={styles.seeAll}>See All</Text>
+                </TouchableOpacity>
               </View>
-            ) : (
-              <FlatList
-                data={brands?.brands}
-                renderItem={({ item }) => <BrandItems item={item} />}
-                keyExtractor={(item, index) => index.toString()}
-                initialNumToRender={4}
-                maxToRenderPerBatch={4}
-                windowSize={5}
-                removeClippedSubviews={true}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalList}
-              />
-            )}
-          </View>
-        )}
 
-        {/* CARS SECTION */}
-        {!carsError && (
-          <View style={[styles.section, { marginTop: 10 }]}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Available Near You</Text>
-              <TouchableOpacity
-                onPress={() => router.push("/screens/Others/SearchCarCards")}
-              >
-                <Text style={styles.seeAll}>See All</Text>
-              </TouchableOpacity>
+              {carsLoading ? (
+                <View style={{ flexDirection: "row", paddingLeft: 20 }}>
+                  {[1, 2].map((i) => (
+                    <View key={i} style={{ marginRight: 16 }}>
+                      <SkeletonLoader
+                        style={{ width: 260, height: 280, borderRadius: 20 }}
+                      />
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <FlatList
+                  data={cars?.data}
+                  renderItem={({ item }) => <CarItems item={item} />}
+                  keyExtractor={(item) => item._id}
+                  initialNumToRender={5}
+                  maxToRenderPerBatch={5}
+                  windowSize={6}
+                  removeClippedSubviews={true}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.horizontalList}
+                />
+              )}
             </View>
-
-            {carsLoading ? (
-              <View style={{ flexDirection: "row", paddingLeft: 20 }}>
-                {[1, 2].map((i) => (
-                  <View key={i} style={{ marginRight: 16 }}>
-                    <SkeletonLoader
-                      style={{ width: 260, height: 280, borderRadius: 20 }}
-                    />
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <FlatList
-                data={cars?.data}
-                renderItem={({ item }) => <CarItems item={item} />}
-                keyExtractor={(item) => item._id}
-                initialNumToRender={5}
-                maxToRenderPerBatch={5}
-                windowSize={6}
-                removeClippedSubviews={true}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalList}
-              />
-            )}
-          </View>
-        )}
+          )}
+        </View>
       </ScrollView>
 
       {/* PROFILE MODAL */}
@@ -337,7 +341,7 @@ const styles = StyleSheet.create({
   },
   headerInfo: { flex: 1 },
   greetingText: {
-    fontSize: 14,
+    fontSize: RFValue(13),
     color: "#64748B",
     fontWeight: "600",
     marginBottom: 4,
@@ -347,7 +351,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   locationValue: {
-    fontSize: 15,
+    fontSize: RFValue(14),
     fontWeight: "800",
     color: "rgba(31, 48, 94, 0.88)",
     marginLeft: 4,
@@ -382,17 +386,17 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
   title: {
-    fontSize: 28,
+    fontSize: RFValue(26),
     fontWeight: "300",
     color: "rgba(31, 48, 94, 0.88)",
-    lineHeight: 36,
+    lineHeight: RFValue(33),
     letterSpacing: -0.5,
   },
   highlightText: { fontWeight: "800", color: "rgba(31, 48, 94, 0.88)" },
   searchPlaceholder: {
     flex: 1,
     marginLeft: 12,
-    fontSize: 14,
+    fontSize: RFValue(13),
     color: Colors.muted,
     fontWeight: "500",
   },
@@ -425,14 +429,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#10B981",
   },
   activeSectionTitle: {
-    fontSize: 13,
+    fontSize: RFValue(12),
     fontWeight: "800",
     color: Colors.primary,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   seeAllLeasesText: {
-    fontSize: 12,
+    fontSize: RFValue(11),
     fontWeight: "700",
     color: Colors.primary,
   },
@@ -446,13 +450,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: RFValue(18),
     fontWeight: "800",
     color: "rgba(31, 48, 94, 0.88)",
     letterSpacing: -0.5,
   },
   seeAll: {
-    fontSize: 13,
+    fontSize: RFValue(12),
     color: "rgba(31, 48, 94, 0.88)",
     fontWeight: "700",
     marginBottom: 2,
@@ -468,13 +472,13 @@ const styles = StyleSheet.create({
     borderColor: "#FEE2E2",
   },
   errorTitle: {
-    fontSize: 16,
+    fontSize: RFValue(15),
     fontWeight: "800",
     color: "rgba(31, 48, 94, 0.88)",
     marginTop: 10,
   },
   errorSub: {
-    fontSize: 13,
+    fontSize: RFValue(12),
     color: "#991B1B",
     textAlign: "center",
     marginTop: 4,
@@ -487,7 +491,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 10,
   },
-  retryBtnText: { color: "#FFF", fontWeight: "700", fontSize: 14 },
+  retryBtnText: { color: "#FFF", fontWeight: "700", fontSize: RFValue(13) },
   modalStyle: { borderTopLeftRadius: 32, borderTopRightRadius: 32 },
   modalInner: { alignItems: "center", padding: 32, paddingBottom: 40 },
   modalProfileWrapper: { position: "relative", marginBottom: 16 },
@@ -506,12 +510,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   modalName: {
-    fontSize: 22,
+    fontSize: RFValue(20),
     fontWeight: "800",
     color: "rgba(31, 48, 94, 0.88)",
   },
   modalEmail: {
-    fontSize: 15,
+    fontSize: RFValue(14),
     color: "#64748B",
     marginTop: 4,
     fontWeight: "500",
@@ -530,7 +534,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  modalButtonText: { fontSize: 16, fontWeight: "700", color: "#FFF" },
+  modalButtonText: { fontSize: RFValue(15), fontWeight: "700", color: "#FFF" },
   skeleton: {
     backgroundColor: "#E2E8F0",
     opacity: 0.7,
