@@ -35,7 +35,7 @@ export default function SignInWithGoogle() {
 
       if (sessionId && setActive) {
         await setActive({ session: sessionId });
-        router.replace("/(tabs)/Home");
+        router.replace("/");
         return;
       }
 

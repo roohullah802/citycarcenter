@@ -1,16 +1,30 @@
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { View, ActivityIndicator, StyleSheet, Text } from "react-native";
 import { useAuth } from "@clerk/expo";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Colors } from "@/utils/Colors";
 
 export default function Index() {
   const params = useLocalSearchParams();
   const { isLoaded, isSignedIn } = useAuth({ treatPendingAsSignedOut: false });
   const isOAuthCallback = params.oauth === "true";
+  const [callbackResolved, setCallbackResolved] = useState(false);
 
   useEffect(() => {
-    if (!isLoaded || !isOAuthCallback) return;
+    if (!isOAuthCallback || !isLoaded) {
+      setCallbackResolved(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setCallbackResolved(true);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [isOAuthCallback, isLoaded]);
+
+  useEffect(() => {
+    if (!isOAuthCallback || !callbackResolved || !isLoaded) return;
 
     if (isSignedIn) {
       router.replace("/(tabs)/Home");
@@ -18,7 +32,7 @@ export default function Index() {
     }
 
     router.replace("/screens/Auth/SocialAuth");
-  }, [isLoaded, isOAuthCallback, isSignedIn]);
+  }, [isOAuthCallback, callbackResolved, isLoaded, isSignedIn]);
 
   if (!isLoaded) {
     return (
@@ -29,7 +43,7 @@ export default function Index() {
     );
   }
 
-  if (isOAuthCallback) {
+  if (isOAuthCallback && !callbackResolved) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color={Colors.primary} />

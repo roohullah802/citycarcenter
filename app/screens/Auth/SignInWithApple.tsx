@@ -30,7 +30,7 @@ export default function SignInWithApple() {
 
       if (sessionId && setActive) {
         await setActive({ session: sessionId });
-        router.replace("/(tabs)/Home");
+        router.replace("/");
         return;
       }
       if (signUp && signUp.status === "missing_requirements") {
@@ -41,7 +41,7 @@ export default function SignInWithApple() {
 
         if (transfer.createdSessionId && setActive) {
           await setActive({ session: transfer.createdSessionId });
-          router.replace("/(tabs)/Home");
+          router.replace("/");
         }
       }
     } catch (error: any) {
