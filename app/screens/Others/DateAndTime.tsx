@@ -341,7 +341,7 @@ export default function DateAndTimeScreen() {
         {/* Duration & Cost Summary */}
         <View style={styles.summaryCard}>
           <View style={styles.summaryHeader}>
-            <Text style={styles.summaryTitle}>Price Breakdown</Text>
+            <Text style={styles.summaryTitle}>Duration</Text>
             <View style={styles.durationBadge}>
               <Text style={styles.durationText}>{totalDays} Day{totalDays > 1 ? "s" : ""}</Text>
             </View>
@@ -349,13 +349,6 @@ export default function DateAndTimeScreen() {
 
           {car && (
             <View style={styles.breakdownRows}>
-
-              {priceEstimation.discount > 0 && (
-                <View style={styles.breakdownRow}>
-                  <Text style={[styles.rowLabel, { color: "#D97706" }]}>Discount ({car.discountPercentage}%)</Text>
-                  <Text style={[styles.rowValue, { color: "#D97706" }]}>-${priceEstimation.discount}</Text>
-                </View>
-              )}
 
               <View style={[styles.divider, { marginHorizontal: 0, marginVertical: 10 }]} />
 
@@ -367,13 +360,6 @@ export default function DateAndTimeScreen() {
           )}
         </View>
 
-        {/* Insurance Highlight Box */}
-        <View style={styles.infoHighlight}>
-          <Ionicons name="shield-checkmark" size={20} color="#059669" />
-          <Text style={styles.infoHighlightText}>
-            Includes full maintenance, insurance coverage, and 24/7 roadside support.
-          </Text>
-        </View>
       </ScrollView>
 
       {/* Fixed Footer Button */}

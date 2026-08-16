@@ -293,7 +293,7 @@ const ExtendLeaseScreen = () => {
 
           {/* EXTENSION SUMMARY & PRICE BREAKDOWN */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>EXTENSION BREAKDOWN</Text>
+            <Text style={styles.cardTitle}>EXTENSION DETAILS</Text>
 
             <View style={styles.breakdownList}>
               <View style={styles.breakdownRow}>
@@ -309,21 +309,6 @@ const ExtendLeaseScreen = () => {
               </View>
 
               <View style={styles.divider} />
-
-              <View style={styles.breakdownRow}>
-                <Text style={styles.rowLabel}>Rate Tier ({priceBreakdown.rateType})</Text>
-                <Text style={styles.rowValue}>${priceBreakdown.base}</Text>
-              </View>
-
-              {priceBreakdown.tax > 0 && (
-                <View style={styles.breakdownRow}>
-                  <Text style={styles.rowLabel}>Tax ({car?.tax || 0}%)</Text>
-                  <Text style={styles.rowValue}>+${priceBreakdown.tax}</Text>
-                </View>
-              )}
-
-              <View style={styles.divider} />
-
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Total Extension Fee</Text>
                 <Text style={styles.totalValue}>${priceBreakdown.total}</Text>
