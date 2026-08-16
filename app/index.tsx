@@ -1,36 +1,61 @@
-import { Colors } from "@/utils/Colors";
+import { Redirect, router, useLocalSearchParams } from "expo-router";
+import { View, ActivityIndicator, StyleSheet, Text } from "react-native";
 import { useAuth } from "@clerk/expo";
-import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
-
+import { Colors } from "@/utils/Colors";
 
 export default function Index() {
-  const { isSignedIn, isLoaded } = useAuth();
-  const router = useRouter();
+  const params = useLocalSearchParams();
+  const { isLoaded, isSignedIn } = useAuth({ treatPendingAsSignedOut: false });
+  const isOAuthCallback = params.oauth === "true";
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || !isOAuthCallback) return;
 
     if (isSignedIn) {
       router.replace("/(tabs)/Home");
-    } else {
-      const timer = setTimeout(() => {
-        router.replace("/screens/Auth/SocialAuth");
-      }, 3000);
-
-      return () => clearTimeout(timer);
+      return;
     }
-  }, [isLoaded]);
 
-  return (
-    <View style={{
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "#FFFFFF"
-    }}>
-      <ActivityIndicator size="large" color={Colors.primary} />
-    </View>
-  );
+    router.replace("/screens/Auth/SocialAuth");
+  }, [isLoaded, isOAuthCallback, isSignedIn]);
+
+  if (!isLoaded) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.text}>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (isOAuthCallback) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.text}>Authenticating...</Text>
+      </View>
+    );
+  }
+
+  if (isSignedIn) {
+    return <Redirect href="/(tabs)/Home" />;
+  }
+
+  return <Redirect href="/screens/Auth/SocialAuth" />;
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+  },
+  text: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: "600",
+    color: Colors.primary,
+  }
+});
