@@ -41,7 +41,7 @@ export default function SignInWithGoogle() {
       }
     } catch (error: any) {
       if (error.code !== "ASYNC_OP_IN_PROGRESS") {
-         console.log("Google Auth Error:", error.message || error);
+        console.log("Google Auth Error:", error.message || error);
       }
     } finally {
       setLoading(false);
