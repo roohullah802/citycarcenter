@@ -20,7 +20,7 @@ import { useCreateIntent } from "@/hooks/usePayment";
 import { useLeaseById } from "@/hooks/useFetchLease";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
-import { useUser } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { capitalText } from "@/folder/capitalText";
 
@@ -30,7 +30,7 @@ const ExtendLeaseScreen = () => {
   const insets = useSafeAreaInsets();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const createIntent = useCreateIntent();
-  const { user } = useUser();
+  const { user } = useAuth();
 
   // Fetch lease details for car rates and current end date
   const { data: leaseData, isLoading: isLeaseLoading } = useLeaseById(id as string);
@@ -124,7 +124,7 @@ const ExtendLeaseScreen = () => {
 
     setIsLoading(true);
     try {
-      const mongodbId = user?.publicMetadata?.mongodbId;
+      const mongodbId = user?._id;
 
       if (!mongodbId) throw new Error("User session expired. Please re-login.");
 

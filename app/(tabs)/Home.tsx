@@ -6,7 +6,7 @@ import { useCars } from "@/hooks/useFetchCars";
 import { useActiveLeases } from "@/hooks/useFetchLease";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
-import { useUser } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -32,7 +32,7 @@ const SkeletonLoader = ({ style }: { style?: any }) => (
 );
 
 function HomeScreen() {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, user } = useAuth();
   const insets = useSafeAreaInsets();
   const modalRef = useRef<Modalize>(null);
   const location = useGetCurrentLocation();
@@ -84,7 +84,7 @@ function HomeScreen() {
           <View style={styles.header}>
             <View style={styles.headerInfo}>
               <Text style={styles.greetingText}>
-                {greeting}, {isSignedIn ? user?.firstName || "Guest" : "Guest"}
+                {greeting}, Hi, {user?.name || "Guest"} 👋
               </Text>
               {isSignedIn && (
                 <View style={styles.locationContainer}>
@@ -107,8 +107,8 @@ function HomeScreen() {
               >
                 <Image
                   source={
-                    isSignedIn && user?.imageUrl
-                      ? { uri: user.imageUrl }
+                    user?.profileImage 
+                      ? { uri: user.profileImage }
                       : require("../../assests/guest3.png")
                   }
                   style={styles.profileImage}
@@ -296,8 +296,8 @@ function HomeScreen() {
           <View style={styles.modalProfileWrapper}>
             <Image
               source={
-                isSignedIn && user?.imageUrl
-                  ? { uri: user.imageUrl }
+                user?.profileImage
+                  ? { uri: user.profileImage }
                   : require("../../assests/guest3.png")
               }
               style={styles.modalProfileImage}
@@ -311,12 +311,10 @@ function HomeScreen() {
             )}
           </View>
           <Text style={styles.modalName}>
-            {isSignedIn ? user?.fullName : "Guest User"}
+            {isSignedIn ? user?.name : "Guest User"}
           </Text>
           <Text style={styles.modalEmail}>
-            {isSignedIn
-              ? user?.primaryEmailAddress?.emailAddress
-              : "Login to sync your data"}
+            {isSignedIn ? user?.email : "Login to sync your data"}
           </Text>
           <View style={styles.modalDivider} />
           <TouchableOpacity

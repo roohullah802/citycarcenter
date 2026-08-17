@@ -1,7 +1,7 @@
 import { capitalText } from "@/folder/capitalText";
 import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
 import { Colors } from "@/utils/Colors";
-import { useAuth } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useDocumentStatus } from "@/hooks/useDocuments";

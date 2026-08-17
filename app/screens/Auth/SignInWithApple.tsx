@@ -1,6 +1,7 @@
-import { useSSO } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
+import { Colors } from "@/utils/Colors";
 import { Image } from "expo-image";
-import * as Linking from "expo-linking";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -11,41 +12,39 @@ import {
   View,
   Modal,
 } from "react-native";
+
 export default function SignInWithApple() {
   const [loading, setLoading] = useState<boolean>(false);
-  const { startSSOFlow } = useSSO();
+  const { loginWithApple } = useAuth();
 
   const handlePress = async () => {
+    setLoading(true);
     try {
-      const redirectUrl = Linking.createURL("/?oauth=true", { scheme: "citycarcenter" });
-      const { createdSessionId, setActive, signIn, signUp } =
-        await startSSOFlow({
-          strategy: "oauth_apple",
-          redirectUrl,
-        });
-      const sessionId =
-        createdSessionId ||
-        signIn?.createdSessionId ||
-        signUp?.createdSessionId;
+      // Using Apple's native sign-in
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
 
-      if (sessionId && setActive) {
-        await setActive({ session: sessionId });
+      if (credential.identityToken || credential.user) {
+        // Extract user info from Apple credential
+        const appleId = credential.user;
+        const name = credential.fullName?.givenName || "User";
+        const email = credential.email || `${appleId}@apple.local`;
+        const profileImage = ""; // Apple doesn't provide profile image
+        const identityToken = credential.identityToken;
+
+        await loginWithApple(identityToken, appleId, name, email, profileImage);
         router.replace("/");
-        return;
-      }
-      if (signUp && signUp.status === "missing_requirements") {
-        const transfer = await signUp.prepareVerification({
-          strategy: "oauth_apple",
-          redirectUrl,
-        });
-
-        if (transfer.createdSessionId && setActive) {
-          await setActive({ session: transfer.createdSessionId });
-          router.replace("/");
-        }
       }
     } catch (error: any) {
-      console.log("Auth Error:", error.errors?.[0]?.longMessage || "Failed");
+      if (error.code === "ERR_CANCELED") {
+        console.log("Apple sign-in cancelled");
+      } else {
+        console.log("Apple Auth Error:", error.message || error);
+      }
     } finally {
       setLoading(false);
     }
@@ -76,7 +75,7 @@ export default function SignInWithApple() {
 
       <Modal visible={loading} transparent animationType="fade">
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color={"rgba(31, 48, 94, 0.88)"} />
+          <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={styles.loadingText}>Authenticating...</Text>
         </View>
       </Modal>

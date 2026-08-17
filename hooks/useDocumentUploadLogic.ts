@@ -1,6 +1,6 @@
 import { showToast } from "@/folder/toastService";
 import { uploadFile } from "@/folder/upload";
-import { useUser } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
@@ -28,7 +28,7 @@ export interface UploadResult {
 }
 
 export const useDocumentUploadLogic = () => {
-  const { user } = useUser();
+  const { user } = useAuth();
   const { mutateAsync: uploadDocToDB } = useUploadDocs();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -100,7 +100,7 @@ export const useDocumentUploadLogic = () => {
 
   const uploadSingleFile = async (asset: ImageAsset, key: string, identifier: string): Promise<UploadResult> => {
     try {
-      const fileName = `${key}_${user?.id}_${identifier}_${Date.now()}.jpg`;
+      const fileName = `${key}_${user?._id}_${identifier}_${Date.now()}.jpg`;
       const fileToUpload = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
       const result = await uploadFile(fileToUpload, fileName);
 
@@ -120,7 +120,7 @@ export const useDocumentUploadLogic = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user?.id) {
+    if (!user?._id) {
       showToast("User session not found. Please log in again.");
       return;
     }
@@ -168,7 +168,6 @@ export const useDocumentUploadLogic = () => {
       };
 
       const payload = {
-        clerkId: user.id,
         cnicFront: getDocResult("cnicFront"),
         cnicBack: getDocResult("cnicBack"),
         drivingLicence: getDocResult("drivingLicence"),

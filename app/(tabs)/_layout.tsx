@@ -1,5 +1,5 @@
 import { Colors } from "@/utils/Colors";
-import { useAuth } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, Redirect } from "expo-router";
 import React from "react";
@@ -8,11 +8,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  const { isLoaded, isSignedIn } = useAuth({
-    treatPendingAsSignedOut: false,
-  });
+  const { isLoading, isSignedIn } = useAuth();
 
-  if (!isLoaded) {
+  if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />

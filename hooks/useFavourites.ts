@@ -1,10 +1,10 @@
 import favouriteApi from "@/api/favourite.service";
-import { useUser } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useFetchFavourites = () => {
-  const { user } = useUser();
-  const userId = user?.id;
+  const { user } = useAuth();
+  const userId = user?._id;
 
   return useQuery({
     queryKey: ["favourites", userId],
@@ -14,8 +14,8 @@ export const useFetchFavourites = () => {
 };
 
 export const useToggleFavourite = () => {
-  const { user } = useUser();
-  const userId = user?.id;
+  const { user } = useAuth();
+  const userId = user?._id;
   const queryClient = useQueryClient();
 
   return useMutation({

@@ -52,7 +52,7 @@
     },
     "plugins": [
       "expo-router",
-      "@clerk/expo",
+      "expo-apple-authentication",
       [
         "expo-splash-screen",
         {
@@ -81,7 +81,8 @@
       ],
       "@react-native-community/datetimepicker",
       "expo-web-browser",
-      "expo-font"
+      "expo-font",
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true,

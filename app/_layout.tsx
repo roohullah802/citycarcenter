@@ -1,6 +1,5 @@
 import ToastProvider from "@/folder/toastService";
 import { Colors } from "@/utils/Colors";
-import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/expo";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
@@ -11,7 +10,7 @@ import { ActivityIndicator, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "react-native-url-polyfill/auto";
-import { tokenCache } from "../folder/tokenCache";
+import { AuthProvider } from "@/context/AuthContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,7 +18,6 @@ export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
 
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 const publishableStripeKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 
 
@@ -50,33 +48,26 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style="dark" />
-      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-        <ClerkLoading>
-          <SafeAreaView style={style.cnt}>
-            <ActivityIndicator size="large" color={Colors.primary} />
-          </SafeAreaView>
-        </ClerkLoading>
-        <ClerkLoaded>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <QueryClientProvider client={queryClient}>
-              <ToastProvider>
-                <StripeProvider
-                  publishableKey={
-                    publishableStripeKey
-                  }
-                >
-                  <Stack
-                    screenOptions={{
-                      headerShown: false,
-                      animation: "fade_from_bottom"
-                    }}
-                  />
-                </StripeProvider>
-              </ToastProvider>
-            </QueryClientProvider>
-          </GestureHandlerRootView>
-        </ClerkLoaded>
-      </ClerkProvider>
+      <AuthProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <QueryClientProvider client={queryClient}>
+            <ToastProvider>
+              <StripeProvider
+                publishableKey={
+                  publishableStripeKey
+                }
+              >
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    animation: "fade_from_bottom"
+                  }}
+                />
+              </StripeProvider>
+            </ToastProvider>
+          </QueryClientProvider>
+        </GestureHandlerRootView>
+      </AuthProvider>
     </>
   );
 }

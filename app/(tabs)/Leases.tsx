@@ -2,7 +2,7 @@ import CountDown from "@/components/CountDown";
 import { useActiveLeases } from "@/hooks/useFetchLease";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
-import { useAuth } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";

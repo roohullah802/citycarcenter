@@ -1,4 +1,4 @@
-import { useAuth, useUser } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, {
   DateTimePickerEvent,
@@ -29,7 +29,7 @@ export default function DateAndTimeScreen() {
   const { mutateAsync: createIntent, isPending: loading } = useCreateIntent();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { isSignedIn } = useAuth();
-  const { user } = useUser();
+  const { user } = useAuth();
 
   // Fetch car details for price estimation
   const { data: carData } = useCarById(cleanCarId);
@@ -166,7 +166,7 @@ export default function DateAndTimeScreen() {
     }
 
     try {
-      const mongodbId = user?.publicMetadata?.mongodbId;
+      const mongodbId = user?._id;
 
       if (!mongodbId) throw new Error("User session expired. Please re-login.");
 

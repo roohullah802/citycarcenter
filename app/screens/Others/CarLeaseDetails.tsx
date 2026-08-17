@@ -4,7 +4,7 @@ import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
 import { useCarById } from "@/hooks/useFetchCars";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
-import { useAuth } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useRef, useState } from "react";

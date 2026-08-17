@@ -2,7 +2,7 @@ import { capitalText } from "@/folder/capitalText";
 import { useFetchFavourites, useToggleFavourite } from "@/hooks/useFavourites";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
-import { useAuth } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { Image } from "expo-image";
 import { useDocumentStatus } from "@/hooks/useDocuments";
 import { showToast } from "@/folder/toastService";

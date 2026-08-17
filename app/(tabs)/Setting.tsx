@@ -3,7 +3,7 @@ import { useDocumentStatus } from "@/hooks/useDocuments";
 import { statusConfig } from "@/lib/status";
 import { Colors } from "@/utils/Colors";
 import { GlobalStyles } from "@/utils/GlobalStyles";
-import { useAuth, useUser } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -24,8 +24,7 @@ import LogoutModal from "../screens/Auth/Logout";
 const Settings = () => {
   const insets = useSafeAreaInsets();
   const [isVisible, setIsVisible] = useState(false);
-  const { user } = useUser();
-  const { isSignedIn } = useAuth();
+  const { user, isSignedIn } = useAuth();
 
   const { data, isLoading, isError } = useDocumentStatus();
   const currentStatus = data?.docStatus || "unverified";
@@ -33,8 +32,8 @@ const Settings = () => {
   const handleVisible = useCallback(() => setIsVisible((prev) => !prev), []);
 
   const avatarSource =
-    isSignedIn && user?.imageUrl
-      ? { uri: user?.imageUrl }
+    isSignedIn && user?.profileImage
+      ? { uri: user?.profileImage }
       : require("../../assests/guest3.png");
 
   const getBadgeInfo = () => {
@@ -73,7 +72,7 @@ const Settings = () => {
           <View style={styles.profileDetails}>
             <View style={styles.nameRow}>
               <Text style={styles.name}>
-                {user?.fullName ? user.fullName : "Guest User"}
+                {user?.name ? user.name : "Guest User"}
               </Text>
               {isSignedIn && (
                 <View style={[styles.statusBadge, { backgroundColor: `${badgeColor}15` }]}>
@@ -84,7 +83,7 @@ const Settings = () => {
             </View>
             <Text numberOfLines={1} style={styles.email}>
               {isSignedIn
-                ? user?.primaryEmailAddress?.emailAddress
+                ? user?.email
                 : "Join City Car Center today"}
             </Text>
           </View>

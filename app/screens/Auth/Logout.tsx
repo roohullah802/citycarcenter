@@ -1,4 +1,4 @@
-import { useAuth, getClerkInstance } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { Redirect, router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -23,19 +23,15 @@ interface LogoutModalProps {
 
 const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const { signOut } = useAuth();
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
     setLoading(true);
     try {
-      // Forcefully clear the local session to prevent getting trapped by a dead session
-      const clerk = getClerkInstance();
-      await clerk.setActive({ session: null }).catch(() => {});
-      
-      // Attempt remote signout, but don't block if it fails (e.g. session already dead)
-      await signOut();
+      await logout();
     } catch (error: any) {
-      console.log("Logout network call failed, but local session cleared.");
+      console.log("Logout error:", error);
+      showToast("Failed to log out. Please try again.");
     } finally {
       onClose();
       setLoading(false);

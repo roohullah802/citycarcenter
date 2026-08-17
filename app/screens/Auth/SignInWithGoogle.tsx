@@ -1,9 +1,8 @@
 import { Colors } from "@/utils/Colors";
-import { useSSO } from "@clerk/expo";
+import { useAuth } from "@/context/AuthContext";
 import { Image } from "expo-image";
-import * as Linking from "expo-linking";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -12,45 +11,38 @@ import {
   View,
   Modal,
 } from "react-native";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 export default function SignInWithGoogle() {
-  const { startSSOFlow } = useSSO();
+  const { loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+      iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    });
+  }, []);
 
   const handlePress = async () => {
     setLoading(true);
     try {
-      const redirectUrl = Linking.createURL("/?oauth=true", {
-        scheme: "citycarcenter",
-      });
-      const { createdSessionId, setActive, signIn, signUp } =
-        await startSSOFlow({
-          strategy: "oauth_google",
-          redirectUrl,
-        });
-      const sessionId =
-        createdSessionId ||
-        signIn?.createdSessionId ||
-        signUp?.createdSessionId;
+      await GoogleSignin.hasPlayServices();
+      const userInfo: any = await GoogleSignin.signIn();
+      const idToken = userInfo?.data?.idToken || userInfo?.idToken;
 
-      if (sessionId && setActive) {
-        await setActive({ session: sessionId });
+      if (idToken) {
+        // We only pass the idToken to the backend now, as the backend will verify it
+        // and extract the user's name, email, etc. directly from Google's servers.
+        await loginWithGoogle(idToken);
         router.replace("/");
-        return;
-      }
-
-      if (signUp && signUp.status === "missing_requirements") {
-        const transfer = await signUp.prepareVerification({
-          strategy: "oauth_google",
-          redirectUrl,
-        });
-
-        if (transfer.createdSessionId && setActive) {
-          await setActive({ session: transfer.createdSessionId });
-        }
+      } else {
+        throw new Error("No ID token received from Google");
       }
     } catch (error: any) {
-      console.log("Auth Error:", error.errors?.[0]?.longMessage || "Failed");
+      if (error.code !== "ASYNC_OP_IN_PROGRESS") {
+         console.log("Google Auth Error:", error.message || error);
+      }
     } finally {
       setLoading(false);
     }
