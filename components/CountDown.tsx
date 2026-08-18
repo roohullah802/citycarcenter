@@ -162,19 +162,19 @@ const styles = StyleSheet.create({
   // FULL VARIANT STYLES
   fullContainer: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: "#F1F5F9",
     padding: 20,
     marginBottom: 16,
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(31, 48, 94, 0.12)",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 10,
+        shadowColor: "rgba(31, 48, 94, 0.8)",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 4,
       },
-      android: { elevation: 3 },
+      android: { elevation: 1 },
     }),
   },
   fullHeaderRow: {

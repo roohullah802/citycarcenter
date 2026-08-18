@@ -51,7 +51,7 @@ const AllLeases = () => {
   }
 
   return (
-    <SafeAreaView style={GlobalStyles.container}>
+    <SafeAreaView style={GlobalStyles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" />
 
       {/* REFINED HEADER */}
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 8,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
     borderBottomColor: "#F1F5F9",
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
   emptyWrapper: {
     flex: 1,

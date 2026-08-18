@@ -46,10 +46,13 @@ const SearchCarCards = () => {
 
   const filteredCars = useMemo(() => {
     const allCars = data?.data || [];
+    const normalizedSearch = searchText.trim().replace(/\s+/g, ' ').toLowerCase();
+
     return allCars.filter((car: Car) => {
-      const matchesSearch = car.modelName
-        .toLowerCase()
-        .includes(searchText.toLowerCase());
+      const matchesSearch = 
+        car.modelName.toLowerCase().includes(normalizedSearch) ||
+        car.brand.toLowerCase().includes(normalizedSearch);
+        
       const matchesBrand = selectedBrand
         ? car.brand.toLowerCase() === selectedBrand.toLowerCase()
         : true;
