@@ -65,8 +65,8 @@ export default function DateAndTimeScreen() {
   // Calculate total lease days
   const totalDays = useMemo(() => {
     const diffTime = returnDate.getTime() - pickUpDate.getTime();
-    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return days > 0 ? days : 1;
+    const days = +(diffTime / (1000 * 60 * 60 * 24)).toFixed(2);
+    return days > 0 ? days : 0.01;
   }, [pickUpDate, returnDate]);
 
   // Live estimated price calculation
@@ -110,7 +110,8 @@ export default function DateAndTimeScreen() {
 
   // Date picker handlers
   const onChangePickUp = useCallback((event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (Platform.OS === "android") setActivePicker(null);
+    if (Platform.OS === "android" && event.type === "set") setActivePicker(null);
+    if (Platform.OS === "android" && event.type === "dismissed") setActivePicker(null);
     if (selectedDate) {
       setPickUpDate(selectedDate);
       // Ensure return date is strictly after pickup date
@@ -123,7 +124,8 @@ export default function DateAndTimeScreen() {
   }, [returnDate]);
 
   const onChangeReturn = useCallback((event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (Platform.OS === "android") setActivePicker(null);
+    if (Platform.OS === "android" && event.type === "set") setActivePicker(null);
+    if (Platform.OS === "android" && event.type === "dismissed") setActivePicker(null);
     if (selectedDate) {
       if (selectedDate <= pickUpDate) {
         showToast("Return date must be after pick-up date.");
@@ -139,6 +141,8 @@ export default function DateAndTimeScreen() {
       month: "short",
       day: "numeric",
       year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
     });
   };
 
@@ -170,11 +174,9 @@ export default function DateAndTimeScreen() {
 
       if (!mongodbId) throw new Error("User session expired. Please re-login.");
 
-      // Adjust dates to midday to avoid timezone shifting them to a previous day in UTC
+      // Use the exact time selected by the user for precise hour calculation
       const startSend = new Date(pickUpDate);
-      startSend.setHours(12, 0, 0, 0);
       const endSend = new Date(returnDate);
-      endSend.setHours(12, 0, 0, 0);
 
       const resp = await createIntent({
         action: "createLease",
@@ -283,8 +285,8 @@ export default function DateAndTimeScreen() {
             <View style={styles.pickerContainer}>
               <DateTimePicker
                 value={pickUpDate}
-                mode="date"
-                display={Platform.OS === "ios" ? "inline" : "default"}
+                mode={Platform.OS === 'ios' ? 'datetime' : 'date'}
+                display={Platform.OS === "ios" ? "spinner" : "default"}
                 minimumDate={today}
                 onChange={onChangePickUp}
               />
@@ -321,8 +323,8 @@ export default function DateAndTimeScreen() {
             <View style={styles.pickerContainer}>
               <DateTimePicker
                 value={returnDate}
-                mode="date"
-                display={Platform.OS === "ios" ? "inline" : "default"}
+                mode={Platform.OS === 'ios' ? 'datetime' : 'date'}
+                display={Platform.OS === "ios" ? "spinner" : "default"}
                 minimumDate={minReturnDate}
                 onChange={onChangeReturn}
               />

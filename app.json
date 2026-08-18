@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "City Car Center",
-    "slug": "citycarcenter",
+    "slug": "city-car-center",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/ios-light.png",
@@ -91,7 +91,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "77996d1d-5c78-4285-9e18-cfb9159ea7c3"
+        "projectId": "a1d3a4af-9025-4fc9-817e-056f7b5c8369"
       }
     }
   }
