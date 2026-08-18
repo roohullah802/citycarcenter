@@ -37,7 +37,7 @@ interface Car {
 const SearchCarCards = () => {
   const [searchText, setSearchText] = useState("");
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
-  const [priceRange, setPriceRange] = useState<[number, number]>([1, 1000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([1, 10000]);
   const { data: favouritesData } = useFetchFavourites();
   const favouriteIds = favouritesData?.carIds || [];
 
@@ -165,7 +165,7 @@ const SearchCarCards = () => {
               onPress={() => {
                 setSearchText("");
                 setSelectedBrand(null);
-                setPriceRange([1, 1000]);
+                setPriceRange([1, 10000]);
               }}
               style={styles.resetButton}
             >

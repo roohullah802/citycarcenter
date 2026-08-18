@@ -268,7 +268,7 @@ function HomeScreen() {
                 </View>
               ) : (
                 <FlatList
-                  data={cars?.data}
+                  data={cars?.data?.slice(0, 10)}
                   renderItem={({ item }) => <CarItems item={item} />}
                   keyExtractor={(item) => item._id}
                   initialNumToRender={5}

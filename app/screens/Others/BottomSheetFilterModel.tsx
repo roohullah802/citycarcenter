@@ -26,7 +26,7 @@ const BottomSheetFilterModal = React.memo(
       }, [localPrice, onClose, setPriceRange]);
 
       const clearFilter = () => {
-        const defaultRange: [number, number] = [1, 1000];
+        const defaultRange: [number, number] = [1, 10000];
         setLocalPrice(defaultRange);
         setPriceRange(defaultRange);
       };
@@ -62,7 +62,7 @@ const BottomSheetFilterModal = React.memo(
               <Slider
                 style={styles.slider}
                 minimumValue={1}
-                maximumValue={1000}
+                maximumValue={10000}
                 step={10}
                 minimumTrackTintColor="rgba(31, 48, 94, 0.88)"
                 maximumTrackTintColor="#F1F5F9"
@@ -73,7 +73,7 @@ const BottomSheetFilterModal = React.memo(
 
               <View style={styles.sliderLabels}>
                 <Text style={styles.minMax}>$1</Text>
-                <Text style={styles.minMax}>$1,000+</Text>
+                <Text style={styles.minMax}>$10,000+</Text>
               </View>
             </View>
 
