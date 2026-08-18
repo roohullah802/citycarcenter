@@ -25,8 +25,7 @@ export default function DocumentUploadScreen() {
         </TouchableOpacity>
 
         <Text style={styles.title}>Account Verification</Text>
-        
-        <View style={{ width: 40 }} /> {/* Placeholder for centering title */}
+        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
