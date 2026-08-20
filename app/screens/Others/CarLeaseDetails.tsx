@@ -242,6 +242,11 @@ const CarDetails = () => {
               label="Fuel Type"
               value={details?.fuelType || "Petrol"}
             />
+            <FeatureItem
+              icon="receipt"
+              label="Service Tax"
+              value={details?.tax ? `${details?.tax}%` : 'None'}
+            />
           </View>
         </View>
       </ScrollView>

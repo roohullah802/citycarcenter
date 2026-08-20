@@ -57,17 +57,23 @@ export default function DateAndTimeScreen() {
   const [pickUpDate, setPickUpDate] = useState<Date>(today);
   const [returnDate, setReturnDate] = useState<Date>(tomorrow);
 
-  const [activePicker, setActivePicker] = useState<"pickup" | "return" | null>(null);
+  const [activePicker, setActivePicker] = useState<"pickup" | "return" | "pickupTime" | "returnTime" | null>(null);
 
   const { data: docData } = useDocumentStatus();
   const currentStatus = docData?.docStatus || "unverified";
 
   // Calculate total lease days
-  const totalDays = useMemo(() => {
+  
+  const totalHours = useMemo(() => {
     const diffTime = returnDate.getTime() - pickUpDate.getTime();
-    const days = +(diffTime / (1000 * 60 * 60 * 24)).toFixed(2);
-    return days > 0 ? days : 0.01;
+    const hours = diffTime / (1000 * 60 * 60);
+    return hours > 0 ? hours : 0;
   }, [pickUpDate, returnDate]);
+
+  const totalDays = useMemo(() => {
+    return totalHours / 24;
+  }, [totalHours]);
+
 
   // Live estimated price calculation
   const priceEstimation = useMemo(() => {
@@ -109,29 +115,70 @@ export default function DateAndTimeScreen() {
   }, [car, totalDays]);
 
   // Date picker handlers
+  
   const onChangePickUp = useCallback((event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (Platform.OS === "android" && event.type === "set") setActivePicker(null);
-    if (Platform.OS === "android" && event.type === "dismissed") setActivePicker(null);
-    if (selectedDate) {
-      setPickUpDate(selectedDate);
-      // Ensure return date is strictly after pickup date
-      if (returnDate <= selectedDate) {
-        const newReturn = new Date(selectedDate);
-        newReturn.setDate(newReturn.getDate() + 1);
-        setReturnDate(newReturn);
+    if (Platform.OS === 'android') {
+      if (event.type === 'set' && selectedDate) {
+        const newDate = new Date(pickUpDate);
+        if (activePicker === 'pickup') {
+          newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+          setPickUpDate(newDate);
+          setTimeout(() => setActivePicker('pickupTime'), 100);
+        } else if (activePicker === 'pickupTime') {
+          newDate.setHours(selectedDate.getHours(), selectedDate.getMinutes());
+          setPickUpDate(newDate);
+          setActivePicker(null);
+        }
+      } else {
+        setActivePicker(null);
+      }
+    } else {
+      // iOS
+      if (selectedDate) {
+        setPickUpDate(selectedDate);
       }
     }
-  }, [returnDate]);
+  }, [activePicker, pickUpDate]);
 
   const onChangeReturn = useCallback((event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (Platform.OS === "android" && event.type === "set") setActivePicker(null);
-    if (Platform.OS === "android" && event.type === "dismissed") setActivePicker(null);
-    if (selectedDate) {
-      if (selectedDate <= pickUpDate) {
-        showToast("Return date must be after pick-up date.");
-        return;
+    if (Platform.OS === 'android') {
+      if (event.type === 'set' && selectedDate) {
+        const newDate = new Date(returnDate);
+        if (activePicker === 'return') {
+          newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+          setReturnDate(newDate);
+          setTimeout(() => setActivePicker('returnTime'), 100);
+        } else if (activePicker === 'returnTime') {
+          newDate.setHours(selectedDate.getHours(), selectedDate.getMinutes());
+          if (newDate <= pickUpDate) {
+            showToast("Return time must be after pick-up time.");
+            setActivePicker(null);
+            return;
+          }
+          setReturnDate(newDate);
+          setActivePicker(null);
+        }
+      } else {
+        setActivePicker(null);
       }
-      setReturnDate(selectedDate);
+    } else {
+      // iOS
+      if (selectedDate) {
+        if (selectedDate <= pickUpDate) {
+          showToast("Return date/time must be after pick-up date/time.");
+          return;
+        }
+        setReturnDate(selectedDate);
+      }
+    }
+  }, [activePicker, returnDate, pickUpDate]);
+
+  // Ensure pickUpDate constraints apply whenever it changes
+  React.useEffect(() => {
+    if (returnDate <= pickUpDate) {
+      const newReturn = new Date(pickUpDate);
+      newReturn.setHours(newReturn.getHours() + 1); // default to 1 hour lease
+      setReturnDate(newReturn);
     }
   }, [pickUpDate]);
 
@@ -144,6 +191,19 @@ export default function DateAndTimeScreen() {
       hour: "numeric",
       minute: "2-digit",
     });
+  };
+
+  const formatDuration = (hours: number) => {
+    const d = Math.floor(hours / 24);
+    const h = Math.floor(hours % 24);
+    const m = Math.round((hours % 1) * 60);
+    
+    let parts = [];
+    if (d > 0) parts.push(`${d}d`);
+    if (h > 0) parts.push(`${h}h`);
+    if (m > 0) parts.push(`${m}m`);
+    
+    return parts.length > 0 ? parts.join(" ") : "0h";
   };
 
   const minReturnDate = useMemo(() => {
@@ -165,7 +225,7 @@ export default function DateAndTimeScreen() {
     }
 
     if (returnDate <= pickUpDate) {
-      showToast("Return date must be at least 1 day after pick-up date.");
+      showToast("Return time must be after pick-up time.");
       return;
     }
 
@@ -275,31 +335,34 @@ export default function DateAndTimeScreen() {
               <Ionicons name="calendar-outline" size={22} color="#1F305E" />
             </View>
             <View style={styles.dateInfo}>
-              <Text style={styles.dateLabel}>Pick-up Date</Text>
+              <Text style={styles.dateLabel}>Pick-up Date & Time</Text>
               <Text style={styles.dateText}>{formatDate(pickUpDate)}</Text>
             </View>
             <Ionicons name="pencil-outline" size={18} color="#94A3B8" />
           </TouchableOpacity>
 
-          {activePicker === "pickup" && (
+          
+          {activePicker === "pickup" && Platform.OS === 'android' && (
+            <DateTimePicker value={pickUpDate} mode="date" display="default" onChange={onChangePickUp} minimumDate={today} />
+          )}
+          {activePicker === "pickupTime" && Platform.OS === 'android' && (
+            <DateTimePicker value={pickUpDate} mode="time" display="default" onChange={onChangePickUp} />
+          )}
+          {activePicker === "pickup" && Platform.OS === 'ios' && (
             <View style={styles.pickerContainer}>
               <DateTimePicker
                 value={pickUpDate}
-                mode={Platform.OS === 'ios' ? 'datetime' : 'date'}
-                display={Platform.OS === "ios" ? "spinner" : "default"}
+                mode="datetime"
+                display="spinner"
                 minimumDate={today}
                 onChange={onChangePickUp}
               />
-              {Platform.OS === "ios" && (
-                <TouchableOpacity
-                  style={styles.doneBtn}
-                  onPress={() => setActivePicker(null)}
-                >
-                  <Text style={styles.doneBtnText}>Done</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity style={styles.doneBtn} onPress={() => setActivePicker(null)}>
+                <Text style={styles.doneBtnText}>Done</Text>
+              </TouchableOpacity>
             </View>
           )}
+
 
           <View style={styles.divider} />
 
@@ -313,31 +376,34 @@ export default function DateAndTimeScreen() {
               <Ionicons name="calendar" size={22} color="#059669" />
             </View>
             <View style={styles.dateInfo}>
-              <Text style={styles.dateLabel}>Return Date</Text>
+              <Text style={styles.dateLabel}>Return Date & Time</Text>
               <Text style={styles.dateText}>{formatDate(returnDate)}</Text>
             </View>
             <Ionicons name="pencil-outline" size={18} color="#94A3B8" />
           </TouchableOpacity>
 
-          {activePicker === "return" && (
+          
+          {activePicker === "return" && Platform.OS === 'android' && (
+            <DateTimePicker value={returnDate} mode="date" display="default" onChange={onChangeReturn} minimumDate={minReturnDate} />
+          )}
+          {activePicker === "returnTime" && Platform.OS === 'android' && (
+            <DateTimePicker value={returnDate} mode="time" display="default" onChange={onChangeReturn} />
+          )}
+          {activePicker === "return" && Platform.OS === 'ios' && (
             <View style={styles.pickerContainer}>
               <DateTimePicker
                 value={returnDate}
-                mode={Platform.OS === 'ios' ? 'datetime' : 'date'}
-                display={Platform.OS === "ios" ? "spinner" : "default"}
+                mode="datetime"
+                display="spinner"
                 minimumDate={minReturnDate}
                 onChange={onChangeReturn}
               />
-              {Platform.OS === "ios" && (
-                <TouchableOpacity
-                  style={styles.doneBtn}
-                  onPress={() => setActivePicker(null)}
-                >
-                  <Text style={styles.doneBtnText}>Done</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity style={styles.doneBtn} onPress={() => setActivePicker(null)}>
+                <Text style={styles.doneBtnText}>Done</Text>
+              </TouchableOpacity>
             </View>
           )}
+
         </View>
 
         {/* Duration & Cost Summary */}
@@ -345,7 +411,7 @@ export default function DateAndTimeScreen() {
           <View style={styles.summaryHeader}>
             <Text style={styles.summaryTitle}>Duration</Text>
             <View style={styles.durationBadge}>
-              <Text style={styles.durationText}>{totalDays} Day{totalDays > 1 ? "s" : ""}</Text>
+              <Text style={styles.durationText}>{formatDuration(totalHours)}</Text>
             </View>
           </View>
 
