@@ -58,7 +58,9 @@ axiosInstance.interceptors.response.use(
         message = "Server error encountered. Please try again later.";
       }
     } else if (error?.request) {
-      message = "Network error. Please check your internet connection.";
+      // Network error — silently reject. The useNetworkMonitor hook
+      // already shows a toast when connectivity is lost.
+      return Promise.reject(error);
     }
 
     showToast(message);

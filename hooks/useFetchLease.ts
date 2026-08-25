@@ -34,7 +34,6 @@ export const useLeaseReturn = (id: string) => {
     mutationKey: ["leaseRetuen"],
     mutationFn: () => leaseApi.returnCar(id),
     onSuccess: () => showToast("Car Return Successfully"),
-    onError: (error) => showToast(error.message || "Failed to return car!"),
   });
 
   return result;

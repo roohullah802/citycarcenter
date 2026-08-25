@@ -14,8 +14,6 @@ export const useUploadDocs = () => {
       // Invalidate the status query to immediately fetch the new pending status
       queryClient.invalidateQueries({ queryKey: ["status"] });
     },
-    onError: (error) =>
-      showToast(error.message || "Failed to upload documents!"),
   });
 
   return result;
@@ -36,9 +34,6 @@ export const usePostIssues = () => {
     onSuccess: () => {
       showToast("Issue post successfully");
       router.back();
-    },
-    onError: (error) => {
-      showToast(error.message || "Failed to post issue!");
     },
   });
   return result;

@@ -43,9 +43,7 @@ export default function DateAndTimeScreen() {
 
   // Dates state
   const today = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
+    return new Date(); // Use exact current time to avoid timezone mismatch with server midnight
   }, []);
 
   const tomorrow = useMemo(() => {
@@ -123,7 +121,7 @@ export default function DateAndTimeScreen() {
         if (activePicker === 'pickup') {
           newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
           setPickUpDate(newDate);
-          setTimeout(() => setActivePicker('pickupTime'), 100);
+          setActivePicker(null);
         } else if (activePicker === 'pickupTime') {
           newDate.setHours(selectedDate.getHours(), selectedDate.getMinutes());
           setPickUpDate(newDate);
@@ -147,7 +145,7 @@ export default function DateAndTimeScreen() {
         if (activePicker === 'return') {
           newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
           setReturnDate(newDate);
-          setTimeout(() => setActivePicker('returnTime'), 100);
+          setActivePicker(null);
         } else if (activePicker === 'returnTime') {
           newDate.setHours(selectedDate.getHours(), selectedDate.getMinutes());
           if (newDate <= pickUpDate) {
@@ -238,14 +236,18 @@ export default function DateAndTimeScreen() {
       const startSend = new Date(pickUpDate);
       const endSend = new Date(returnDate);
 
-      const resp = await createIntent({
+      const payload = {
         action: "createLease",
         userId: mongodbId,
         carId: cleanCarId,
         startDate: startSend.toISOString(),
         endDate: endSend.toISOString(),
         applyDiscount: car?.discountEnabled || false,
-      });
+      };
+      
+      console.log("PAYLOAD BEING SENT:", payload);
+
+      const resp = await createIntent(payload);
 
       if (!resp?.clientSecret) {
         throw new Error(
@@ -276,24 +278,29 @@ export default function DateAndTimeScreen() {
 
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {
-      const serverData = error?.response?.data;
-      let finalMessage = "Transaction failed";
+      console.error("Payment Error:", error?.response?.data || error);
+      // Only toast for non-axios errors (e.g. Stripe, client-side).
+      // Axios server errors are already toasted by the interceptor.
+      if (!error?.response) {
+        const serverData = error?.response?.data;
+        let finalMessage = "Transaction failed";
 
-      if (serverData?.errors && typeof serverData.errors === "object") {
-        // Extract Zod validation field errors
-        const errorMessages = Object.values(serverData.errors).flat();
-        finalMessage = errorMessages.join(", ");
-      } else {
-        finalMessage = serverData?.message || serverData?.error || error?.message || "Transaction failed";
+        if (serverData?.errors && typeof serverData.errors === "object" && Object.keys(serverData.errors).length > 0) {
+          // Extract Zod validation field errors
+          const errorMessages = Object.values(serverData.errors).flat();
+          finalMessage = errorMessages.join(", ") || "Transaction failed";
+        } else {
+          finalMessage = serverData?.message || serverData?.error || error?.message || "Transaction failed";
+        }
+
+        if (Array.isArray(finalMessage)) {
+          finalMessage = finalMessage.join(", ");
+        } else if (typeof finalMessage === "object") {
+          finalMessage = JSON.stringify(finalMessage);
+        }
+
+        showToast(finalMessage ? String(finalMessage) : "Transaction failed");
       }
-
-      if (Array.isArray(finalMessage)) {
-        finalMessage = finalMessage.join(", ");
-      } else if (typeof finalMessage === "object") {
-        finalMessage = JSON.stringify(finalMessage);
-      }
-
-      showToast(String(finalMessage));
     }
   };
 
@@ -326,20 +333,35 @@ export default function DateAndTimeScreen() {
         {/* Date Selector Card */}
         <View style={styles.mainCard}>
           {/* Pick-Up Date */}
-          <TouchableOpacity
-            style={styles.dateRow}
-            onPress={() => setActivePicker(activePicker === "pickup" ? null : "pickup")}
-            activeOpacity={0.6}
-          >
+          
+          {/* Pick-Up */}
+          <View style={styles.dateRowContainer}>
             <View style={[styles.iconBox, { backgroundColor: "#E0F2FE" }]}>
               <Ionicons name="calendar-outline" size={22} color="#1F305E" />
             </View>
             <View style={styles.dateInfo}>
-              <Text style={styles.dateLabel}>Pick-up Date & Time</Text>
-              <Text style={styles.dateText}>{formatDate(pickUpDate)}</Text>
+              <Text style={styles.dateLabel}>Pick-up</Text>
+              <View style={styles.dateTimeButtonGroup}>
+                <TouchableOpacity 
+                  style={styles.dateTimeBtn} 
+                  onPress={() => setActivePicker("pickup")}
+                  activeOpacity={0.6}
+                >
+                  <Text style={styles.dateTimeBtnText}>{pickUpDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</Text>
+                  <Ionicons name="calendar" size={14} color="#94A3B8" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.dateTimeBtn} 
+                  onPress={() => setActivePicker(Platform.OS === 'ios' ? 'pickup' : 'pickupTime')}
+                  activeOpacity={0.6}
+                >
+                  <Text style={styles.dateTimeBtnText}>{pickUpDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                  <Ionicons name="time-outline" size={16} color="#94A3B8" />
+                </TouchableOpacity>
+              </View>
             </View>
-            <Ionicons name="pencil-outline" size={18} color="#94A3B8" />
-          </TouchableOpacity>
+          </View>
+
 
           
           {activePicker === "pickup" && Platform.OS === 'android' && (
@@ -367,20 +389,35 @@ export default function DateAndTimeScreen() {
           <View style={styles.divider} />
 
           {/* Return Date */}
-          <TouchableOpacity
-            style={styles.dateRow}
-            onPress={() => setActivePicker(activePicker === "return" ? null : "return")}
-            activeOpacity={0.6}
-          >
+          
+          {/* Return */}
+          <View style={styles.dateRowContainer}>
             <View style={[styles.iconBox, { backgroundColor: "#F0FDF4" }]}>
               <Ionicons name="calendar" size={22} color="#059669" />
             </View>
             <View style={styles.dateInfo}>
-              <Text style={styles.dateLabel}>Return Date & Time</Text>
-              <Text style={styles.dateText}>{formatDate(returnDate)}</Text>
+              <Text style={styles.dateLabel}>Return</Text>
+              <View style={styles.dateTimeButtonGroup}>
+                <TouchableOpacity 
+                  style={styles.dateTimeBtn} 
+                  onPress={() => setActivePicker("return")}
+                  activeOpacity={0.6}
+                >
+                  <Text style={styles.dateTimeBtnText}>{returnDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</Text>
+                  <Ionicons name="calendar" size={14} color="#94A3B8" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.dateTimeBtn} 
+                  onPress={() => setActivePicker(Platform.OS === 'ios' ? 'return' : 'returnTime')}
+                  activeOpacity={0.6}
+                >
+                  <Text style={styles.dateTimeBtnText}>{returnDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                  <Ionicons name="time-outline" size={16} color="#94A3B8" />
+                </TouchableOpacity>
+              </View>
             </View>
-            <Ionicons name="pencil-outline" size={18} color="#94A3B8" />
-          </TouchableOpacity>
+          </View>
+
 
           
           {activePicker === "return" && Platform.OS === 'android' && (
@@ -509,7 +546,36 @@ const styles = StyleSheet.create({
       android: { elevation: 2 },
     }),
   },
+  
+  dateRowContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    padding: 16,
+  },
+  dateTimeButtonGroup: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 6,
+  },
+  dateTimeBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    gap: 6,
+  },
+  dateTimeBtnText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1F305E",
+  },
   dateRow: {
+
     flexDirection: "row",
     alignItems: "center",
     padding: 16,

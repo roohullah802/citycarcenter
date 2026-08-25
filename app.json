@@ -23,6 +23,7 @@
       }
     },
     "android": {
+      "versionCode": 13,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -91,8 +92,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "a1d3a4af-9025-4fc9-817e-056f7b5c8369"
+        "projectId": "75918459-9aa2-4a44-affb-8c71243a869e"
       }
-    }
+    },
+    "owner": "roohullah83s-team"
   }
 }

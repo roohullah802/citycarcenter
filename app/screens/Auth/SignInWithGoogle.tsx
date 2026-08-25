@@ -2,7 +2,7 @@ import { Colors } from "@/utils/Colors";
 import { useAuth } from "@/context/AuthContext";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -17,12 +17,6 @@ export default function SignInWithGoogle() {
   const { loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-      iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-    });
-  }, []);
 
   const handlePress = async () => {
     setLoading(true);

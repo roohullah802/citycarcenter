@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { tokenStorage } from "@/folder/tokenStorage";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 export interface User {
   _id: string;
@@ -28,8 +29,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state on app load
+  // Initialize auth state and configure GoogleSignin on app load
   useEffect(() => {
+    // Configure GoogleSignin early so signOut() works even after app restart
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+      iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    });
+
     const initAuth = async () => {
       try {
         const storedToken = await tokenStorage.getToken();
@@ -121,6 +128,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async (): Promise<void> => {
     try {
+      // Try to sign out from Google, but don't let it block local cleanup
+      try {
+        await GoogleSignin.signOut();
+      } catch (googleError) {
+        // GoogleSignin.signOut() can fail if no Google session exists (e.g. Apple login,
+        // or if the SDK wasn't properly initialized). This is safe to ignore.
+        console.log("GoogleSignin.signOut() skipped:", googleError);
+      }
+
+      // Always clear local auth state regardless of Google sign-out result
       await tokenStorage.clear();
       setToken(null);
       setUser(null);

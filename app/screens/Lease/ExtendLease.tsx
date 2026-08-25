@@ -165,17 +165,21 @@ const ExtendLeaseScreen = () => {
 
       router.push("/screens/Payments/PaymentSuccess");
     } catch (error: any) {
-      const serverData = error?.response?.data;
-      const serverMessage = serverData?.message || serverData?.error || serverData;
-      let finalMessage = serverMessage || error?.message || "Extension failed";
+      // Only toast for non-axios errors (e.g. Stripe, client-side).
+      // Axios server errors are already toasted by the interceptor.
+      if (!error?.response) {
+        const serverData = error?.response?.data;
+        const serverMessage = serverData?.message || serverData?.error || serverData;
+        let finalMessage = serverMessage || error?.message || "Extension failed";
 
-      if (Array.isArray(finalMessage)) {
-        finalMessage = finalMessage.join(", ");
-      } else if (typeof finalMessage === "object") {
-        finalMessage = JSON.stringify(finalMessage);
+        if (Array.isArray(finalMessage)) {
+          finalMessage = finalMessage.join(", ");
+        } else if (typeof finalMessage === "object") {
+          finalMessage = JSON.stringify(finalMessage);
+        }
+
+        showToast(String(finalMessage));
       }
-
-      showToast(String(finalMessage));
     } finally {
       setIsLoading(false);
     }

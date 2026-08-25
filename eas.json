@@ -7,11 +7,15 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "credentialsSource": "local"
+      "credentialsSource": "local",
+      "autoIncrement": true
     },
     "preview": {
       "android": {
         "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
       },
       "distribution": "internal"
     },

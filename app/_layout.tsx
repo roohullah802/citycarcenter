@@ -11,6 +11,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "react-native-url-polyfill/auto";
 import { AuthProvider } from "@/context/AuthContext";
+import { useNetworkMonitor } from "@/hooks/useNetworkMonitor";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -52,6 +53,7 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <QueryClientProvider client={queryClient}>
             <ToastProvider>
+              <NetworkMonitor />
               <StripeProvider
                 publishableKey={
                   publishableStripeKey
@@ -70,6 +72,12 @@ export default function RootLayout() {
       </AuthProvider>
     </>
   );
+}
+
+/** Renders nothing – just activates the network listener inside ToastProvider */
+function NetworkMonitor() {
+  useNetworkMonitor();
+  return null;
 }
 
 const style = StyleSheet.create({

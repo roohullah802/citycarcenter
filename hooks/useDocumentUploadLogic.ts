@@ -191,7 +191,11 @@ export const useDocumentUploadLogic = () => {
       router.push("/screens/Setting/DocumentSubmittedScreen");
     } catch (err: any) {
       console.error("Submission Error Details:", err);
-      showToast(err.message || "Failed to submit documents. Please try again.");
+      // Only toast for non-axios errors (e.g. ImageKit upload failures).
+      // Axios server errors are already toasted by the interceptor.
+      if (!err?.response) {
+        showToast(err.message || "Failed to submit documents. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
