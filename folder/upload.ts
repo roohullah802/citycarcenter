@@ -1,8 +1,9 @@
 import { axiosInstance } from "./axiosInstance";
-import { imagekit } from "./imagekit";
+import { getImageKit } from "./imagekit";
 
 export const uploadFile = async (file: string, fileName: string) => {
   try {
+    const imagekit = getImageKit();
     const response = await axiosInstance.get("/signature");
     const auth = response.data?.imagekit_signature;
 

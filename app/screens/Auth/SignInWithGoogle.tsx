@@ -11,7 +11,11 @@ import {
   View,
   Modal,
 } from "react-native";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
+import { showToast } from "@/folder/toastService";
 
 export default function SignInWithGoogle() {
   const { loginWithGoogle } = useAuth();
@@ -34,9 +38,23 @@ export default function SignInWithGoogle() {
         throw new Error("No ID token received from Google");
       }
     } catch (error: any) {
-      if (error.code !== "ASYNC_OP_IN_PROGRESS") {
-        console.log("Google Auth Error:", error.message || error);
+      const code = String(error?.code ?? "UNKNOWN");
+
+      if (code === String(statusCodes.SIGN_IN_CANCELLED)) {
+        return;
       }
+
+      if (
+        code === String(statusCodes.IN_PROGRESS) ||
+        code === "ASYNC_OP_IN_PROGRESS"
+      ) {
+        showToast("Google sign-in is already in progress.", "info");
+        return;
+      }
+
+      const message = error?.message || "Google sign-in failed";
+      console.error("Google Auth Error:", { code, message });
+      showToast(`Google sign-in failed (${code}): ${message}`, "error");
     } finally {
       setLoading(false);
     }

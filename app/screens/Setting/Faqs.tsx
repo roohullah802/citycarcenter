@@ -16,8 +16,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const isFabricEnabled = !!(
+  globalThis as typeof globalThis & { nativeFabricUIManager?: unknown }
+).nativeFabricUIManager;
+
 if (
   Platform.OS === "android" &&
+  !isFabricEnabled &&
   UIManager.setLayoutAnimationEnabledExperimental
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
